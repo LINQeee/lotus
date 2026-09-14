@@ -1,0 +1,28 @@
+a = 0
+d = 'hello world'
+
+while a < 3 {
+    b = 0
+    while b < 10 {
+        a = a + 1
+        b = b + 1
+        if b==2 next@1
+    }
+
+
+
+    if a == 10 {
+        return {
+            if a < 5 {
+                return 15
+            } else {
+                return 30
+            }
+        }
+    }
+
+
+
+    a = a+1
+}
+a

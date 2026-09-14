@@ -1,0 +1,17 @@
+
+a = 0
+d = 'hello world'
+
+while a < 3 {
+    b = 0
+    while b < 10 {
+        a = a + 1
+        b = b + 1
+        if b==2 next@1
+    }
+
+    return if a == 10 if a < 5 15 else 30
+
+    a = a+1
+}
+a
