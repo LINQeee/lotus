@@ -16,6 +16,14 @@ void initCodegen() {
   cg->module = LLVMModuleCreateWithNameInContext("lotus", cg->context);
   cg->builder = LLVMCreateBuilderInContext(cg->context);
   cg->allocaBuilder = LLVMCreateBuilderInContext(cg->context);
+
+  cg->i64Type = LLVMInt64TypeInContext(cg->context);
+  cg->i32Type = LLVMInt32TypeInContext(cg->context);
+  cg->boolType = LLVMInt1TypeInContext(cg->context);
+  cg->voidType = LLVMVoidTypeInContext(cg->context);
+  cg->f32Type = LLVMFloatTypeInContext(cg->context);
+  cg->f64Type = LLVMDoubleTypeInContext(cg->context);
+  cg->i8Type = LLVMInt8TypeInContext(cg->context);
 }
 
 void codegenProgram(const ProgramNode *program) {

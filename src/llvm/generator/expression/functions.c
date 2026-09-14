@@ -26,13 +26,13 @@ void collectFunctions(Node *node) {
     LLVMTypeRef params[32];
 
     for (int i = 0; i < fn->paramCount; i++) {
-      f->args[i] = LOTUS_I32;
+      f->args[i] = fn->params[i]->base.dataType;
 
-      params[i] = LLVMInt32TypeInContext(cg->context);
+      params[i] = convertType(fn->params[i]->base.dataType);
     }
 
-    LLVMTypeRef type = LLVMFunctionType(LLVMInt32TypeInContext(cg->context),
-                                        params, f->argc, 0);
+    LLVMTypeRef type =
+        LLVMFunctionType(convertType(fn->base.dataType), params, f->argc, 0);
 
     f->fnType = type;
 
@@ -74,11 +74,12 @@ void generateFunction(const FunctionNode *node) {
 
   for (int i = 0; i < fn->argc; i++) {
     LLVMValueRef arg = LLVMGetParam(fn->llvmFunction, i);
-    LLVMVariable *var = createVar(
-        node->params[i]->name,
-        LLVMBuildAlloca(cg->allocaBuilder, LLVMInt32TypeInContext(cg->context),
-                        node->params[i]->name),
-        node->params[i]->base.dataType);
+    LLVMVariable *var =
+        createVar(node->params[i]->name,
+                  LLVMBuildAlloca(cg->allocaBuilder,
+                                  convertType(node->params[i]->base.dataType),
+                                  node->params[i]->name),
+                  node->params[i]->base.dataType);
 
     LLVMBuildStore(cg->builder, arg, var->alloca);
   }
@@ -86,8 +87,8 @@ void generateFunction(const FunctionNode *node) {
   generateNode(node->body);
 
   if (!LLVMGetBasicBlockTerminator(entry)) {
-    LLVMBuildRet(cg->builder,
-                 LLVMConstInt(LLVMInt32TypeInContext(cg->context), 0, 0));
+    // LLVMBuildRet(cg->builder,LLVMConstInt(cg->i32Type, 0, 0));
+    LLVMBuildRetVoid(cg->builder);
   }
 
   cg->currentBlock = prevCurBlock;
@@ -109,7 +110,8 @@ LLVMValueRef generateCall(const CallNode *node) {
       args[i] = generateExpression(node->arguments[i]);
     }
     return LLVMBuildCall2(cg->builder, fn->fnType, fn->llvmFunction, args,
-                          node->argumentCount, "calltmp");
+                          node->argumentCount,
+                          node->base.dataType == LOTUS_VOID ? "" : "calltmp");
   }
 
   LLVMNativeFunction *native = findNative(name);

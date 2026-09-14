@@ -1,5 +1,5 @@
-fn main(): int {
-    return 0
+fn func(text: string) {
+    print(text)
 }
 
-main()
+func("test")

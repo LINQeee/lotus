@@ -25,8 +25,7 @@ LLVMTypeRef lotusValueLLVMType() {
   if (type)
     return type;
 
-  LLVMTypeRef fields[] = {LLVMInt32TypeInContext(cg->context),
-                          LLVMInt64TypeInContext(cg->context)};
+  LLVMTypeRef fields[] = {cg->i32Type, cg->i64Type};
 
   type = LLVMStructCreateNamed(cg->context, "LotusValue");
 
@@ -38,23 +37,23 @@ LLVMTypeRef lotusValueLLVMType() {
 LLVMTypeRef convertType(const LotusType type) {
   switch (type) {
   case LOTUS_I32:
-    return LLVMInt32TypeInContext(cg->context);
+    return cg->i32Type;
   case LOTUS_I64:
-    return LLVMInt64TypeInContext(cg->context);
+    return cg->i64Type;
   case LOTUS_BOOL:
-    return LLVMInt1TypeInContext(cg->context);
+    return cg->boolType;
   case LOTUS_F32:
-    return LLVMFloatTypeInContext(cg->context);
+    return cg->f32Type;
   case LOTUS_F64:
-    return LLVMDoubleTypeInContext(cg->context);
+    return cg->f64Type;
   case LOTUS_STRING:
-    return LLVMPointerType(LLVMInt8TypeInContext(cg->context), 0);
+    return LLVMPointerType(cg->i8Type, 0);
   case LOTUS_VOID:
-    return LLVMVoidTypeInContext(cg->context);
+    return cg->voidType;
   case LOTUS_ANY:
     return lotusValueLLVMType();
   }
-  return LLVMVoidTypeInContext(cg->context);
+  return cg->voidType;
 }
 
 void prepareNativeFunction(const LotusFunctionInfo *info) {
@@ -72,7 +71,7 @@ void prepareNativeFunction(const LotusFunctionInfo *info) {
 
   LLVMTypeRef params[32];
   if (info->variadic)
-    params[0] = LLVMInt32TypeInContext(cg->context);
+    params[0] = cg->i32Type;
   for (int i = 0; i < info->argc; i++)
     params[info->variadic ? i + 1 : i] = convertType(info->args[i]);
 
@@ -131,16 +130,14 @@ LLVMValueRef buildLotusValue(const Node *node) {
   LLVMTypeRef valueType = lotusValueLLVMType();
   LLVMValueRef result = LLVMGetUndef(valueType);
 
-  result = LLVMBuildInsertValue(
-      cg->builder, result,
-      LLVMConstInt(LLVMInt32TypeInContext(cg->context), type, 0), 0, "");
+  result = LLVMBuildInsertValue(cg->builder, result,
+                                LLVMConstInt(cg->i32Type, type, 0), 0, "");
 
   LLVMValueRef payload = NULL;
 
   switch (type) {
   case LOTUS_I32:
-    payload = LLVMBuildSExt(cg->builder, value,
-                            LLVMInt64TypeInContext(cg->context), "");
+    payload = LLVMBuildSExt(cg->builder, value, cg->i64Type, "");
     break;
 
   case LOTUS_I64:
@@ -148,30 +145,25 @@ LLVMValueRef buildLotusValue(const Node *node) {
     break;
 
   case LOTUS_BOOL:
-    payload = LLVMBuildZExt(cg->builder, value,
-                            LLVMInt64TypeInContext(cg->context), "");
+    payload = LLVMBuildZExt(cg->builder, value, cg->i64Type, "");
     break;
 
   case LOTUS_STRING:
-    payload = LLVMBuildPtrToInt(cg->builder, value,
-                                LLVMInt64TypeInContext(cg->context), "");
+    payload = LLVMBuildPtrToInt(cg->builder, value, cg->i64Type, "");
     break;
 
   case LOTUS_F32:
-    payload = LLVMBuildFPExt(cg->builder, value,
-                             LLVMDoubleTypeInContext(cg->context), "");
+    payload = LLVMBuildFPExt(cg->builder, value, cg->f64Type, "");
 
-    payload = LLVMBuildBitCast(cg->builder, payload,
-                               LLVMInt64TypeInContext(cg->context), "");
+    payload = LLVMBuildBitCast(cg->builder, payload, cg->i64Type, "");
     break;
 
   case LOTUS_F64:
-    payload = LLVMBuildBitCast(cg->builder, value,
-                               LLVMInt64TypeInContext(cg->context), "");
+    payload = LLVMBuildBitCast(cg->builder, value, cg->i64Type, "");
     break;
 
   default:
-    payload = LLVMConstInt(LLVMInt64TypeInContext(cg->context), 0, 0);
+    payload = LLVMConstInt(cg->i64Type, 0, 0);
   }
 
   result = LLVMBuildInsertValue(cg->builder, result, payload, 1, "");
@@ -183,8 +175,7 @@ LLVMValueRef generateNativeCall(const CallNode *node) {
   LLVMNativeFunction *native = findNative(node->callee->name);
   LLVMValueRef args[64];
   if (native->variadic)
-    args[0] = LLVMConstInt(LLVMInt32TypeInContext(cg->context),
-                           node->argumentCount, 0);
+    args[0] = LLVMConstInt(cg->i32Type, node->argumentCount, 0);
   for (int i = 0; i < node->argumentCount; i++) {
     LotusType expected;
     if (i < native->argc)

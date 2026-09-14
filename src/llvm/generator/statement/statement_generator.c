@@ -82,25 +82,19 @@ static void generateReturn(const ReturnNode *node) {
 static LLVMTypeRef lotusTypeToLLVMType(LotusType type) {
   switch (type) {
   case LOTUS_I32:
-    return LLVMInt32TypeInContext(cg->context);
-
+    return cg->i32Type;
   case LOTUS_I64:
-    return LLVMInt64TypeInContext(cg->context);
-
+    return cg->i64Type;
   case LOTUS_F32:
-    return LLVMFloatTypeInContext(cg->context);
-
+    return cg->f32Type;
   case LOTUS_F64:
-    return LLVMDoubleTypeInContext(cg->context);
-
+    return cg->f64Type;
   case LOTUS_BOOL:
-    return LLVMInt1TypeInContext(cg->context);
-
+    return cg->boolType;
   case LOTUS_VOID:
-    return LLVMVoidTypeInContext(cg->context);
-
+    return cg->voidType;
   case LOTUS_STRING:
-    return LLVMPointerType(LLVMInt8TypeInContext(cg->context), 0);
+    return LLVMPointerType(cg->i8Type, 0);
 
   default:
     return NULL;

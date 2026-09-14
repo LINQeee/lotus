@@ -11,13 +11,13 @@
 static LLVMValueRef generateNumber(const NumberNode *node) {
   switch (node->base.dataType) {
   case LOTUS_I32:
-    return LLVMConstInt(LLVMInt32TypeInContext(cg->context), node->i32, 0);
+    return LLVMConstInt(cg->i32Type, node->i32, 0);
   case LOTUS_I64:
-    return LLVMConstInt(LLVMInt64TypeInContext(cg->context), node->i64, 0);
+    return LLVMConstInt(cg->i64Type, node->i64, 0);
   case LOTUS_F32:
-    return LLVMConstReal(LLVMFloatTypeInContext(cg->context), node->f32);
+    return LLVMConstReal(cg->f32Type, node->f32);
   case LOTUS_F64:
-    return LLVMConstReal(LLVMDoubleTypeInContext(cg->context), node->f64);
+    return LLVMConstReal(cg->f64Type, node->f64);
   default:
     exitWithError("Unknown number datatype %d", node->base.dataType);
   }
@@ -28,7 +28,7 @@ static LLVMValueRef generateString(const StringNode *node) {
 }
 
 static LLVMValueRef generateBool(const BooleanNode *node) {
-  return LLVMConstInt(LLVMInt1TypeInContext(cg->context), node->value, 0);
+  return LLVMConstInt(cg->boolType, node->value, 0);
 }
 
 static LLVMValueRef buildAdd(TokenType resultType, LLVMValueRef left,
