@@ -29,17 +29,17 @@ bool isAssignable(LotusType target, LotusType source) {
   if (source == LOTUS_ANY)
     return false;
 
-  // if (target == LOTUS_I64 && source == LOTUS_I32) return true; TODO: somehow
-  // add support for seamless type conversion
+  if (target == LOTUS_I64 && source == LOTUS_I32)
+    return true;
 
-  // if (target == LOTUS_F64 && source == LOTUS_F32) return true; TODO: yep,
-  // again, idk, I guess u should implement some type check inside llvm runtime
-
-  // if (target == LOTUS_F32 && source == LOTUS_I32) return true;
-  // if (target == LOTUS_F64 && (source == LOTUS_I32 || source == LOTUS_I64 ||
-  // source == LOTUS_F32))
-  //     return true; TODO: good feature not sure I need it at this point,
-  //     surely later
+  if (target == LOTUS_F64 && source == LOTUS_F32)
+    return true;
+  //
+  // if (target == LOTUS_F32 && source == LOTUS_I32)
+  //   return true;
+  //
+  // if (target == LOTUS_F64 && (source == LOTUS_I32 || source == LOTUS_I64))
+  //   return true;
 
   return false;
 }

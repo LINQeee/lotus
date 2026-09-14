@@ -24,6 +24,11 @@ void initCodegen() {
   cg->f32Type = LLVMFloatTypeInContext(cg->context);
   cg->f64Type = LLVMDoubleTypeInContext(cg->context);
   cg->i8Type = LLVMInt8TypeInContext(cg->context);
+
+  cg->stringType = LLVMStructCreateNamed(cg->context, "String");
+
+  LLVMTypeRef fields[] = {cg->i64Type, LLVMPointerType(cg->i8Type, 0)};
+  LLVMStructSetBody(cg->stringType, fields, 2, false);
 }
 
 void codegenProgram(const ProgramNode *program) {

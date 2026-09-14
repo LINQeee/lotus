@@ -46,6 +46,7 @@ typedef struct {
   LLVMTypeRef f64Type;
   LLVMTypeRef voidType;
   LLVMTypeRef i8Type;
+  LLVMTypeRef stringType;
 } Codegen;
 
 Codegen *cg;

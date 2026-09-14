@@ -1,5 +1,2 @@
-fn func(text: string) {
-    print(text)
-}
-
-func("test")
+string a = input()
+print(a)

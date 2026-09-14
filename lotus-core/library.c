@@ -6,6 +6,12 @@
 #include <string.h>
 #include <time.h>
 
+// WARNING
+// BAD CODE HERE MIGHT CRASH THE SHIT OUT OF PROGRAM
+// WARNING
+// CHANGE ANYTHING AT YOUR OWN RISK
+// Nah, I'm jk, do whatever u want
+
 int addMany(int count, ...) {
   va_list args;
   va_start(args, count);
@@ -38,7 +44,8 @@ void print(int count, ...) {
       printf("%ld", val.value.i64);
       break;
     case LOTUS_STRING:
-      printf("%s", (char *)val.value.ptr);
+      const LotusString *str = val.value.ptr;
+      printf("%s", str->data);
       break;
     }
   }
@@ -68,9 +75,46 @@ bool toBool(const LotusValue value) {
   }
 }
 
+LotusString *_concat(LotusString *str1, LotusString *str2) {
+  LotusString *result = malloc(sizeof(LotusString));
+  result->length = str1->length + str2->length;
+  char *data = malloc(result->length + 1);
+
+  memcpy(data, str1->data, str1->length);
+  memcpy(data + str1->length, str2->data, str2->length);
+
+  data[result->length] = '\0';
+  result->data = data;
+  return result;
+}
+
 int randomNum(int min, int max) {
   srand(time(NULL));
   return rand() % (max - min + 1) + min;
+}
+
+LotusString *input() {
+  LotusString *str = malloc(sizeof(LotusString));
+
+  size_t capacity = 16;
+  str->data = malloc(capacity);
+
+  size_t length = 0;
+  int c;
+
+  while ((c = getchar()) != '\n' && c != EOF) {
+    if (length + 1 >= capacity) {
+      capacity *= 2;
+      str->data = realloc(str->data, capacity);
+    }
+
+    str->data[length++] = (char)c;
+  }
+
+  str->data[length] = '\0';
+  str->length = length;
+
+  return str;
 }
 
 LOTUS_NATIVE_LIBRARY {
@@ -81,4 +125,7 @@ LOTUS_NATIVE_LIBRARY {
 
   LOTUS_VARIADIC(print, LOTUS_VOID, LOTUS_ANY);
   LOTUS_VARIADIC(addMany, LOTUS_I32, LOTUS_I32);
+
+  LOTUS_FUNCTION(input, LOTUS_STRING);
+  LOTUS_FUNCTION(_concat, LOTUS_STRING, LOTUS_STRING, LOTUS_STRING);
 }

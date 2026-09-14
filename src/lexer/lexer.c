@@ -1,11 +1,11 @@
 #include "lexer.h"
 
+#include "../utils/cutils.h"
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../utils/cutils.h"
 
 static const char *source;
 static size_t position;
@@ -37,9 +37,7 @@ static const Keyword KEYWORDS[] = {
     {"false", TOKEN_FALSE},
 };
 
-static char current() {
-    return source[position];
-}
+static char current() { return source[position]; }
 static char advance() {
     char c = source[position++];
 
@@ -58,12 +56,23 @@ static bool match(const char *text) {
 }
 static void skipWhitespaces() {
     while (isspace((unsigned char) current())) advance();
+
+    if (match("//")) {
+        while (advance() != '\n');
+        skipWhitespaces();
+    }
+    if (match("/*")) {
+        while (!match("*/")) advance();
+        advance();
+        advance();
+        skipWhitespaces();
+    }
 }
 
 static char *copySource(size_t start, size_t length) {
     char *value = mallocSafe(length + 1);
 
-    memcpy(value, source+start, length);
+    memcpy(value, source + start, length);
     value[length] = '\0';
 
     return value;
@@ -94,10 +103,7 @@ static Token readIdentifier() {
 
     char *value = copySource(start, length);
 
-    Token token = {
-        getKeywordType(value),
-        value
-    };
+    Token token = {getKeywordType(value), value};
     return token;
 }
 static Token readNumber() {
@@ -112,18 +118,14 @@ static Token readNumber() {
             advance();
     }
 
-    if (current() == 'L' || current() == 'l' ||
-        current() == 'F' || current() == 'f' ||
-        current() == 'D' || current() == 'd') {
+    if (current() == 'L' || current() == 'l' || current() == 'F' ||
+        current() == 'f' || current() == 'D' || current() == 'd') {
         advance();
     }
 
     size_t length = position - start;
 
-    return (Token){
-        TOKEN_NUMBER,
-        copySource(start, length)
-    };
+    return (Token){TOKEN_NUMBER, copySource(start, length)};
 }
 static Token readString(char endSymbol) {
     advance();
@@ -171,10 +173,7 @@ static Token readString(char endSymbol) {
 
     value[length] = '\0';
 
-    return (Token){
-        TOKEN_STRING,
-        value
-    };
+    return (Token){TOKEN_STRING, value};
 }
 static Token readSymbol() {
     if (match("==")) return makeToken(TOKEN_EQ, 2);

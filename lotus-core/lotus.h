@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <sys/_types/_size_t.h>
 
 #ifdef _WIN32
 #define LOTUS_EXPORT __declspec(dllexport)
@@ -33,6 +34,11 @@
 
 #define LOTUS_NATIVE_LIBRARY                                                   \
   LOTUS_EXPORT void LOTUS_CALL lotusRegister(RegisterFunction reg)
+
+typedef struct {
+  size_t length;
+  char *data;
+} LotusString;
 
 typedef enum {
   LOTUS_I32,

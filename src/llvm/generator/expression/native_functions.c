@@ -85,12 +85,10 @@ void prepareNativeFunction(const LotusFunctionInfo *info) {
                                info->argc, info->variadic);
 }
 
+// deprecated
 LotusType resolveExpressionType(const Node *node) {
   switch (node->type) {
-  case NODE_NUMBER: {
-    const NumberNode *n = (NumberNode *)node;
-    return n->base.dataType;
-  }
+  case NODE_NUMBER: return node->dataType;
 
   case NODE_STRING:
     return LOTUS_STRING;
@@ -122,9 +120,10 @@ LotusType resolveExpressionType(const Node *node) {
     return LOTUS_I32;
   }
 }
-
+//
 LLVMValueRef buildLotusValue(const Node *node) {
-  LotusType type = resolveExpressionType(node);
+  // LotusType type = resolveExpressionType(node);
+  LotusType type = node->dataType;
   LLVMValueRef value = generateExpression(node);
 
   LLVMTypeRef valueType = lotusValueLLVMType();
