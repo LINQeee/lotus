@@ -1,2 +1,17 @@
-string a = input()
+//int a = 5
+//int b = 0
+//if (a == 5) {
+//    int b = 5
+//    print(b)
+//}
+//
+//print(b)
+
+int a = toInt('2')
+fn test() {
+int a = 3
+print(a)
+}
+
+test()
 print(a)

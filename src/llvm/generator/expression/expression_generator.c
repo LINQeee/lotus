@@ -223,7 +223,7 @@ static LLVMValueRef generateBinary(const BinaryNode *node) {
 
 static LLVMValueRef generateIdentifier(const char *name) {
     LLVMVariable *var = getVar(name);
-    return LLVMBuildLoad2(cg->builder, convertType(var->type), var->alloca, name);
+    return LLVMBuildLoad2(cg->builder, convertType(var->type), var->storage, name);
 }
 
 LLVMValueRef generateExpression(const Node *node) {

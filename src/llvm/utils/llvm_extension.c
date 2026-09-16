@@ -19,7 +19,7 @@ void LLVMMoveBuilderToEnd(const LLVMBasicBlockRef block) {
 }
 
 LLVMBasicBlockRef LLVMAppendBlock(const char *name) {
-    return LLVMAppendBasicBlockInContext(cg->context, cg->function, name);
+    return LLVMAppendBasicBlockInContext(cg->context, cg->currentFn, name);
 }
 
 void createMainFunctionAndGenerateCode(ProgramNode *program) {
@@ -28,7 +28,8 @@ void createMainFunctionAndGenerateCode(ProgramNode *program) {
     LLVMTypeRef returnType = LLVMInt32TypeInContext(cg->context);
     LLVMTypeRef functionType = LLVMFunctionType(returnType, NULL, 0, 0);
     LLVMValueRef mainFunction = LLVMAddFunction(cg->module, "main", functionType);
-    cg->function = mainFunction;
+    cg->currentFn = mainFunction;
+    cg->mainFunction = cg->currentFn;
     LLVMBasicBlockRef entry = LLVMAppendBlock("entry");
     LLVMMoveBuilderToEnd(entry);
 

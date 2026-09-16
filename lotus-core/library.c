@@ -117,6 +117,8 @@ LotusString *input() {
   return str;
 }
 
+int toInt(LotusString *str) { return atoi(str->data); }
+
 LOTUS_NATIVE_LIBRARY {
   LOTUS_FUNCTION(randomNum, LOTUS_I32, LOTUS_I32, LOTUS_I32);
 
@@ -125,6 +127,8 @@ LOTUS_NATIVE_LIBRARY {
 
   LOTUS_VARIADIC(print, LOTUS_VOID, LOTUS_ANY);
   LOTUS_VARIADIC(addMany, LOTUS_I32, LOTUS_I32);
+
+  LOTUS_FUNCTION(toInt, LOTUS_I32, LOTUS_STRING);
 
   LOTUS_FUNCTION(input, LOTUS_STRING);
   LOTUS_FUNCTION(_concat, LOTUS_STRING, LOTUS_STRING, LOTUS_STRING);

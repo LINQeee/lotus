@@ -6,11 +6,12 @@
 
 typedef struct {
     char name[64];
-    LLVMValueRef alloca;
+    LLVMValueRef storage;
     LotusType type;
+    LLVMValueRef relatedFn;
 } LLVMVariable;
 
-LLVMVariable *createVar(const char *name, LLVMValueRef alloca, LotusType type);
+LLVMVariable *createVar(const char *name, LLVMValueRef storage, LotusType type);
 
 LLVMVariable *getVar(const char *name);
 #endif
