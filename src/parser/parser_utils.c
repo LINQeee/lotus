@@ -5,13 +5,12 @@
 #include <string.h>
 
 #include "../lexer/lexer.h"
-#include "parser.h"
 #include "../utils/cutils.h"
+#include "parser.h"
 
 bool isComparison(const TokenType type) {
-    return type == TOKEN_GT || type == TOKEN_LT ||
-           type == TOKEN_GE || type == TOKEN_LE ||
-           type == TOKEN_EQ || type == TOKEN_NEQ;
+    return type == TOKEN_GT || type == TOKEN_LT || type == TOKEN_GE || type == TOKEN_LE || type == TOKEN_EQ ||
+           type == TOKEN_NEQ;
 }
 
 LotusType tokenTypeToLotusType(TokenType type) {
@@ -22,22 +21,18 @@ LotusType tokenTypeToLotusType(TokenType type) {
         case TOKEN_TYPE_LONG: return LOTUS_I64;
         case TOKEN_TYPE_DOUBLE: return LOTUS_F64;
         case TOKEN_TYPE_STRING: return LOTUS_STRING;
-        default:
-            printf("Unknown LOTUS DATATYPE %d\n", type);
-            exit(EXIT_FAILURE);
+        default: printf("Unknown LOTUS DATATYPE %d\n", type); exit(EXIT_FAILURE);
     }
 }
 
 bool isDataType(TokenType type) {
-    return type == TOKEN_TYPE_INT || type == TOKEN_TYPE_STRING ||
-           type == TOKEN_TYPE_BOOL || type == TOKEN_TYPE_FLOAT ||
+    return type == TOKEN_TYPE_INT || type == TOKEN_TYPE_STRING || type == TOKEN_TYPE_BOOL || type == TOKEN_TYPE_FLOAT ||
            type == TOKEN_TYPE_DOUBLE || type == TOKEN_TYPE_LONG;
 }
 
 bool isOperator(const TokenType type) {
-    return type == TOKEN_PLUS || type == TOKEN_MINUS || type == TOKEN_PERCENT || type == TOKEN_STAR || type ==
-           TOKEN_SLASH || isComparison(type)
-           || type == TOKEN_AND || type == TOKEN_OR;
+    return type == TOKEN_PLUS || type == TOKEN_MINUS || type == TOKEN_PERCENT || type == TOKEN_STAR ||
+           type == TOKEN_SLASH || isComparison(type) || type == TOKEN_AND || type == TOKEN_OR;
 }
 
 FunctionNode *newFunctionNode(const char *name, LotusType returnType, SourceLocation location) {
@@ -105,23 +100,15 @@ ProgramNode *newProgramNode() {
     node->base.type = NODE_PROGRAM;
     node->count = 0;
     node->capacity = 8;
-    node->statements = malloc(
-        sizeof(Node *) * node->capacity
-    );
+    node->statements = malloc(sizeof(Node *) * node->capacity);
     return node;
 }
 
-void programAddStatement(
-    ProgramNode *program,
-    Node *statement
-) {
+void programAddStatement(ProgramNode *program, Node *statement) {
     if (program->count >= program->capacity) {
         program->capacity *= 2;
 
-        program->statements = reallocSafe(
-            program->statements,
-            sizeof(Node *) * program->capacity
-        );
+        program->statements = reallocSafe(program->statements, sizeof(Node *) * program->capacity);
     }
 
     program->statements[program->count++] = statement;

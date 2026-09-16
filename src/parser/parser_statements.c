@@ -2,10 +2,10 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include "../utils/cutils.h"
 #include "./parser.h"
 #include "./parser_utils.h"
 #include "parser_expressions.h"
-#include "../utils/cutils.h"
 
 Node *parseStatement();
 
@@ -15,17 +15,16 @@ static Node *parseBlock() {
 
     ProgramNode *program = newProgramNode();
 
-    while (!isCurrent(TOKEN_RBRACE) && !isCurrent(TOKEN_EOF))
-        programAddStatement(program, parseStatement());
+    while (!isCurrent(TOKEN_RBRACE) && !isCurrent(TOKEN_EOF)) programAddStatement(program, parseStatement());
 
     expect(TOKEN_RBRACE);
-    return (Node *) program;
+    return (Node *)program;
 }
 static Node *parseReturn() {
     SourceLocation returnLoc = expect(TOKEN_RETURN).location;
-    // if (current().type == TOKEN_LBRACE || current().type == TOKEN_IF) node->value = parseBlock(); //TODO return lambda()
-    // else node->value = parseExpression(0);
-    return (Node *) newReturnNode(parseExpression(), returnLoc);
+    // if (current().type == TOKEN_LBRACE || current().type == TOKEN_IF) node->value = parseBlock();
+    // //TODO return lambda() else node->value = parseExpression(0);
+    return (Node *)newReturnNode(parseExpression(), returnLoc);
 }
 static Node *parseBreak() {
     SourceLocation breakLoc = expect(TOKEN_BREAK).location;
@@ -34,7 +33,7 @@ static Node *parseBreak() {
         advance(); // skip '@'
         node->level = strtol(advance().value, NULL, 10);
     }
-    return (Node *) node;
+    return (Node *)node;
 }
 static Node *parseContinue() {
     SourceLocation continueLoc = expect(TOKEN_CONTINUE).location;
@@ -43,18 +42,18 @@ static Node *parseContinue() {
         advance(); // skip '@'
         node->level = strtol(advance().value, NULL, 10);
     }
-    return (Node *) node;
+    return (Node *)node;
 }
 static Node *parseWhile() {
     SourceLocation whileLoc = expect(TOKEN_WHILE).location;
-    return (Node *) newWhileNode(parseExpression(), parseBlock(), whileLoc);
+    return (Node *)newWhileNode(parseExpression(), parseBlock(), whileLoc);
 }
 static Node *parseIf() {
     SourceLocation ifLoc = expect(TOKEN_IF).location;
     IfNode *node = newIfNode(parseExpression(), parseBlock(), ifLoc);
     if (matchCurrent(TOKEN_ELSE)) node->elseBranch = parseBlock();
 
-    return (Node *) node;
+    return (Node *)node;
 }
 static Node *parseDeclaration() {
     Token typeToken = advance();
@@ -67,7 +66,7 @@ static Node *parseDeclaration() {
 
     IdentifierNode *identifier = newIdentifierNode(varName.value, type, varName.location);
 
-    return (Node *) newDeclarationNode(identifier, value, varName.location);
+    return (Node *)newDeclarationNode(identifier, value, varName.location);
 }
 static Node *parseAssignment() {
     Token varName = advance();
@@ -78,7 +77,7 @@ static Node *parseAssignment() {
 
     Node *value = parseExpression();
 
-    return (Node *) newAssignmentNode(identifier, value, varName.location);
+    return (Node *)newAssignmentNode(identifier, value, varName.location);
 }
 
 static IdentifierNode *parseParameter() {
@@ -100,8 +99,7 @@ static Node *parseFunction() {
     int paramCount = 0;
     if (!isCurrent(TOKEN_RPAREN)) {
         do {
-            if (paramCount >= MAX_ARGS)
-                exitWithError("Too many function parameters");
+            if (paramCount >= MAX_ARGS) exitWithError("Too many function parameters");
 
             params[paramCount++] = parseParameter();
         } while (matchCurrent(TOKEN_COMMA));
@@ -117,40 +115,32 @@ static Node *parseFunction() {
     func->paramCount = paramCount;
     func->params = params;
     func->body = parseBlock();
-    return (Node *) func;
+    return (Node *)func;
 }
 
 Node *parseStatement() {
     switch (current().type) {
-        case TOKEN_FUNCTION:
-            return parseFunction();
+        case TOKEN_FUNCTION: return parseFunction();
 
-        case TOKEN_RETURN:
-            return parseReturn();
+        case TOKEN_RETURN: return parseReturn();
 
-        case TOKEN_BREAK:
-            return parseBreak();
+        case TOKEN_BREAK: return parseBreak();
 
-        case TOKEN_CONTINUE:
-            return parseContinue();
+        case TOKEN_CONTINUE: return parseContinue();
 
-        case TOKEN_IF:
-            return parseIf();
+        case TOKEN_IF: return parseIf();
 
-        case TOKEN_WHILE:
-            return parseWhile();
+        case TOKEN_WHILE: return parseWhile();
 
         case TOKEN_TYPE_INT:
         case TOKEN_TYPE_LONG:
         case TOKEN_TYPE_FLOAT:
         case TOKEN_TYPE_DOUBLE:
         case TOKEN_TYPE_BOOL:
-        case TOKEN_TYPE_STRING:
-            return parseDeclaration();
+        case TOKEN_TYPE_STRING: return parseDeclaration();
 
         case TOKEN_IDENTIFIER: {
-            if (peekNext().type == TOKEN_EQUAL)
-                return parseAssignment();
+            if (peekNext().type == TOKEN_EQUAL) return parseAssignment();
             return parseExpression();
         }
         default: return parseExpression();

@@ -5,10 +5,8 @@
 
 static void moveAllocaBuilder() {
     LLVMValueRef firstInstr = LLVMGetFirstInstruction(cg->currentAllocaBlock);
-    if (!firstInstr)
-        LLVMPositionBuilderAtEnd(cg->allocaBuilder, cg->currentAllocaBlock);
-    else
-        LLVMPositionBuilderBefore(cg->allocaBuilder, firstInstr);
+    if (!firstInstr) LLVMPositionBuilderAtEnd(cg->allocaBuilder, cg->currentAllocaBlock);
+    else LLVMPositionBuilderBefore(cg->allocaBuilder, firstInstr);
 }
 
 LLVMVariable *createVar(const char *name, const LLVMValueRef storage, const LotusType type) {

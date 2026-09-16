@@ -21,14 +21,13 @@ static const char *findLineStart(const char *source, size_t targetLine) {
 static size_t lineLength(const char *lineStart) {
     size_t length = 0;
 
-    while (lineStart[length] != '\0' && lineStart[length] != '\n')
-        length++;
+    while (lineStart[length] != '\0' && lineStart[length] != '\n') length++;
 
     return length;
 }
 
 static void printLineNumber(size_t line, size_t width) {
-    fprintf(stderr, "%*zu | ", (int) width, line);
+    fprintf(stderr, "%*zu | ", (int)width, line);
 }
 
 static size_t digits(size_t value) {
@@ -42,12 +41,7 @@ static size_t digits(size_t value) {
     return result;
 }
 
-void diagnosticError(
-    const char *scriptContent,
-    SourceLocation location,
-    const char *format,
-    ...
-) {
+void diagnosticError(const char *scriptContent, SourceLocation location, const char *format, ...) {
     fprintf(stderr, "error: ");
 
     va_list args;
@@ -57,13 +51,7 @@ void diagnosticError(
 
     fprintf(stderr, "\n");
 
-    fprintf(
-        stderr,
-        " --> %s:%zu:%zu\n",
-        location.file,
-        location.line,
-        location.column
-    );
+    fprintf(stderr, " --> %s:%zu:%zu\n", location.file, location.line, location.column);
 
     const char *lineStart = findLineStart(scriptContent, location.line);
 
@@ -78,10 +66,9 @@ void diagnosticError(
 
     size_t numberWidth = digits(location.line);
 
-    fprintf(stderr, "%*s | ", (int) numberWidth, "");
+    fprintf(stderr, "%*s | ", (int)numberWidth, "");
 
-    for (size_t i = 1; i < location.column; i++)
-        fputc(' ', stderr);
+    for (size_t i = 1; i < location.column; i++) fputc(' ', stderr);
 
     size_t markerLength = location.length;
 
@@ -95,8 +82,7 @@ void diagnosticError(
         if (markerLength == 0) markerLength = 1;
     }
 
-    for (size_t i = 0; i < markerLength; i++)
-        fputc('^', stderr);
+    for (size_t i = 0; i < markerLength; i++) fputc('^', stderr);
 
     fputc('\n', stderr);
 

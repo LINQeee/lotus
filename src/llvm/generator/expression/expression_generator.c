@@ -39,8 +39,7 @@ static LLVMValueRef generateBool(const BooleanNode *node) {
     return LLVMConstInt(cg->boolType, node->value, 0);
 }
 
-static LLVMValueRef castNumeric(LLVMValueRef value, LotusType from,
-                                LotusType to) {
+static LLVMValueRef castNumeric(LLVMValueRef value, LotusType from, LotusType to) {
     if (from == to) return value;
 
     switch (from) {
@@ -59,15 +58,13 @@ static LLVMValueRef castNumeric(LLVMValueRef value, LotusType from,
             if (to == LOTUS_F64) return LLVMBuildFPExt(cg->builder, value, cg->f64Type, "float_to_double");
             break;
 
-        default:
-            break;
+        default: break;
     }
 
     exitWithError("Invalid numeric cast %d -> %d", from, to);
 }
 
-static LLVMValueRef buildArithmetic(const BinaryNode *bNode, LLVMValueRef left,
-                                    LLVMValueRef right) {
+static LLVMValueRef buildArithmetic(const BinaryNode *bNode, LLVMValueRef left, LLVMValueRef right) {
     left = castNumeric(left, bNode->left->dataType, bNode->base.dataType);
     right = castNumeric(right, bNode->right->dataType, bNode->base.dataType);
 
@@ -75,46 +72,33 @@ static LLVMValueRef buildArithmetic(const BinaryNode *bNode, LLVMValueRef left,
         case LOTUS_I32:
         case LOTUS_I64:
             switch (bNode->op) {
-                case TOKEN_PLUS:
-                    return LLVMBuildAdd(cg->builder, left, right, "add_tmp");
-                case TOKEN_MINUS:
-                    return LLVMBuildSub(cg->builder, left, right, "sub_tmp");
-                case TOKEN_STAR:
-                    return LLVMBuildMul(cg->builder, left, right, "mul_tmp");
-                case TOKEN_SLASH:
-                    return LLVMBuildSDiv(cg->builder, left, right, "div_tmp");
-                case TOKEN_PERCENT:
-                    return LLVMBuildSRem(cg->builder, left, right, "rem_tmp");
-                default:
-                    break;
+                case TOKEN_PLUS: return LLVMBuildAdd(cg->builder, left, right, "add_tmp");
+                case TOKEN_MINUS: return LLVMBuildSub(cg->builder, left, right, "sub_tmp");
+                case TOKEN_STAR: return LLVMBuildMul(cg->builder, left, right, "mul_tmp");
+                case TOKEN_SLASH: return LLVMBuildSDiv(cg->builder, left, right, "div_tmp");
+                case TOKEN_PERCENT: return LLVMBuildSRem(cg->builder, left, right, "rem_tmp");
+                default: break;
             }
             break;
 
         case LOTUS_F32:
         case LOTUS_F64:
             switch (bNode->op) {
-                case TOKEN_PLUS:
-                    return LLVMBuildFAdd(cg->builder, left, right, "add_tmp");
-                case TOKEN_MINUS:
-                    return LLVMBuildFSub(cg->builder, left, right, "sub_tmp");
-                case TOKEN_STAR:
-                    return LLVMBuildFMul(cg->builder, left, right, "mul_tmp");
-                case TOKEN_SLASH:
-                    return LLVMBuildFDiv(cg->builder, left, right, "div_tmp");
-                default:
-                    break;
+                case TOKEN_PLUS: return LLVMBuildFAdd(cg->builder, left, right, "add_tmp");
+                case TOKEN_MINUS: return LLVMBuildFSub(cg->builder, left, right, "sub_tmp");
+                case TOKEN_STAR: return LLVMBuildFMul(cg->builder, left, right, "mul_tmp");
+                case TOKEN_SLASH: return LLVMBuildFDiv(cg->builder, left, right, "div_tmp");
+                default: break;
             }
             break;
 
-        default:
-            break;
+        default: break;
     }
 
     return NULL;
 }
 
-static LLVMValueRef buildComparison(const BinaryNode *bNode, LLVMValueRef left,
-                                    LLVMValueRef right) {
+static LLVMValueRef buildComparison(const BinaryNode *bNode, LLVMValueRef left, LLVMValueRef right) {
     LotusType commonType = commonNumericType(bNode->left->dataType, bNode->right->dataType);
 
     left = castNumeric(left, bNode->left->dataType, commonType);
@@ -126,27 +110,14 @@ static LLVMValueRef buildComparison(const BinaryNode *bNode, LLVMValueRef left,
         LLVMRealPredicate predicate;
 
         switch (bNode->op) {
-            case TOKEN_LT:
-                predicate = LLVMRealOLT;
-                break;
-            case TOKEN_GT:
-                predicate = LLVMRealOGT;
-                break;
-            case TOKEN_LE:
-                predicate = LLVMRealOLE;
-                break;
-            case TOKEN_GE:
-                predicate = LLVMRealOGE;
-                break;
-            case TOKEN_EQ:
-                predicate = LLVMRealOEQ;
-                break;
-            case TOKEN_NEQ:
-                predicate = LLVMRealONE;
-                break;
+            case TOKEN_LT: predicate = LLVMRealOLT; break;
+            case TOKEN_GT: predicate = LLVMRealOGT; break;
+            case TOKEN_LE: predicate = LLVMRealOLE; break;
+            case TOKEN_GE: predicate = LLVMRealOGE; break;
+            case TOKEN_EQ: predicate = LLVMRealOEQ; break;
+            case TOKEN_NEQ: predicate = LLVMRealONE; break;
 
-            default:
-                return NULL;
+            default: return NULL;
         }
 
         return LLVMBuildFCmp(cg->builder, predicate, left, right, "cmp_tmp");
@@ -155,27 +126,14 @@ static LLVMValueRef buildComparison(const BinaryNode *bNode, LLVMValueRef left,
     LLVMIntPredicate predicate;
 
     switch (bNode->op) {
-        case TOKEN_LT:
-            predicate = LLVMIntSLT;
-            break;
-        case TOKEN_GT:
-            predicate = LLVMIntSGT;
-            break;
-        case TOKEN_LE:
-            predicate = LLVMIntSLE;
-            break;
-        case TOKEN_GE:
-            predicate = LLVMIntSGE;
-            break;
-        case TOKEN_EQ:
-            predicate = LLVMIntEQ;
-            break;
-        case TOKEN_NEQ:
-            predicate = LLVMIntNE;
-            break;
+        case TOKEN_LT: predicate = LLVMIntSLT; break;
+        case TOKEN_GT: predicate = LLVMIntSGT; break;
+        case TOKEN_LE: predicate = LLVMIntSLE; break;
+        case TOKEN_GE: predicate = LLVMIntSGE; break;
+        case TOKEN_EQ: predicate = LLVMIntEQ; break;
+        case TOKEN_NEQ: predicate = LLVMIntNE; break;
 
-        default:
-            return NULL;
+        default: return NULL;
     }
 
     return LLVMBuildICmp(cg->builder, predicate, left, right, "cmp_tmp");
@@ -191,8 +149,7 @@ static LLVMValueRef generateBinary(const BinaryNode *node) {
                 LLVMNativeFunction *concatFn = findNative("_concat");
                 LLVMValueRef args[] = {left, right};
 
-                return LLVMBuildCall2(cg->builder, concatFn->fnType,
-                                      concatFn->llvmFunction, args, 2, "str.concat");
+                return LLVMBuildCall2(cg->builder, concatFn->fnType, concatFn->llvmFunction, args, 2, "str.concat");
             }
 
             return buildArithmetic(node, left, right);
@@ -200,22 +157,18 @@ static LLVMValueRef generateBinary(const BinaryNode *node) {
         case TOKEN_MINUS:
         case TOKEN_STAR:
         case TOKEN_SLASH:
-        case TOKEN_PERCENT:
-            return buildArithmetic(node, left, right);
+        case TOKEN_PERCENT: return buildArithmetic(node, left, right);
 
         case TOKEN_LT:
         case TOKEN_GT:
         case TOKEN_LE:
         case TOKEN_GE:
         case TOKEN_EQ:
-        case TOKEN_NEQ:
-            return buildComparison(node, left, right);
+        case TOKEN_NEQ: return buildComparison(node, left, right);
 
-        case TOKEN_AND:
-            return LLVMBuildAnd(cg->builder, left, right, "andtmp");
+        case TOKEN_AND: return LLVMBuildAnd(cg->builder, left, right, "andtmp");
 
-        case TOKEN_OR:
-            return LLVMBuildOr(cg->builder, left, right, "ortmp");
+        case TOKEN_OR: return LLVMBuildOr(cg->builder, left, right, "ortmp");
     }
 
     return NULL;
@@ -228,18 +181,12 @@ static LLVMValueRef generateIdentifier(const char *name) {
 
 LLVMValueRef generateExpression(const Node *node) {
     switch (node->type) {
-        case NODE_NUMBER:
-            return generateNumber((NumberNode *) node);
-        case NODE_BINARY:
-            return generateBinary((BinaryNode *) node);
-        case NODE_IDENTIFIER:
-            return generateIdentifier(((IdentifierNode *) node)->name);
-        case NODE_CALL:
-            return generateCall((CallNode *) node);
-        case NODE_STRING:
-            return generateString((StringNode *) node);
-        case NODE_BOOLEAN:
-            return generateBool((BooleanNode *) node);
+        case NODE_NUMBER: return generateNumber((NumberNode *)node);
+        case NODE_BINARY: return generateBinary((BinaryNode *)node);
+        case NODE_IDENTIFIER: return generateIdentifier(((IdentifierNode *)node)->name);
+        case NODE_CALL: return generateCall((CallNode *)node);
+        case NODE_STRING: return generateString((StringNode *)node);
+        case NODE_BOOLEAN: return generateBool((BooleanNode *)node);
     }
     return NULL;
 }

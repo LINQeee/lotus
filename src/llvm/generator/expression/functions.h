@@ -1,7 +1,7 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
-#include <llvm-c/Types.h>
 #include "native_functions.h"
+#include <llvm-c/Types.h>
 
 typedef struct {
     char name[64];

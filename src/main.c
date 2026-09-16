@@ -2,11 +2,11 @@
 #include <stdlib.h>
 
 #include "lexer/lexer.h"
+#include "native_loader/native_loader.h"
 #include "parser/parser.h"
+#include "type_checker/type_checker.h"
 #include "utils/utils.h"
 #include "llvm/llvm.h"
-#include "native_loader/native_loader.h"
-#include "type_checker/type_checker.h"
 
 char *readScript(const char *filePath) {
     FILE *file = fopen(filePath, "r");
@@ -42,7 +42,3 @@ int main(void) {
     codegenProgram(program);
     return 0;
 }
-
-
-
-

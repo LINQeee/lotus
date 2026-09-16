@@ -2,11 +2,11 @@
 #include <stdlib.h>
 
 #include "../llvm.h"
-#include <string.h>
 #include <llvm-c/Analysis.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/TargetMachine.h>
 #include <llvm-c/Transforms/PassBuilder.h>
+#include <string.h>
 
 #include "../generator/generator.h"
 
@@ -33,7 +33,7 @@ void createMainFunctionAndGenerateCode(ProgramNode *program) {
     LLVMBasicBlockRef entry = LLVMAppendBlock("entry");
     LLVMMoveBuilderToEnd(entry);
 
-    generateNode((Node *) program);
+    generateNode((Node *)program);
 
     if (!LLVMGetBasicBlockTerminator(cg->currentAllocaBlock))
         LLVMBuildRet(cg->builder, LLVMConstInt(LLVMInt32TypeInContext(cg->context), 0, 0));
@@ -41,11 +41,7 @@ void createMainFunctionAndGenerateCode(ProgramNode *program) {
 
 void verifyCode() {
     char *error = NULL;
-    if (LLVMVerifyModule(
-        cg->module,
-        LLVMPrintMessageAction,
-        &error
-    )) {
+    if (LLVMVerifyModule(cg->module, LLVMPrintMessageAction, &error)) {
         printf("%s\n", error);
         LLVMDisposeMessage(error);
     }
@@ -63,10 +59,8 @@ static LLVMTargetMachineRef getTargetMachine() {
         return NULL;
     }
 
-    LLVMTargetMachineRef targetMachine = LLVMCreateTargetMachine(
-        target, triple, "", "",
-        LLVMCodeGenLevelDefault, LLVMRelocDefault, LLVMCodeModelDefault
-    );
+    LLVMTargetMachineRef targetMachine = LLVMCreateTargetMachine(target, triple, "", "", LLVMCodeGenLevelDefault,
+                                                                 LLVMRelocDefault, LLVMCodeModelDefault);
 
     LLVMTargetDataRef dataLayout = LLVMCreateTargetDataLayout(targetMachine);
     LLVMSetModuleDataLayout(cg->module, dataLayout);

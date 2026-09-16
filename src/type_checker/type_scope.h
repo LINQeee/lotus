@@ -16,15 +16,8 @@ typedef struct TypeScope {
 TypeScope *typeScopeCreate(TypeScope *parent);
 void typeScopeDestroy(TypeScope *scope);
 
-void typeScopeDeclare(
-    TypeScope *scope,
-    const char *name,
-    LotusType type
-);
+void typeScopeDeclare(TypeScope *scope, const char *name, LotusType type);
 
-Variable *typeScopeFind(
-    TypeScope *scope,
-    const char *name
-);
+Variable *typeScopeFind(TypeScope *scope, const char *name);
 
 #endif

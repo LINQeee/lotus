@@ -1,5 +1,5 @@
-#include "../lexer/lexer.h"
 #include "parser.h"
+#include "../lexer/lexer.h"
 #include "parser_utils.h"
 
 #include "../utils/cutils.h"
@@ -21,15 +21,13 @@ bool isCurrent(TokenType type) {
     return current().type == type;
 }
 bool matchCurrent(TokenType type) {
-    if (!isCurrent(type))
-        return false;
+    if (!isCurrent(type)) return false;
 
     advance();
     return true;
 }
 Token expect(TokenType type) {
-    if (!isCurrent(type))
-        exitWithError("Expected %d but got %d (%s)", type, current().type, current().value);
+    if (!isCurrent(type)) exitWithError("Expected %d but got %d (%s)", type, current().type, current().value);
     return advance();
 }
 

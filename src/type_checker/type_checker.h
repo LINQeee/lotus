@@ -1,10 +1,10 @@
 #ifndef TYPE_CHECKER_H
 #define TYPE_CHECKER_H
 
-#include <stdbool.h>
 #include "../lexer/lexer.h"
 #include "../llvm/lotus_types.h"
 #include "../parser/parser.h"
+#include <stdbool.h>
 
 typedef struct TypeChecker TypeChecker;
 
@@ -23,17 +23,9 @@ TypeChecker *typeCheckerCreate(const char *fileContent);
 
 void typeCheckerDestroy(TypeChecker *checker);
 
-void typeCheckerAddNativeFunction(
-    const char *name,
-    LotusType returnType,
-    const LotusType *parameterTypes,
-    size_t parameterCount,
-    bool variadic
-);
+void typeCheckerAddNativeFunction(const char *name, LotusType returnType, const LotusType *parameterTypes,
+                                  size_t parameterCount, bool variadic);
 
-void typeCheckerCheckProgram(
-    TypeChecker *checker,
-    const ProgramNode *program
-);
+void typeCheckerCheckProgram(TypeChecker *checker, const ProgramNode *program);
 
 #endif

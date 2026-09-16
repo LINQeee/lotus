@@ -1,11 +1,11 @@
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32
-#include <windows.h>
 #include <fileapi.h>
+#include <windows.h>
 #else
 #include <dirent.h>
 #include <dlfcn.h>
@@ -25,10 +25,10 @@
 #define LOTUS_CALL
 #endif
 
-#include "native_loader.h"
 #include "../llvm/generator/expression/native_functions.h"
+#include "native_loader.h"
 
-typedef void (LOTUS_CALL *RegisterFunction)(const LotusFunctionInfo *info);
+typedef void(LOTUS_CALL *RegisterFunction)(const LotusFunctionInfo *info);
 
 #ifdef _WIN32
 static void loadWindows(const char *path) {
@@ -38,12 +38,10 @@ static void loadWindows(const char *path) {
     WIN32_FIND_DATAA data;
     HANDLE hFind = FindFirstFileA(searchPath, &data);
 
-    if (hFind == INVALID_HANDLE_VALUE)
-        return;
+    if (hFind == INVALID_HANDLE_VALUE) return;
 
     do {
-        if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-            continue;
+        if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) continue;
 
         char full[512];
         sprintf(full, "%s\\%s", path, data.cFileName);
@@ -52,15 +50,11 @@ static void loadWindows(const char *path) {
         if (!lib) {
             DWORD err = GetLastError();
 
-            printf(
-                "Cannot load %s error=%lu\n",
-                full,
-                err
-            );
+            printf("Cannot load %s error=%lu\n", full, err);
             continue;
         }
 
-        RegisterFunction init = (RegisterFunction) GetProcAddress(lib, "lotusRegister");
+        RegisterFunction init = (RegisterFunction)GetProcAddress(lib, "lotusRegister");
 
         if (!init) {
             printf("No lotusRegister in %s\n", full);
@@ -83,23 +77,19 @@ static void loadUnix(const char *path) {
     struct dirent *entry;
 
     while ((entry = readdir(dir))) {
-        if (!strstr(entry->d_name, LIB_EXT))
-            continue;
+        if (!strstr(entry->d_name, LIB_EXT)) continue;
 
         char full[512];
         snprintf(full, sizeof(full), "%s/%s", path, entry->d_name);
 
         void *lib = dlopen(full, RTLD_NOW | RTLD_GLOBAL);
-        if (!lib)
-            continue;
+        if (!lib) continue;
 
         void (*init)(RegisterFunction);
 
-        init = (void (*)(RegisterFunction))
-                dlsym(lib, "lotusRegister");
+        init = (void (*)(RegisterFunction))dlsym(lib, "lotusRegister");
 
-        if (init)
-            init(prepareNativeFunction);
+        if (init) init(prepareNativeFunction);
     }
 
     closedir(dir);

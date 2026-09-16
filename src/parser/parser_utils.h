@@ -34,7 +34,7 @@ StringNode *newStringNode(const char *value, SourceLocation location);
 
 NumberNode *newNumberNode(const char *value, SourceLocation location);
 
-BinaryNode *newBinaryNode(TokenType operator, Node *left, Node *right, SourceLocation location);
+BinaryNode *newBinaryNode(TokenType operator, Node * left, Node *right, SourceLocation location);
 
 WhileNode *newWhileNode(Node *condition, Node *body, SourceLocation location);
 

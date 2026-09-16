@@ -18,8 +18,7 @@ void exitWithError(const char *format, ...) {
 
 void *mallocSafe(size_t size) {
     void *p = malloc(size);
-    if (!p)
-        exitWithError("Allocation error, aborting program");
+    if (!p) exitWithError("Allocation error, aborting program");
     return p;
 }
 
@@ -31,4 +30,3 @@ void *reallocSafe(void *p, size_t size) {
     }
     return new_p;
 }
-

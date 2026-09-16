@@ -1,9 +1,9 @@
 #ifndef PARSER_H
 #define PARSER_H
+#include "../lexer/lexer.h"
+#include "../llvm/lotus_types.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include "../llvm/lotus_types.h"
-#include "../lexer/lexer.h"
 
 #define MAX_ARGS 256
 

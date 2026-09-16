@@ -19,25 +19,17 @@ typedef struct {
 } Keyword;
 
 static const Keyword KEYWORDS[] = {
-    {"if", TOKEN_IF},
-    {"else", TOKEN_ELSE},
-    {"while", TOKEN_WHILE},
-    {"fn", TOKEN_FUNCTION},
-    {"return", TOKEN_RETURN},
-    {"continue", TOKEN_CONTINUE},
-    {"next", TOKEN_CONTINUE},
-    {"break", TOKEN_BREAK},
-    {"int", TOKEN_TYPE_INT},
-    {"long", TOKEN_TYPE_LONG},
-    {"float", TOKEN_TYPE_FLOAT},
-    {"double", TOKEN_TYPE_DOUBLE},
-    {"bool", TOKEN_TYPE_BOOL},
-    {"string", TOKEN_TYPE_STRING},
-    {"true", TOKEN_TRUE},
+    {"if", TOKEN_IF},          {"else", TOKEN_ELSE},          {"while", TOKEN_WHILE},
+    {"fn", TOKEN_FUNCTION},    {"return", TOKEN_RETURN},      {"continue", TOKEN_CONTINUE},
+    {"next", TOKEN_CONTINUE},  {"break", TOKEN_BREAK},        {"int", TOKEN_TYPE_INT},
+    {"long", TOKEN_TYPE_LONG}, {"float", TOKEN_TYPE_FLOAT},   {"double", TOKEN_TYPE_DOUBLE},
+    {"bool", TOKEN_TYPE_BOOL}, {"string", TOKEN_TYPE_STRING}, {"true", TOKEN_TRUE},
     {"false", TOKEN_FALSE},
 };
 
-static char current() { return source[position]; }
+static char current() {
+    return source[position];
+}
 static char advance() {
     char c = source[position++];
 
@@ -55,7 +47,7 @@ static bool match(const char *text) {
     return strncmp(source + position, text, length) == 0;
 }
 static void skipWhitespaces() {
-    while (isspace((unsigned char) current())) advance();
+    while (isspace((unsigned char)current())) advance();
 
     if (match("//")) {
         while (advance() != '\n');
@@ -80,16 +72,14 @@ static char *copySource(size_t start, size_t length) {
 static Token makeToken(TokenType type, int length) {
     Token token = {type, copySource(position, length)};
 
-    for (size_t i = 0; i < length; i++)
-        advance();
+    for (size_t i = 0; i < length; i++) advance();
 
     return token;
 }
 
 static TokenType getKeywordType(const char *word) {
     for (size_t i = 0; i < sizeof(KEYWORDS) / sizeof(KEYWORDS[0]); i++) {
-        if (strcmp(word, KEYWORDS[i].word) == 0)
-            return KEYWORDS[i].type;
+        if (strcmp(word, KEYWORDS[i].word) == 0) return KEYWORDS[i].type;
     }
 
     return TOKEN_IDENTIFIER;
@@ -97,7 +87,7 @@ static TokenType getKeywordType(const char *word) {
 static Token readIdentifier() {
     size_t start = position;
 
-    while (isalnum((unsigned char) current()) || current() == '_') advance();
+    while (isalnum((unsigned char)current()) || current() == '_') advance();
 
     size_t length = position - start;
 
@@ -109,17 +99,16 @@ static Token readIdentifier() {
 static Token readNumber() {
     size_t start = position;
 
-    while (isdigit((unsigned char) current())) advance();
+    while (isdigit((unsigned char)current())) advance();
 
     if (current() == '.') {
         advance();
 
-        while (isdigit((unsigned char) current()))
-            advance();
+        while (isdigit((unsigned char)current())) advance();
     }
 
-    if (current() == 'L' || current() == 'l' || current() == 'F' ||
-        current() == 'f' || current() == 'D' || current() == 'd') {
+    if (current() == 'L' || current() == 'l' || current() == 'F' || current() == 'f' || current() == 'D' ||
+        current() == 'd') {
         advance();
     }
 
@@ -140,20 +129,25 @@ static Token readString(char endSymbol) {
 
         if (c == '\\') {
             switch (current()) {
-                case 'n': advance();
+                case 'n':
+                    advance();
                     c = '\n';
                     break;
-                case 't': advance();
+                case 't':
+                    advance();
                     c = '\t';
                     break;
-                case '\\': advance();
+                case '\\':
+                    advance();
                     c = '\\';
                     break;
-                case '\'': if (endSymbol != '\'') break;
+                case '\'':
+                    if (endSymbol != '\'') break;
                     advance();
                     c = '\'';
                     break;
-                case '"': if (endSymbol != '"') break;
+                case '"':
+                    if (endSymbol != '"') break;
                     advance();
                     c = '"';
                     break;
@@ -218,12 +212,9 @@ static Token nextToken() {
 
     Token token;
 
-    if (isalpha((unsigned char) c) || c == '_')
-        token = readIdentifier();
-    else if (isdigit((unsigned char) c))
-        token = readNumber();
-    else if (c == '"' || c == '\'')
-        token = readString(c);
+    if (isalpha((unsigned char)c) || c == '_') token = readIdentifier();
+    else if (isdigit((unsigned char)c)) token = readNumber();
+    else if (c == '"' || c == '\'') token = readString(c);
     else token = readSymbol();
 
     token.location = location;
