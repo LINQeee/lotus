@@ -1,5 +1,8 @@
 src/deprecated_or_experiment_files
 **/.DS_Store
+.DS_Store
+
+libs/**
 
 *.exe
 *.out
