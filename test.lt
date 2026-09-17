@@ -6,12 +6,9 @@
 //}
 //
 //print(b)
-
-int a = toInt('2')
-fn test() {
-int a = 3
-print(a)
+int a = 10
+fn sum() {
+    print(a)
 }
 
-test()
 print(a)
