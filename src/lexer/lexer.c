@@ -19,10 +19,10 @@ typedef struct {
 } Keyword;
 
 static const Keyword KEYWORDS[] = {
-    {"if", TOKEN_IF},          {"else", TOKEN_ELSE},          {"while", TOKEN_WHILE},
-    {"fn", TOKEN_FUNCTION},    {"return", TOKEN_RETURN},      {"continue", TOKEN_CONTINUE},
-    {"next", TOKEN_CONTINUE},  {"break", TOKEN_BREAK},        {"int", TOKEN_TYPE_INT},
-    {"long", TOKEN_TYPE_LONG}, {"float", TOKEN_TYPE_FLOAT},   {"double", TOKEN_TYPE_DOUBLE},
+    {"if", TOKEN_IF}, {"else", TOKEN_ELSE}, {"while", TOKEN_WHILE},
+    {"fn", TOKEN_FUNCTION}, {"return", TOKEN_RETURN}, {"continue", TOKEN_CONTINUE},
+    {"next", TOKEN_CONTINUE}, {"break", TOKEN_BREAK}, {"int", TOKEN_TYPE_INT},
+    {"long", TOKEN_TYPE_LONG}, {"float", TOKEN_TYPE_FLOAT}, {"double", TOKEN_TYPE_DOUBLE},
     {"bool", TOKEN_TYPE_BOOL}, {"string", TOKEN_TYPE_STRING}, {"true", TOKEN_TRUE},
     {"false", TOKEN_FALSE},
 };
@@ -129,25 +129,20 @@ static Token readString(char endSymbol) {
 
         if (c == '\\') {
             switch (current()) {
-                case 'n':
-                    advance();
+                case 'n': advance();
                     c = '\n';
                     break;
-                case 't':
-                    advance();
+                case 't': advance();
                     c = '\t';
                     break;
-                case '\\':
-                    advance();
+                case '\\': advance();
                     c = '\\';
                     break;
-                case '\'':
-                    if (endSymbol != '\'') break;
+                case '\'': if (endSymbol != '\'') break;
                     advance();
                     c = '\'';
                     break;
-                case '"':
-                    if (endSymbol != '"') break;
+                case '"': if (endSymbol != '"') break;
                     advance();
                     c = '"';
                     break;
@@ -174,6 +169,11 @@ static Token readSymbol() {
     if (match("!=")) return makeToken(TOKEN_NEQ, 2);
     if (match("<=")) return makeToken(TOKEN_LE, 2);
     if (match(">=")) return makeToken(TOKEN_GE, 2);
+    if (match("+=")) return makeToken(TOKEN_EQ_PLUS, 2);
+    if (match("-=")) return makeToken(TOKEN_EQ_MINUS, 2);
+    if (match("*=")) return makeToken(TOKEN_EQ_STAR, 2);
+    if (match("/=")) return makeToken(TOKEN_EQ_SLASH, 2);
+    if (match("%=")) return makeToken(TOKEN_EQ_PERCENT, 2);
 
     switch (current()) {
         case '-': return makeToken(TOKEN_MINUS, 1);

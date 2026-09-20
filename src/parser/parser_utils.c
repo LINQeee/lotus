@@ -8,9 +8,14 @@
 #include "../utils/cutils.h"
 #include "parser.h"
 
-bool isComparison(const TokenType type) {
+bool isComparison(TokenType type) {
     return type == TOKEN_GT || type == TOKEN_LT || type == TOKEN_GE || type == TOKEN_LE || type == TOKEN_EQ ||
            type == TOKEN_NEQ;
+}
+
+bool isAssignmentOp(TokenType type) {
+    return type == TOKEN_EQUAL || type == TOKEN_EQ_PLUS || type == TOKEN_EQ_MINUS || type == TOKEN_EQ_PERCENT || type ==
+           TOKEN_EQ_STAR || type == TOKEN_EQ_SLASH;
 }
 
 LotusType tokenTypeToLotusType(TokenType type) {
@@ -21,7 +26,8 @@ LotusType tokenTypeToLotusType(TokenType type) {
         case TOKEN_TYPE_LONG: return LOTUS_I64;
         case TOKEN_TYPE_DOUBLE: return LOTUS_F64;
         case TOKEN_TYPE_STRING: return LOTUS_STRING;
-        default: printf("Unknown LOTUS DATATYPE %d\n", type); exit(EXIT_FAILURE);
+        default: printf("Unknown LOTUS DATATYPE %d\n", type);
+            exit(EXIT_FAILURE);
     }
 }
 
@@ -161,25 +167,21 @@ NumberNode *newNumberNode(const char *value, SourceLocation location) {
 
     switch (suffix) {
         case 'L':
-        case 'l':
-            node->base.dataType = LOTUS_I64;
+        case 'l': node->base.dataType = LOTUS_I64;
             node->i64 = strtoll(value, NULL, 10);
             break;
 
         case 'F':
-        case 'f':
-            node->base.dataType = LOTUS_F32;
+        case 'f': node->base.dataType = LOTUS_F32;
             node->f32 = strtof(value, NULL);
             break;
 
         case 'D':
-        case 'd':
-            node->base.dataType = LOTUS_F64;
+        case 'd': node->base.dataType = LOTUS_F64;
             node->f64 = strtod(value, NULL);
             break;
 
-        default:
-            if (strchr(value, '.') != NULL) {
+        default: if (strchr(value, '.') != NULL) {
                 node->base.dataType = LOTUS_F64;
                 node->f64 = strtod(value, NULL);
             } else {

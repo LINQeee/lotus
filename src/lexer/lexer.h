@@ -42,7 +42,12 @@ typedef enum {
     TOKEN_TYPE_DOUBLE,
     TOKEN_TRUE,
     TOKEN_FALSE,
-    TOKEN_COLON
+    TOKEN_COLON,
+    TOKEN_EQ_PLUS,
+    TOKEN_EQ_MINUS,
+    TOKEN_EQ_STAR,
+    TOKEN_EQ_SLASH,
+    TOKEN_EQ_PERCENT
 } TokenType;
 
 typedef struct {

@@ -73,10 +73,26 @@ static Node *parseAssignment() {
 
     IdentifierNode *identifier = newIdentifierNode(varName.value, LOTUS_UNKNOWN, varName.location);
 
-    expect(TOKEN_EQUAL);
+    Node *value;
 
-    Node *value = parseExpression();
-
+    if (matchCurrent(TOKEN_EQUAL)) value = parseExpression();
+    else {
+        TokenType op;
+        switch (current().type) {
+            case TOKEN_EQ_PLUS: op = TOKEN_PLUS;
+                break;
+            case TOKEN_EQ_MINUS: op = TOKEN_MINUS;
+                break;
+            case TOKEN_EQ_STAR: op = TOKEN_STAR;
+                break;
+            case TOKEN_EQ_SLASH: op = TOKEN_SLASH;
+                break;
+            case TOKEN_EQ_PERCENT: op = TOKEN_PERCENT;
+            default: exitWithError("Unknown assignment operator: %d", current().type);
+        }
+        SourceLocation assignOpLoc = advance().location;
+        value = (Node *)newBinaryNode(op, (Node *)identifier, parseExpression(), assignOpLoc);
+    }
     return (Node *)newAssignmentNode(identifier, value, varName.location);
 }
 
@@ -140,7 +156,7 @@ Node *parseStatement() {
         case TOKEN_TYPE_STRING: return parseDeclaration();
 
         case TOKEN_IDENTIFIER: {
-            if (peekNext().type == TOKEN_EQUAL) return parseAssignment();
+            if (isAssignmentOp(peekNext().type)) return parseAssignment();
             return parseExpression();
         }
         default: return parseExpression();
