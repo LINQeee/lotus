@@ -5,6 +5,9 @@
 #include "parser.h"
 #include "parser_utils.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 static Node *parsePrimary();
 
 static int getPrecedence(TokenType type) {
@@ -52,6 +55,19 @@ static Node *parseExpressionPrec(const int minPrecedence) {
 static Node *parsePrimary() {
     const Token primaryT = current();
 
+    if (isCurrent(TOKEN_MINUS)) {
+        if (peekNext().type == TOKEN_NUMBER) {
+            advance();
+            Token num = advance();
+            size_t newNumLen = 2 + strlen(num.value); // +2 cause minus and \0 symbols
+            char *newNum = malloc(newNumLen);
+            newNum[0] = '-';
+            memcpy(newNum+1, num.value, newNumLen-2);
+            newNum[newNumLen] = '\0';
+            return (Node *)newNumberNode(newNum, primaryT.location);
+        }
+        //TODO apply - with any expression
+    }
     if (isCurrent(TOKEN_IDENTIFIER) && peekNext().type == TOKEN_LPAREN) {
         Token id = advance();
         IdentifierNode *idN = newIdentifierNode(id.value, LOTUS_FUNCTION, id.location);
