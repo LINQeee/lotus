@@ -1,5 +1,6 @@
 #include "../lexer/lexer.h"
 #include "./lotus_types.h"
+#include "../utils/cutils.h"
 
 #include <stdbool.h>
 
@@ -34,6 +35,7 @@ const char *tokenTypeName(TokenType type) {
         case TOKEN_STAR: return "*";
         case TOKEN_SLASH: return "/";
         case TOKEN_PERCENT: return "%";
+        case TOKEN_DOUBLE_STAR: return "**";
 
         case TOKEN_EQ: return "==";
         case TOKEN_NEQ: return "!=";
@@ -46,9 +48,20 @@ const char *tokenTypeName(TokenType type) {
         case TOKEN_OR: return "||";
 
         case TOKEN_EQUAL: return "=";
+        case TOKEN_EQ_PLUS: return "+=";
+        case TOKEN_EQ_MINUS: return "-=";
+        case TOKEN_EQ_STAR: return "*=";
+        case TOKEN_EQ_SLASH: return "/=";
+        case TOKEN_EQ_PERCENT: return "%=";
 
         default: return "<operator>";
     }
+}
+
+NumericKind getNumericKind(LotusType type) {
+    if (type == LOTUS_I32 || type == LOTUS_I64) return INTEGER;
+    if (type == LOTUS_F32 || type == LOTUS_F64) return FLOAT;
+    exitWithError("Unknown numeric kind of type: %d", type);
 }
 
 bool isNumericType(LotusType type) {

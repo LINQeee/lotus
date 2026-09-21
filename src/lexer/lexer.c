@@ -174,6 +174,7 @@ static Token readSymbol() {
     if (match("*=")) return makeToken(TOKEN_EQ_STAR, 2);
     if (match("/=")) return makeToken(TOKEN_EQ_SLASH, 2);
     if (match("%=")) return makeToken(TOKEN_EQ_PERCENT, 2);
+    if (match("**")) return makeToken(TOKEN_DOUBLE_STAR, 2);
 
     switch (current()) {
         case '-': return makeToken(TOKEN_MINUS, 1);
@@ -190,6 +191,8 @@ static Token readSymbol() {
 
         case '{': return makeToken(TOKEN_LBRACE, 1);
         case '}': return makeToken(TOKEN_RBRACE, 1);
+        case '[': return makeToken(TOKEN_LBRACKET, 1);
+        case ']': return makeToken(TOKEN_RBRACKET, 1);
 
         case '@': return makeToken(TOKEN_AT, 1);
         case ',': return makeToken(TOKEN_COMMA, 1);

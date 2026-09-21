@@ -52,8 +52,7 @@ bool areComparable(LotusType left, LotusType right) {
 
 bool isValidBinaryOperation(TokenType operator, LotusType left, LotusType right) {
     switch (operator) {
-        case TOKEN_PLUS:
-            if (isNumericType(left) && isNumericType(right)) return true;
+        case TOKEN_PLUS: if (isNumericType(left) && isNumericType(right)) return true;
             if (left == LOTUS_STRING && right == LOTUS_STRING) return true;
 
             return false;
@@ -65,6 +64,9 @@ bool isValidBinaryOperation(TokenType operator, LotusType left, LotusType right)
         case TOKEN_LT:
         case TOKEN_GE:
         case TOKEN_LE: return isNumericType(left) && isNumericType(right);
+
+        case TOKEN_DOUBLE_STAR: return isNumericType(left) && isNumericType(right) && numericRank(left) >=
+                                       numericRank(right) && getNumericKind(left) == FLOAT;
 
         case TOKEN_PERCENT: return isIntegerType(left) && isIntegerType(right);
 
@@ -80,8 +82,7 @@ bool isValidBinaryOperation(TokenType operator, LotusType left, LotusType right)
 
 LotusType binaryResultType(TokenType operator, LotusType left, LotusType right) {
     switch (operator) {
-        case TOKEN_PLUS:
-            if (left == LOTUS_STRING && right == LOTUS_STRING) return LOTUS_STRING;
+        case TOKEN_PLUS: if (left == LOTUS_STRING && right == LOTUS_STRING) return LOTUS_STRING;
 
             return commonNumericType(left, right);
 
@@ -89,6 +90,8 @@ LotusType binaryResultType(TokenType operator, LotusType left, LotusType right) 
         case TOKEN_STAR:
         case TOKEN_SLASH:
         case TOKEN_PERCENT: return commonNumericType(left, right);
+
+        case TOKEN_DOUBLE_STAR: return left;
 
         case TOKEN_GT:
         case TOKEN_LT:

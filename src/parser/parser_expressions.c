@@ -29,6 +29,7 @@ static int getPrecedence(TokenType type) {
         case TOKEN_STAR:
         case TOKEN_SLASH:
         case TOKEN_PERCENT: return 5;
+        case TOKEN_DOUBLE_STAR: return 6;
 
         default: return -1;
     }

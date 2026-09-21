@@ -17,6 +17,11 @@ typedef enum {
     LOTUS_UNKNOWN
 } LotusType;
 
+typedef enum {
+    INTEGER,
+    FLOAT
+} NumericKind;
+
 typedef struct Variable {
     char *name;
     LotusType type;
@@ -25,6 +30,8 @@ typedef struct Variable {
 const char *lotusTypeName(LotusType type);
 
 const char *tokenTypeName(TokenType type);
+
+NumericKind getNumericKind(LotusType type);
 
 bool isNumericType(LotusType type);
 
