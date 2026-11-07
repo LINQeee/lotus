@@ -164,6 +164,14 @@ static void printNode(const Node *node, const char *prefix, bool isLast) {
             break;
         }
 
+        case NODE_CAST: {
+            const CastNode *cast = (const CastNode *)node;
+            printPrefix(prefix, isLast);
+            printf("Cast : %s\n", typeName(node->dataType));
+            printNode(cast->operand, childPrefix, true);
+            break;
+        }
+
         case NODE_BINARY: {
             const BinaryNode *binary = (const BinaryNode *)node;
 

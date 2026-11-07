@@ -95,6 +95,11 @@ static Node *parsePrimary() {
 
     if (isCurrent(TOKEN_LPAREN)) {
         advance(); // skip (
+        if (isDataType(current().type)) {
+            LotusType type = tokenTypeToLotusType(advance().type);
+            expect(TOKEN_RPAREN);
+            return (Node *)newCastNode(type, parsePrimary(), primaryT.location);
+        }
         Node *expr = parseExpressionPrec(0);
         expect(TOKEN_RPAREN);
         return expr;

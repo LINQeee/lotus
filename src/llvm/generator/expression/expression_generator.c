@@ -3,8 +3,8 @@
 #include <llvm-c/Core.h>
 #include <string.h>
 #include <stdbool.h>
+#include <llvm-c/Types.h>
 
-#include "../../../type_checker/type_rules.h"
 #include "../../../utils/cutils.h"
 #include "../../llvm.h"
 #include "native_functions.h"
@@ -13,7 +13,6 @@
 #include "../../var_manager.h"
 #include "../../../parser/parser.h"
 #include "functions.h"
-#include <llvm-c/Types.h>
 
 static LLVMValueRef generateNumber(const NumberNode *node) {
     switch (node->base.dataType) {
@@ -70,9 +69,6 @@ static LLVMValueRef castNumeric(LLVMValueRef value, LotusType from, LotusType to
 
 static LLVMValueRef buildArithmetic(const BinaryNode *bNode, LLVMValueRef left, LLVMValueRef right) {
     if (bNode->op == TOKEN_DOUBLE_STAR) {
-        if (bNode->right->dataType != bNode->left->dataType)
-            right = castNumeric(right, bNode->right->dataType, bNode->left->dataType);
-
         unsigned int intrinsicId = LLVMLookupIntrinsicID("llvm.pow", 8);
 
         LLVMTypeRef paramTypes[] = {convertType(bNode->base.dataType)};
@@ -81,9 +77,6 @@ static LLVMValueRef buildArithmetic(const BinaryNode *bNode, LLVMValueRef left, 
         LLVMValueRef args[] = {left, right};
         return LLVMBuildCall2(cg->builder, LLVMGlobalGetValueType(func), func, args, 2, "pow_call");
     }
-
-    left = castNumeric(left, bNode->left->dataType, bNode->base.dataType);
-    right = castNumeric(right, bNode->right->dataType, bNode->base.dataType);
 
     switch (bNode->base.dataType) {
         case LOTUS_I32:
@@ -116,12 +109,8 @@ static LLVMValueRef buildArithmetic(const BinaryNode *bNode, LLVMValueRef left, 
 }
 
 static LLVMValueRef buildComparison(const BinaryNode *bNode, LLVMValueRef left, LLVMValueRef right) {
-    LotusType commonType = bNode->left->dataType == LOTUS_BOOL && bNode->right->dataType == LOTUS_BOOL
-                               ? LOTUS_BOOL
-                               : commonNumericType(bNode->left->dataType, bNode->right->dataType);
-
-    left = castNumeric(left, bNode->left->dataType, commonType);
-    right = castNumeric(right, bNode->right->dataType, commonType);
+    LotusType commonType = bNode->left->dataType;
+    if (commonType == LOTUS_STRING) exitWithError("String comparison is not implemented");
 
     bool isFloat = commonType == LOTUS_F32 || commonType == LOTUS_F64;
 
@@ -201,6 +190,10 @@ static LLVMValueRef generateIdentifier(const char *name) {
 
 LLVMValueRef generateExpression(const Node *node) {
     switch (node->type) {
+        case NODE_CAST: {
+            const CastNode *cast = (const CastNode *)node;
+            return castNumeric(generateExpression(cast->operand), cast->operand->dataType, node->dataType);
+        }
         case NODE_NUMBER: return generateNumber((NumberNode *)node);
         case NODE_BINARY: return generateBinary((BinaryNode *)node);
         case NODE_IDENTIFIER: return generateIdentifier(((IdentifierNode *)node)->name);

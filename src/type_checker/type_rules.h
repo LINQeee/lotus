@@ -22,4 +22,5 @@ bool isValidBinaryOperation(TokenType operator, LotusType left, LotusType right)
 
 LotusType binaryResultType(TokenType operator, LotusType left, LotusType right);
 
+bool isValidCast(LotusType target, LotusType source);
 #endif

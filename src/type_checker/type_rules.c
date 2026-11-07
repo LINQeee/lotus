@@ -3,48 +3,27 @@
 #include "../lexer/lexer.h"
 #include "../llvm/lotus_types.h"
 
-static int numericRank(LotusType type) {
-    switch (type) {
-        case LOTUS_I32: return 0;
+bool isAssignable(LotusType target, LotusType source) {
+    return target == source || target == LOTUS_ANY;
+}
 
-        case LOTUS_I64: return 1;
-
-        case LOTUS_F32: return 2;
-
-        case LOTUS_F64: return 3;
-
-        default: return -1;
+bool isValidCast(LotusType target, LotusType source) {
+    if (!isNumericType(target) || !isNumericType(source)) return false;
+    if (target == source) return true;
+    switch (source) {
+        case LOTUS_I32: return target == LOTUS_I64 || target == LOTUS_F32 || target == LOTUS_F64;
+        case LOTUS_I64: return target == LOTUS_F32 || target == LOTUS_F64;
+        case LOTUS_F32: return target == LOTUS_F64;
+        default: return false;
     }
 }
 
-bool isAssignable(LotusType target, LotusType source) {
-    if (target == source) return true;
-
-    if (target == LOTUS_ANY) return true;
-
-    if (source == LOTUS_ANY) return false;
-
-    if (target == LOTUS_I64 && source == LOTUS_I32) return true;
-
-    if (target == LOTUS_F64 && source == LOTUS_F32) return true;
-    //
-    // if (target == LOTUS_F32 && source == LOTUS_I32)
-    //   return true;
-    //
-    // if (target == LOTUS_F64 && (source == LOTUS_I32 || source == LOTUS_I64))
-    //   return true;
-
-    return false;
-}
-
 LotusType commonNumericType(LotusType left, LotusType right) {
-    if (!isNumericType(left) || !isNumericType(right)) return LOTUS_ANY;
-
-    return numericRank(left) >= numericRank(right) ? left : right;
+    return left == right && isNumericType(left) ? left : LOTUS_ANY;
 }
 
 bool areComparable(LotusType left, LotusType right) {
-    if (isNumericType(left) && isNumericType(right)) return true;
+    if (left == right && isNumericType(left)) return true;
 
     if (left == LOTUS_BOOL && right == LOTUS_BOOL) return true;
 
@@ -54,11 +33,11 @@ bool areComparable(LotusType left, LotusType right) {
 }
 
 bool isValidBinaryOperation(TokenType operator, LotusType left, LotusType right) {
+    if (left != right) return false;
+
     switch (operator) {
         case TOKEN_PLUS:
-            if (isNumericType(left) && isNumericType(right)) return true;
-            if (left == LOTUS_STRING && right == LOTUS_STRING) return true;
-
+            if (isNumericType(left) || left == LOTUS_STRING) return true;
             return false;
 
         case TOKEN_MINUS:
@@ -67,19 +46,17 @@ bool isValidBinaryOperation(TokenType operator, LotusType left, LotusType right)
         case TOKEN_GT:
         case TOKEN_LT:
         case TOKEN_GE:
-        case TOKEN_LE: return isNumericType(left) && isNumericType(right);
+        case TOKEN_LE: return isNumericType(left);
 
-        case TOKEN_DOUBLE_STAR:
-            return isNumericType(left) && isNumericType(right) && numericRank(left) >= numericRank(right) &&
-                   getNumericKind(left) == FLOAT;
+        case TOKEN_DOUBLE_STAR: return left == LOTUS_F32 || left == LOTUS_F64;
 
-        case TOKEN_PERCENT: return isIntegerType(left) && isIntegerType(right);
+        case TOKEN_PERCENT: return isIntegerType(left);
 
         case TOKEN_EQ:
         case TOKEN_NEQ: return areComparable(left, right);
 
         case TOKEN_AND:
-        case TOKEN_OR: return left == LOTUS_BOOL && right == LOTUS_BOOL;
+        case TOKEN_OR: return left == LOTUS_BOOL;
 
         default: return false;
     }

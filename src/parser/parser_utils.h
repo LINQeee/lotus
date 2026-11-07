@@ -46,5 +46,7 @@ WhileNode *newWhileNode(Node *condition, Node *body, SourceLocation location);
 
 BooleanNode *newBooleanNode(bool value, SourceLocation location);
 
+CastNode *newCastNode(LotusType type, Node *operand, SourceLocation location);
+
 void programAddStatement(ProgramNode *program, Node *statement);
 #endif

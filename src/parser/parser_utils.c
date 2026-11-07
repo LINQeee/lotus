@@ -217,3 +217,10 @@ WhileNode *newWhileNode(Node *condition, Node *body, SourceLocation location) {
     node->body = body;
     return node;
 }
+
+CastNode *newCastNode(LotusType type, Node *operand, SourceLocation location) {
+    CastNode *node = mallocSafe(sizeof(CastNode));
+    node->base = (Node){NODE_CAST, type, location};
+    node->operand = operand;
+    return node;
+}

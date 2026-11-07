@@ -249,6 +249,15 @@ static LotusType checkExpression(TypeChecker *checker, Node *node) {
 
         case NODE_IDENTIFIER: return checkIdentifier(checker, (IdentifierNode *)node);
 
+        case NODE_CAST: {
+            CastNode *cast = (CastNode *)node;
+            LotusType source = checkExpression(checker, cast->operand);
+            if (!isValidCast(node->dataType, source))
+                diagnosticError(checker->scriptContent, node->location, "cannot cast %s to %s", lotusTypeName(source),
+                                lotusTypeName(node->dataType));
+            return node->dataType;
+        }
+
         case NODE_BINARY: return checkBinary(checker, (BinaryNode *)node);
 
         case NODE_CALL: return checkCall(checker, (CallNode *)node);

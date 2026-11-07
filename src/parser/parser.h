@@ -24,7 +24,8 @@ typedef enum {
     NODE_CALL,
     NODE_FUNCTION,
     NODE_DECLARATION,
-    NODE_BOOLEAN
+    NODE_BOOLEAN,
+    NODE_CAST
 } NodeType;
 
 typedef struct {
@@ -63,6 +64,11 @@ typedef struct {
 
     Node *operand;
 } UnaryNode;
+
+typedef struct {
+    Node base;
+    Node *operand;
+} CastNode;
 
 typedef struct {
     Node base;
