@@ -384,6 +384,57 @@ static void checkBlock(TypeChecker *checker, ProgramNode *program) {
     checkProgramBody(checker, program);
 }
 
+typedef struct ReturnLoop {
+    struct ReturnLoop *parent;
+    bool hasBreak;
+} ReturnLoop;
+
+static bool canFallThrough(const Node *node, ReturnLoop *loop) {
+    switch (node->type) {
+        case NODE_RETURN:
+        case NODE_CONTINUE: return false;
+
+        case NODE_BREAK: {
+            const BreakNode *jump = (const BreakNode *)node;
+            for (int level = 1; level < jump->level; level++) loop = loop->parent;
+            loop->hasBreak = true;
+            return false;
+        }
+
+        case NODE_PROGRAM: {
+            const ProgramNode *program = (const ProgramNode *)node;
+            for (size_t i = 0; i < program->count; i++) {
+                if (!canFallThrough(program->statements[i], loop)) return false;
+            }
+            return true;
+        }
+
+        case NODE_IF: {
+            const IfNode *branch = (const IfNode *)node;
+            if (branch->condition->type == NODE_BOOLEAN) {
+                const BooleanNode *condition = (const BooleanNode *)branch->condition;
+                if (condition->value) return canFallThrough(branch->thenBranch, loop);
+                return branch->elseBranch ? canFallThrough(branch->elseBranch, loop) : true;
+            }
+            bool thenFallsThrough = canFallThrough(branch->thenBranch, loop);
+            bool elseFallsThrough = branch->elseBranch ? canFallThrough(branch->elseBranch, loop) : true;
+            return thenFallsThrough || elseFallsThrough;
+        }
+
+        case NODE_WHILE: {
+            const WhileNode *cycle = (const WhileNode *)node;
+            const BooleanNode *condition =
+                cycle->condition->type == NODE_BOOLEAN ? (const BooleanNode *)cycle->condition : NULL;
+            if (condition && !condition->value) return true;
+            ReturnLoop inner = {loop, false};
+            canFallThrough(cycle->body, &inner);
+            return !condition || inner.hasBreak;
+        }
+
+        default: return true;
+    }
+}
+
 static void checkFunction(TypeChecker *checker, FunctionNode *node) {
     if (checker->scope->parent)
         diagnosticError(checker->scriptContent, node->base.location,
@@ -408,6 +459,10 @@ static void checkFunction(TypeChecker *checker, FunctionNode *node) {
     }
 
     checkStatement(checker, node->body);
+    if (node->base.dataType != LOTUS_VOID && canFallThrough(node->body, NULL))
+        diagnosticError(checker->scriptContent, node->base.location,
+                        "function '%s' can reach its end without returning %s", node->name,
+                        lotusTypeName(node->base.dataType));
 
     leaveScope(checker);
     checker->currentReturnType = previousReturnType;

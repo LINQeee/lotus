@@ -86,8 +86,10 @@ void generateFunction(const FunctionNode *node) {
 
     generateNode(node->body);
 
-    if (!LLVMGetBasicBlockTerminator(cg->currentBlock) && fn->returnType == LOTUS_VOID) {
-        LLVMBuildRetVoid(cg->builder);
+    if (!LLVMGetBasicBlockTerminator(cg->currentBlock)) {
+        if (fn->returnType == LOTUS_VOID) LLVMBuildRetVoid(cg->builder);
+        // Type checking proved that a value-returning function can't reach this block
+        else LLVMBuildUnreachable(cg->builder);
     }
 
     cg->varsCount = previousVarsCount;
