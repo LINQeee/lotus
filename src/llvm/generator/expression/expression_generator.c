@@ -198,6 +198,13 @@ static LLVMValueRef generateIdentifier(const char *name) {
 
 LLVMValueRef generateExpression(const Node *node) {
     switch (node->type) {
+        case NODE_UNARY: {
+            const UnaryNode *unary = (const UnaryNode *)node;
+            LLVMValueRef value = generateExpression(unary->operand);
+            if (node->dataType == LOTUS_F32 || node->dataType == LOTUS_F64)
+                return LLVMBuildFNeg(cg->builder, value, "neg_tmp");
+            return LLVMBuildNeg(cg->builder, value, "neg_tmp");
+        }
         case NODE_CAST: {
             const CastNode *cast = (const CastNode *)node;
             return castNumeric(generateExpression(cast->operand), cast->operand->dataType, node->dataType);

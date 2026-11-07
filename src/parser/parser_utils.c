@@ -224,3 +224,11 @@ CastNode *newCastNode(LotusType type, Node *operand, SourceLocation location) {
     node->operand = operand;
     return node;
 }
+
+UnaryNode *newUnaryNode(TokenType op, Node *operand, SourceLocation location) {
+    UnaryNode *node = mallocSafe(sizeof(UnaryNode));
+    node->base = (Node){NODE_UNARY, LOTUS_UNKNOWN, location};
+    node->op = op;
+    node->operand = operand;
+    return node;
+}

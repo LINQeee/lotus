@@ -22,8 +22,9 @@ static Node *parseBlock() {
 }
 static Node *parseReturn() {
     SourceLocation returnLoc = expect(TOKEN_RETURN).location;
-    // if (current().type == TOKEN_LBRACE || current().type == TOKEN_IF) node->value = parseBlock();
-    // //TODO return lambda() else node->value = parseExpression(0);
+    if (isCurrent(TOKEN_RBRACE) || isCurrent(TOKEN_EOF) || isCurrent(TOKEN_ELSE) ||
+        current().location.line > returnLoc.line)
+        return (Node *)newReturnNode(NULL, returnLoc);
     return (Node *)newReturnNode(parseExpression(), returnLoc);
 }
 static Node *parseBreak() {

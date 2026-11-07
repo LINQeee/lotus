@@ -1,3 +1,4 @@
+// AI  ALERT THIS ENTIRE FILE GENERATES AI, I'm too lazy to change log formatting
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -161,6 +162,14 @@ static void printNode(const Node *node, const char *prefix, bool isLast) {
             printPrefix(prefix, isLast);
             printf("Bool \"%s\" : bool\n", boolean->value == 1 ? "true" : "false");
 
+            break;
+        }
+
+        case NODE_UNARY: {
+            const UnaryNode *unary = (const UnaryNode *)node;
+            printPrefix(prefix, isLast);
+            printf("Unary \"%s\" : %s\n", operatorName(unary->op), typeName(node->dataType));
+            printNode(unary->operand, childPrefix, true);
             break;
         }
 

@@ -48,5 +48,7 @@ BooleanNode *newBooleanNode(bool value, SourceLocation location);
 
 CastNode *newCastNode(LotusType type, Node *operand, SourceLocation location);
 
+UnaryNode *newUnaryNode(TokenType op, Node *operand, SourceLocation location);
+
 void programAddStatement(ProgramNode *program, Node *statement);
 #endif

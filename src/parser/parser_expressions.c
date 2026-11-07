@@ -69,7 +69,8 @@ static Node *parsePrimary() {
             free(newNum);
             return node;
         }
-        //TODO apply - with any expression
+        advance();
+        return (Node *)newUnaryNode(TOKEN_MINUS, parsePrimary(), primaryT.location);
     }
     if (isCurrent(TOKEN_IDENTIFIER) && peekNext().type == TOKEN_LPAREN) {
         Token id = advance();

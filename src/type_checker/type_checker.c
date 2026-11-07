@@ -121,7 +121,7 @@ TypeChecker *typeCheckerCreate(const char *fileContent) {
     checker->functionCapacity = INITIAL_FUNCTION_CAPACITY;
     checker->functionCount = 0;
     checker->functions = mallocSafe(sizeof(TypeFunction) * checker->functionCapacity);
-    checker->currentReturnType = LOTUS_VOID;
+    checker->currentReturnType = LOTUS_UNKNOWN;
     checker->loopDepth = 0;
 
     enterScope(checker);
@@ -249,6 +249,16 @@ static LotusType checkExpression(TypeChecker *checker, Node *node) {
 
         case NODE_IDENTIFIER: return checkIdentifier(checker, (IdentifierNode *)node);
 
+        case NODE_UNARY: {
+            UnaryNode *unary = (UnaryNode *)node;
+            LotusType type = checkExpression(checker, unary->operand);
+            if (!isNumericType(type))
+                diagnosticError(checker->scriptContent, node->location, "unary '-' requires a number, got %s",
+                                lotusTypeName(type));
+            node->dataType = type;
+            return type;
+        }
+
         case NODE_CAST: {
             CastNode *cast = (CastNode *)node;
             LotusType source = checkExpression(checker, cast->operand);
@@ -297,6 +307,9 @@ static void checkAssignment(TypeChecker *checker, AssignmentNode *node) {
 }
 
 static void checkReturn(TypeChecker *checker, const ReturnNode *node) {
+    if (checker->currentReturnType == LOTUS_UNKNOWN)
+        diagnosticError(checker->scriptContent, node->base.location, "return is only allowed inside a function");
+
     if (!node->value) {
         if (checker->currentReturnType != LOTUS_VOID)
             diagnosticError(checker->scriptContent, node->base.location, "expected return value of type %s",

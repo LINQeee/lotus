@@ -25,7 +25,8 @@ typedef enum {
     NODE_FUNCTION,
     NODE_DECLARATION,
     NODE_BOOLEAN,
-    NODE_CAST
+    NODE_CAST,
+    NODE_UNARY
 } NodeType;
 
 typedef struct {
