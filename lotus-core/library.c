@@ -69,6 +69,10 @@ bool toBool(const LotusValue value) {
     }
 }
 
+bool _stringEquals(const LotusString *left, const LotusString *right) {
+    return left->length == right->length && memcmp(left->data, right->data, left->length) == 0;
+}
+
 LotusString *_concat(LotusString *str1, LotusString *str2) {
     LotusString *result = malloc(sizeof(LotusString));
     result->length = str1->length + str2->length;
@@ -134,4 +138,5 @@ LOTUS_NATIVE_LIBRARY {
 
     LOTUS_FUNCTION(input, LOTUS_STRING);
     LOTUS_FUNCTION(_concat, LOTUS_STRING, LOTUS_STRING, LOTUS_STRING);
+    LOTUS_FUNCTION(_stringEquals, LOTUS_BOOL, LOTUS_STRING, LOTUS_STRING);
 }

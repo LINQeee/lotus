@@ -110,7 +110,15 @@ static LLVMValueRef buildArithmetic(const BinaryNode *bNode, LLVMValueRef left, 
 
 static LLVMValueRef buildComparison(const BinaryNode *bNode, LLVMValueRef left, LLVMValueRef right) {
     LotusType commonType = bNode->left->dataType;
-    if (commonType == LOTUS_STRING) exitWithError("String comparison is not implemented");
+    if (commonType == LOTUS_STRING) {
+        LLVMNativeFunction *equalsFn = findNative("_stringEquals");
+        if (!equalsFn) exitWithError("String comparison requires _stringEquals; rebuild and load lotus-core");
+
+        LLVMValueRef args[] = {left, right};
+        LLVMValueRef equal =
+            LLVMBuildCall2(cg->builder, equalsFn->fnType, equalsFn->llvmFunction, args, 2, "str.equal");
+        return bNode->op == TOKEN_EQ ? equal : LLVMBuildNot(cg->builder, equal, "str.not_equal");
+    }
 
     bool isFloat = commonType == LOTUS_F32 || commonType == LOTUS_F64;
 
