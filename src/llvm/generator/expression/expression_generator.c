@@ -107,7 +107,9 @@ static LLVMValueRef buildArithmetic(const BinaryNode *bNode, LLVMValueRef left, 
 }
 
 static LLVMValueRef buildComparison(const BinaryNode *bNode, LLVMValueRef left, LLVMValueRef right) {
-    LotusType commonType = commonNumericType(bNode->left->dataType, bNode->right->dataType);
+    LotusType commonType = bNode->left->dataType == LOTUS_BOOL && bNode->right->dataType == LOTUS_BOOL
+                               ? LOTUS_BOOL
+                               : commonNumericType(bNode->left->dataType, bNode->right->dataType);
 
     left = castNumeric(left, bNode->left->dataType, commonType);
     right = castNumeric(right, bNode->right->dataType, commonType);

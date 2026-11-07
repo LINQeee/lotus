@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "../generator/generator.h"
+#include "llvm_extension.h"
 
 void LLVMMoveBuilderToEnd(const LLVMBasicBlockRef block) {
     LLVMPositionBuilderAtEnd(cg->builder, block);
@@ -22,8 +23,8 @@ LLVMBasicBlockRef LLVMAppendBlock(const char *name) {
     return LLVMAppendBasicBlockInContext(cg->context, cg->currentFn, name);
 }
 
-void createMainFunctionAndGenerateCode(ProgramNode *program) {
-    collectFunctions();
+void createMainFunctionAndGenerateCode(const ProgramNode *program) {
+    collectFunctions((const Node *)program);
 
     LLVMTypeRef returnType = LLVMInt32TypeInContext(cg->context);
     LLVMTypeRef functionType = LLVMFunctionType(returnType, NULL, 0, 0);
@@ -35,16 +36,18 @@ void createMainFunctionAndGenerateCode(ProgramNode *program) {
 
     generateNode((Node *)program);
 
-    if (!LLVMGetBasicBlockTerminator(cg->currentAllocaBlock))
+    if (!LLVMGetBasicBlockTerminator(cg->currentBlock))
         LLVMBuildRet(cg->builder, LLVMConstInt(LLVMInt32TypeInContext(cg->context), 0, 0));
 }
 
 void verifyCode() {
     char *error = NULL;
-    if (LLVMVerifyModule(cg->module, LLVMPrintMessageAction, &error)) {
-        printf("%s\n", error);
+    if (LLVMVerifyModule(cg->module, LLVMReturnStatusAction, &error)) {
+        fprintf(stderr, "%s\n", error);
         LLVMDisposeMessage(error);
+        exit(EXIT_FAILURE);
     }
+    LLVMDisposeMessage(error);
 }
 
 static LLVMTargetMachineRef getTargetMachine() {

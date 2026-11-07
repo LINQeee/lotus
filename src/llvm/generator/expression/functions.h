@@ -12,7 +12,7 @@ typedef struct {
     LLVMValueRef llvmFunction;
 } LLVMUserFunction;
 
-void collectFunctions();
+void collectFunctions(const Node *node);
 
 LLVMValueRef generateCall(const CallNode *node);
 

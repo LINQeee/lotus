@@ -376,7 +376,7 @@ static void checkFunction(TypeChecker *checker, FunctionNode *node) {
         declareVariable(checker, parameter->name, parameter->base.dataType, parameter->base.location);
     }
 
-    checkProgramBody(checker, (ProgramNode *)node->body);
+    checkStatement(checker, node->body);
 
     leaveScope(checker);
     checker->currentReturnType = previousReturnType;
@@ -407,6 +407,7 @@ static void checkStatement(TypeChecker *checker, Node *node) {
         case NODE_BINARY:
         case NODE_IDENTIFIER:
         case NODE_NUMBER:
+        case NODE_BOOLEAN:
         case NODE_STRING: checkExpression(checker, node); break;
 
         default: diagnosticError(checker->scriptContent, node->location, "unsupported AST node in type checker");

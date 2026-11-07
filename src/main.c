@@ -28,6 +28,7 @@ int main(void) {
     Token *tokens = tokenize(source, "test.lt");
 
     ProgramNode *program = buildAST(tokens);
+    printAST(program);
 
     initCodegen();
     loadNativeLibraries("../libs");

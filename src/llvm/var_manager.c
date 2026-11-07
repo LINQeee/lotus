@@ -24,7 +24,7 @@ LLVMVariable *getVar(const char *name) {
     for (int i = 0; i < cg->varsCount; i++) {
         if (strcmp(cg->vars[i].name, name) == 0) {
             if (cg->vars[i].relatedFn == cg->currentFn) return &cg->vars[i];
-            globalFoundVar = &cg->vars[i];
+            if (cg->vars[i].relatedFn == cg->mainFunction) globalFoundVar = &cg->vars[i];
         }
     }
     return globalFoundVar;

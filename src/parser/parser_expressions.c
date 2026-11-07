@@ -60,12 +60,14 @@ static Node *parsePrimary() {
         if (peekNext().type == TOKEN_NUMBER) {
             advance();
             Token num = advance();
-            size_t newNumLen = 2 + strlen(num.value); // +2 cause minus and \0 symbols
-            char *newNum = malloc(newNumLen);
+            size_t numLen = strlen(num.value);
+            char *newNum = mallocSafe(numLen + 2);
             newNum[0] = '-';
-            memcpy(newNum+1, num.value, newNumLen-2);
-            newNum[newNumLen] = '\0';
-            return (Node *)newNumberNode(newNum, primaryT.location);
+            memcpy(newNum+1, num.value, numLen);
+            newNum[numLen + 1] = '\0';
+            Node *node = (Node *)newNumberNode(newNum, primaryT.location);
+            free(newNum);
+            return node;
         }
         //TODO apply - with any expression
     }
@@ -76,11 +78,13 @@ static Node *parsePrimary() {
 
         Node **args = mallocSafe(sizeof(Node *) * MAX_ARGS);
         int argsCount = 0;
-        while (!isCurrent(TOKEN_RPAREN) && !isCurrent(TOKEN_EOF)) {
-            args[argsCount++] = parseExpressionPrec(0);
-            matchCurrent(TOKEN_COMMA);
+        if (!isCurrent(TOKEN_RPAREN)) {
+            do {
+                if (argsCount >= MAX_ARGS) exitWithError("Too many function arguments");
+                args[argsCount++] = parseExpressionPrec(0);
+            } while (matchCurrent(TOKEN_COMMA));
         }
-        advance(); // skip )
+        expect(TOKEN_RPAREN);
         return (Node *)newCallNode(idN, argsCount, args, id.location);
     }
 

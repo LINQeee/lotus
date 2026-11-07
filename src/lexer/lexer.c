@@ -50,11 +50,12 @@ static void skipWhitespaces() {
     while (isspace((unsigned char)current())) advance();
 
     if (match("//")) {
-        while (advance() != '\n');
+        while (current() != '\0' && current() != '\n') advance();
         skipWhitespaces();
     }
     if (match("/*")) {
-        while (!match("*/")) advance();
+        while (current() != '\0' && !match("*/")) advance();
+        if (current() == '\0') exitWithError("Unterminated block comment");
         advance();
         advance();
         skipWhitespaces();
@@ -158,7 +159,8 @@ static Token readString(char endSymbol) {
         value[length++] = c;
     }
 
-    if (current() == endSymbol) advance();
+    if (current() != endSymbol) exitWithError("Unterminated string literal");
+    advance();
 
     value[length] = '\0';
 
@@ -201,13 +203,14 @@ static Token readSymbol() {
         case '<': return makeToken(TOKEN_LT, 1);
         case ':': return makeToken(TOKEN_COLON, 1);
     }
-    exitWithError("Unknown symbol: %s", current());
+    exitWithError("Unknown symbol: %c", current());
 }
 
 static Token nextToken() {
     skipWhitespaces();
 
-    SourceLocation location = {currentFilePath, line, column, position};
+    size_t start = position;
+    SourceLocation location = {currentFilePath, line, column, 0};
 
     char c = current();
 
@@ -220,6 +223,7 @@ static Token nextToken() {
     else if (c == '"' || c == '\'') token = readString(c);
     else token = readSymbol();
 
+    location.length = position - start;
     token.location = location;
     return token;
 }
@@ -237,7 +241,7 @@ Token *tokenize(const char *code, const char *fileName) {
     Token t;
     size_t pos = 0;
     while ((t = nextToken()).type != TOKEN_EOF) {
-        if (pos >= capacity) {
+        if (pos + 1 >= capacity) {
             capacity *= 2;
             Token *tmp = reallocSafe(tokens, sizeof(Token) * capacity);
             tokens = tmp;
@@ -246,6 +250,6 @@ Token *tokenize(const char *code, const char *fileName) {
         tokens[pos++] = t;
         printf("ADDED TOKEN {type: %d, value: \"%s\"}\n", t.type, t.value);
     }
-    tokens[pos] = (Token){TOKEN_EOF, .location = {currentFilePath, line, column, position}};
+    tokens[pos] = t;
     return tokens;
 }

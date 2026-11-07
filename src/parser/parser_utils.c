@@ -38,7 +38,7 @@ bool isDataType(TokenType type) {
 
 bool isOperator(const TokenType type) {
     return type == TOKEN_PLUS || type == TOKEN_MINUS || type == TOKEN_PERCENT || type == TOKEN_STAR ||
-           type == TOKEN_SLASH || isComparison(type) || type == TOKEN_AND || type == TOKEN_OR;
+           type == TOKEN_SLASH || type == TOKEN_DOUBLE_STAR || isComparison(type) || type == TOKEN_AND || type == TOKEN_OR;
 }
 
 FunctionNode *newFunctionNode(const char *name, LotusType returnType, SourceLocation location) {
@@ -144,6 +144,7 @@ BooleanNode *newBooleanNode(bool value, SourceLocation location) {
     BooleanNode *node = malloc(sizeof(BooleanNode));
     node->base.type = NODE_BOOLEAN;
     node->base.location = location;
+    node->base.dataType = LOTUS_BOOL;
     node->value = value;
     return node;
 }

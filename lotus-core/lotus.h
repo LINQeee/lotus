@@ -48,7 +48,9 @@ typedef enum {
   LOTUS_BOOL,
   LOTUS_STRING,
   LOTUS_VOID,
-  LOTUS_ANY
+  LOTUS_ANY,
+  LOTUS_FUNCTION,
+  LOTUS_UNKNOWN
 } LotusType;
 
 typedef struct {

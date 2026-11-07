@@ -88,6 +88,7 @@ static Node *parseAssignment() {
             case TOKEN_EQ_SLASH: op = TOKEN_SLASH;
                 break;
             case TOKEN_EQ_PERCENT: op = TOKEN_PERCENT;
+                break;
             default: exitWithError("Unknown assignment operator: %d", current().type);
         }
         SourceLocation assignOpLoc = advance().location;

@@ -53,15 +53,19 @@ static void generateIf(const IfNode *node) {
 
     LLVMMoveBuilderToEnd(thenBlock);
     generateNode(node->thenBranch);
-    if (!LLVMGetBasicBlockTerminator(thenBlock)) LLVMBuildBr(cg->builder, mergeBlock);
+    bool thenTerminates = LLVMGetBasicBlockTerminator(cg->currentBlock) != NULL;
+    if (!thenTerminates) LLVMBuildBr(cg->builder, mergeBlock);
 
+    bool elseTerminates = false;
     if (node->elseBranch) {
         LLVMMoveBuilderToEnd(elseBlock);
         generateNode(node->elseBranch);
-        if (!LLVMGetBasicBlockTerminator(elseBlock)) LLVMBuildBr(cg->builder, mergeBlock);
+        elseTerminates = LLVMGetBasicBlockTerminator(cg->currentBlock) != NULL;
+        if (!elseTerminates) LLVMBuildBr(cg->builder, mergeBlock);
     }
 
     LLVMMoveBuilderToEnd(mergeBlock);
+    if (thenTerminates && elseTerminates) LLVMBuildUnreachable(cg->builder);
 }
 
 static void generateReturn(const ReturnNode *node) {

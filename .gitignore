@@ -18,3 +18,5 @@ libs/**
 *.patch
 .idea/
 lotus-core/.idea/
+*.md
+!README.md

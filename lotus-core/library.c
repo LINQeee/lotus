@@ -40,13 +40,16 @@ void print(int count, ...) {
             case LOTUS_F64: printf("%f", val.value.f64);
                 break;
             case LOTUS_I64:
-            case LOTUS_I32: printf("%ld", val.value.i64);
+            case LOTUS_I32: printf("%lld", (long long)val.value.i64);
                 break;
-            case LOTUS_STRING: const LotusString *str = val.value.ptr;
+            case LOTUS_STRING: {
+                const LotusString *str = val.value.ptr;
                 printf("%s", str->data);
                 break;
+            }
         }
     }
+    va_end(args);
     printf("\n");
 }
 
@@ -57,13 +60,16 @@ bool toBool(const LotusValue value) {
         case LOTUS_F32:
         case LOTUS_F64: return value.value.f64 > 0;
         case LOTUS_BOOL: return value.value.i64 != 0;
-        case LOTUS_STRING: if (strcmp(value.value.ptr, "true") == 0)
+        case LOTUS_STRING: {
+            const LotusString *str = value.value.ptr;
+            if (strcmp(str->data, "true") == 0)
                 return true;
-            if (strcmp(value.value.ptr, "false") == 0)
+            if (strcmp(str->data, "false") == 0)
                 return false;
             fprintf(stderr, "Illegal value to convert string to bool: %s",
-                    (char *) value.value.ptr);
+                    str->data);
             return false;
+        }
         default: return false;
     }
 }

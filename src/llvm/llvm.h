@@ -52,7 +52,7 @@ typedef struct {
     LLVMTypeRef stringType;
 } Codegen;
 
-Codegen *cg;
+extern Codegen *cg;
 
 void codegenProgram(const ProgramNode *program);
 

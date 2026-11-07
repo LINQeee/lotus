@@ -13,15 +13,16 @@
 #include "../generator.h"
 #include "expression_generator.h"
 
-void collectFunctions(Node *node) {
+void collectFunctions(const Node *node) {
     if (node->type == NODE_FUNCTION) {
-        FunctionNode *fn = (FunctionNode *)node;
+        const FunctionNode *fn = (const FunctionNode *)node;
 
         LLVMUserFunction *f = &cg->functions[cg->functionCount++];
 
         strcpy(f->name, fn->name);
 
         f->argc = fn->paramCount;
+        f->returnType = fn->base.dataType;
 
         LLVMTypeRef params[32];
 
@@ -38,11 +39,12 @@ void collectFunctions(Node *node) {
         f->llvmFunction = LLVMAddFunction(cg->module, f->name, type);
     } else {
         switch (node->type) {
-            case NODE_PROGRAM:
-                ProgramNode *program = (ProgramNode *)node;
+            case NODE_PROGRAM: {
+                const ProgramNode *program = (const ProgramNode *)node;
                 for (int i = 0; i < program->count; i++) collectFunctions(program->statements[i]);
                 // TODO collect funcs from entire code
                 break;
+            }
         }
     }
 }
@@ -81,8 +83,7 @@ void generateFunction(const FunctionNode *node) {
 
     generateNode(node->body);
 
-    if (!LLVMGetBasicBlockTerminator(entry)) {
-        // LLVMBuildRet(cg->builder,LLVMConstInt(cg->i32Type, 0, 0));
+    if (!LLVMGetBasicBlockTerminator(cg->currentBlock) && fn->returnType == LOTUS_VOID) {
         LLVMBuildRetVoid(cg->builder);
     }
 

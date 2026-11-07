@@ -2,6 +2,7 @@
 #include "../native_loader/native_loader.h"
 #include "generator/generator.h"
 #include "utils/llvm_extension.h"
+#include "../utils/cutils.h"
 #include <llvm-c/Core.h>
 #include <llvm-c/ExecutionEngine.h>
 #include <llvm-c/Transforms/PassBuilder.h>
@@ -11,7 +12,11 @@
 Codegen *cg;
 
 void initCodegen() {
-    cg = malloc(sizeof(Codegen));
+    cg = mallocSafe(sizeof(Codegen));
+    cg->varsCount = 0;
+    cg->loopCount = 0;
+    cg->nativeCount = 0;
+    cg->functionCount = 0;
     cg->context = LLVMContextCreate();
     cg->module = LLVMModuleCreateWithNameInContext("lotus", cg->context);
     cg->builder = LLVMCreateBuilderInContext(cg->context);
