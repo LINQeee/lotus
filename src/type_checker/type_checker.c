@@ -335,18 +335,24 @@ static void checkCondition(TypeChecker *checker, Node *condition, const char *co
                         lotusTypeName(type));
 }
 
+static void checkScopedStatement(TypeChecker *checker, Node *node) {
+    enterScope(checker);
+    checkStatement(checker, node);
+    leaveScope(checker);
+}
+
 static void checkIf(TypeChecker *checker, const IfNode *node) {
     checkCondition(checker, node->condition, "if");
 
-    checkStatement(checker, node->thenBranch);
+    checkScopedStatement(checker, node->thenBranch);
 
-    if (node->elseBranch) checkStatement(checker, node->elseBranch);
+    if (node->elseBranch) checkScopedStatement(checker, node->elseBranch);
 }
 
 static void checkWhile(TypeChecker *checker, const WhileNode *node) {
     checkCondition(checker, node->condition, "while");
     checker->loopDepth++;
-    checkStatement(checker, node->body);
+    checkScopedStatement(checker, node->body);
     checker->loopDepth--;
 }
 
@@ -379,6 +385,10 @@ static void checkBlock(TypeChecker *checker, ProgramNode *program) {
 }
 
 static void checkFunction(TypeChecker *checker, FunctionNode *node) {
+    if (checker->scope->parent)
+        diagnosticError(checker->scriptContent, node->base.location,
+                        "functions can only be declared at top level; nested functions and closures are not supported");
+
     TypeFunction *function = findFunction(checker, node->name);
 
     if (!function)

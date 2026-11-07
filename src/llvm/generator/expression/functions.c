@@ -65,6 +65,7 @@ void generateFunction(const FunctionNode *node) {
     LLVMBasicBlockRef prevCurBlock = cg->currentBlock;
     LLVMBasicBlockRef prevCurAllocaBlock = cg->currentAllocaBlock;
     LLVMValueRef prevFunc = cg->currentFn;
+    int previousVarsCount = cg->varsCount;
 
     cg->currentFn = fn->llvmFunction;
 
@@ -89,6 +90,7 @@ void generateFunction(const FunctionNode *node) {
         LLVMBuildRetVoid(cg->builder);
     }
 
+    cg->varsCount = previousVarsCount;
     cg->currentBlock = prevCurBlock;
     cg->currentAllocaBlock = prevCurAllocaBlock;
     cg->currentFn = prevFunc;

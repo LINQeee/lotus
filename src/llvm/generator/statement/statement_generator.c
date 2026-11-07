@@ -13,6 +13,12 @@
 #include "../../../parser/parser.h"
 #include <llvm-c/Types.h>
 
+static void generateScopedNode(const Node *node) {
+    int previousVarsCount = cg->varsCount;
+    generateNode(node);
+    cg->varsCount = previousVarsCount;
+}
+
 static void generateWhile(const WhileNode *node) {
     LLVMBasicBlockRef condBlock = LLVMAppendBlock("while.cond");
     LLVMBasicBlockRef bodyBlock = LLVMAppendBlock("while.body");
@@ -30,7 +36,7 @@ static void generateWhile(const WhileNode *node) {
     loop.continueBlock = condBlock;
     cg->loops[cg->loopCount++] = loop;
 
-    generateNode(node->body);
+    generateScopedNode(node->body);
     cg->loopCount--;
     if (!LLVMGetBasicBlockTerminator(cg->currentBlock)) LLVMBuildBr(cg->builder, condBlock);
 
@@ -59,14 +65,14 @@ static void generateIf(const IfNode *node) {
     LLVMBuildCondBr(cg->builder, cond, thenBlock, node->elseBranch ? elseBlock : mergeBlock);
 
     LLVMMoveBuilderToEnd(thenBlock);
-    generateNode(node->thenBranch);
+    generateScopedNode(node->thenBranch);
     bool thenTerminates = LLVMGetBasicBlockTerminator(cg->currentBlock) != NULL;
     if (!thenTerminates) LLVMBuildBr(cg->builder, mergeBlock);
 
     bool elseTerminates = false;
     if (node->elseBranch) {
         LLVMMoveBuilderToEnd(elseBlock);
-        generateNode(node->elseBranch);
+        generateScopedNode(node->elseBranch);
         elseTerminates = LLVMGetBasicBlockTerminator(cg->currentBlock) != NULL;
         if (!elseTerminates) LLVMBuildBr(cg->builder, mergeBlock);
     }
@@ -107,7 +113,11 @@ static void generateDeclaration(const DeclarationNode *node) {
 
         LLVMBuildStore(cg->builder, value, storage);
     } else {
-        LLVMValueRef storage = LLVMBuildAlloca(cg->builder, type, node->target->name);
+        LLVMBasicBlockRef entry = LLVMGetEntryBasicBlock(cg->currentFn);
+        LLVMValueRef first = LLVMGetFirstInstruction(entry);
+        if (first) LLVMPositionBuilderBefore(cg->allocaBuilder, first);
+        else LLVMPositionBuilderAtEnd(cg->allocaBuilder, entry);
+        LLVMValueRef storage = LLVMBuildAlloca(cg->allocaBuilder, type, node->target->name);
         LLVMBuildStore(cg->builder, value, storage);
 
         createVar(node->target->name, storage, node->base.dataType);

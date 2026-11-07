@@ -25,10 +25,10 @@ LLVMVariable *createVar(const char *name, const LLVMValueRef storage, const Lotu
 
 LLVMVariable *getVar(const char *name) {
     LLVMVariable *globalFoundVar = NULL;
-    for (int i = 0; i < cg->varsCount; i++) {
+    for (int i = cg->varsCount - 1; i >= 0; i--) {
         if (strcmp(cg->vars[i].name, name) == 0) {
             if (cg->vars[i].relatedFn == cg->currentFn) return &cg->vars[i];
-            if (cg->vars[i].relatedFn == cg->mainFunction) globalFoundVar = &cg->vars[i];
+            if (!globalFoundVar && cg->vars[i].relatedFn == cg->mainFunction) globalFoundVar = &cg->vars[i];
         }
     }
     return globalFoundVar;
