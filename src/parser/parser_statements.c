@@ -1,11 +1,11 @@
-
-#include <stddef.h>
 #include <stdlib.h>
 
 #include "../utils/cutils.h"
 #include "./parser.h"
 #include "./parser_utils.h"
 #include "parser_expressions.h"
+#include "../lexer/lexer.h"
+#include "../llvm/lotus_types.h"
 
 Node *parseStatement();
 
@@ -79,16 +79,11 @@ static Node *parseAssignment() {
     else {
         TokenType op;
         switch (current().type) {
-            case TOKEN_EQ_PLUS: op = TOKEN_PLUS;
-                break;
-            case TOKEN_EQ_MINUS: op = TOKEN_MINUS;
-                break;
-            case TOKEN_EQ_STAR: op = TOKEN_STAR;
-                break;
-            case TOKEN_EQ_SLASH: op = TOKEN_SLASH;
-                break;
-            case TOKEN_EQ_PERCENT: op = TOKEN_PERCENT;
-                break;
+            case TOKEN_EQ_PLUS: op = TOKEN_PLUS; break;
+            case TOKEN_EQ_MINUS: op = TOKEN_MINUS; break;
+            case TOKEN_EQ_STAR: op = TOKEN_STAR; break;
+            case TOKEN_EQ_SLASH: op = TOKEN_SLASH; break;
+            case TOKEN_EQ_PERCENT: op = TOKEN_PERCENT; break;
             default: exitWithError("Unknown assignment operator: %d", current().type);
         }
         SourceLocation assignOpLoc = advance().location;

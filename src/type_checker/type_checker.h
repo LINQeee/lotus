@@ -1,10 +1,11 @@
 #ifndef TYPE_CHECKER_H
 #define TYPE_CHECKER_H
 
-#include "../lexer/lexer.h"
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "../llvm/lotus_types.h"
 #include "../parser/parser.h"
-#include <stdbool.h>
 
 typedef struct TypeChecker TypeChecker;
 

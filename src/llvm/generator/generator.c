@@ -1,6 +1,4 @@
-
 #include <stdbool.h>
-#include <stdlib.h>
 
 #include "../../parser/parser.h"
 #include "expression/expression_generator.h"

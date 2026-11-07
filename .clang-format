@@ -1,30 +1,44 @@
 BasedOnStyle: LLVM
 
+# Layout: compact control flow, readable function bodies.
 IndentWidth: 4
 TabWidth: 4
 UseTab: Never
-
+ContinuationIndentWidth: 4
 ColumnLimit: 120
-
 BreakBeforeBraces: Attach
-
 AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AllowShortLoopsOnASingleLine: true
 AllowShortBlocksOnASingleLine: Empty
 AllowShortFunctionsOnASingleLine: Empty
-
+AllowShortEnumsOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: true
 IndentCaseLabels: true
+BinPackArguments: true
+BinPackParameters: BinPack
+BreakAfterReturnType: None
+AlignEscapedNewlines: Left
 
+# Keep the project's C pointer and cast style.
 PointerAlignment: Right
 ReferenceAlignment: Right
 DerivePointerAlignment: false
-
+SpaceAfterCStyleCast: false
 SpaceBeforeParens: ControlStatements
 SpaceBeforeAssignmentOperators: true
 
+# Include order can affect C headers; do not rearrange it.
 IncludeBlocks: Preserve
-SortIncludes: CaseSensitive
+SortIncludes:
+  Enabled: false
+ReflowComments: Never
+BreakStringLiterals: false
 
-AlwaysBreakAfterReturnType: None
-AlwaysBreakAfterDefinitionReturnType: None
+# Remove excess blank space and normalize file endings.
+MaxEmptyLinesToKeep: 1
+KeepEmptyLines:
+  AtStartOfFile: false
+  AtStartOfBlock: false
+  AtEndOfFile: false
+InsertNewlineAtEOF: true
+LineEnding: LF

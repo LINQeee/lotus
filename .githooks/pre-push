@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+remote=${1:-origin}
+tempDir=$(mktemp -d "${TMPDIR:-/tmp}/lotus-pre-push.XXXXXX")
+trap 'rm -rf "$tempDir"' EXIT
+touch "$tempDir/tips" "$tempDir/commits"
+
+while read -r localRef localObject remoteRef remoteObject; do
+    # Deleting a ref sends no source code; tags pointing to non-commits have no source tree.
+    [[ "$localObject" =~ ^0+$ ]] && continue
+    if ! commit=$(git rev-parse --verify "$localObject^{commit}" 2>/dev/null); then
+        continue
+    fi
+    printf '%s\n' "$commit" >> "$tempDir/tips"
+    printf '%s\n' "$commit" >> "$tempDir/commits"
+    if [[ ! "$remoteObject" =~ ^0+$ ]] && git cat-file -e "$remoteObject^{commit}" 2>/dev/null; then
+        git rev-list "$commit" "^$remoteObject" >> "$tempDir/commits"
+    else
+        git rev-list "$commit" --not "--remotes=$remote" >> "$tempDir/commits"
+    fi
+done
+
+sort -u "$tempDir/commits" > "$tempDir/unique"
+while IFS= read -r commit; do
+    # Old history predates the formatter. New branch tips must always include its configuration.
+    if grep -Fxq "$commit" "$tempDir/tips" || git cat-file -e "$commit:.clang-format-version" 2>/dev/null; then
+        echo "Checking formatting in $commit..."
+        "$root/scripts/format.sh" --ref "$commit"
+    fi
+    if grep -Fxq "$commit" "$tempDir/tips" || git cat-file -e "$commit:.iwyu-version" 2>/dev/null; then
+        echo "Checking includes in $commit..."
+        "$root/scripts/includes.sh" --ref "$commit"
+    fi
+done < "$tempDir/unique"

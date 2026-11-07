@@ -3,6 +3,7 @@ src/deprecated_or_experiment_files
 .DS_Store
 
 libs/**
+.tools/
 
 *.exe
 *.out

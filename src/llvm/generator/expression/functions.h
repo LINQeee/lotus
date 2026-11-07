@@ -1,7 +1,9 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
-#include "native_functions.h"
 #include <llvm-c/Types.h>
+
+#include "../../lotus_types.h"
+#include "../../../parser/parser.h"
 
 typedef struct {
     char name[64];

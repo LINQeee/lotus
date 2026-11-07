@@ -1,14 +1,20 @@
 #include "native_functions.h"
-#include "../../llvm.h"
+
 #include <stdbool.h>
 #include <string.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../../llvm.h"
 #include "../../../type_checker/type_checker.h"
 #include "../../../utils/cutils.h"
 #include "expression_generator.h"
+#include "../../lotus_types.h"
+#include "../../var_manager.h"
+#include "../../../parser/parser.h"
+#include "functions.h"
+#include <llvm-c/Core.h>
+#include <llvm-c/Types.h>
 
 LLVMNativeFunction *findNative(const char *name) {
     for (int i = 0; i < cg->nativeCount; i++) {

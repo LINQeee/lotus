@@ -6,12 +6,10 @@
 #define MAX_NATIVE 256
 
 #include "../parser/parser.h"
-
-#include <llvm-c/Core.h>
-
 #include "generator/expression/functions.h"
 #include "generator/expression/native_functions.h"
 #include "var_manager.h"
+#include <llvm-c/Types.h>
 
 typedef struct {
     LLVMBasicBlockRef continueBlock;

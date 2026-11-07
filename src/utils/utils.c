@@ -1,7 +1,10 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "../parser/parser.h"
 #include "utils.h"
+#include "../lexer/lexer.h"
+#include "../llvm/lotus_types.h"
 
 static void printNode(const Node *node, const char *prefix, bool isLast);
 

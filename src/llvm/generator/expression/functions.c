@@ -1,17 +1,19 @@
 #include "functions.h"
-#include "../../../parser/parser.h"
-#include "../../llvm.h"
-#include "native_functions.h"
+
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
 #include <string.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../../../parser/parser.h"
+#include "../../llvm.h"
+#include "native_functions.h"
 #include "../../utils/llvm_extension.h"
 #include "../generator.h"
 #include "expression_generator.h"
+#include "../../var_manager.h"
+#include "../../lotus_types.h"
 
 void collectFunctions(const Node *node) {
     if (node->type == NODE_FUNCTION) {

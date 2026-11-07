@@ -1,10 +1,17 @@
+#include <llvm-c/Core.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
 #include "../../../utils/cutils.h"
 #include "../../llvm.h"
 #include "../../utils/llvm_extension.h"
 #include "../expression/expression_generator.h"
 #include "../generator.h"
-#include <llvm-c/Core.h>
-#include <stdlib.h>
+#include "../expression/functions.h"
+#include "../../lotus_types.h"
+#include "../../var_manager.h"
+#include "../../../parser/parser.h"
+#include <llvm-c/Types.h>
 
 static void generateWhile(const WhileNode *node) {
     LLVMBasicBlockRef condBlock = LLVMAppendBlock("while.cond");

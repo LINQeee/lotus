@@ -1,12 +1,12 @@
-
-#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
 #include "../utils/cutils.h"
 #include "parser.h"
 #include "parser_utils.h"
-
-#include <stdlib.h>
-#include <string.h>
+#include "../lexer/lexer.h"
+#include "../llvm/lotus_types.h"
 
 static Node *parsePrimary();
 
@@ -63,7 +63,7 @@ static Node *parsePrimary() {
             size_t numLen = strlen(num.value);
             char *newNum = mallocSafe(numLen + 2);
             newNum[0] = '-';
-            memcpy(newNum+1, num.value, numLen);
+            memcpy(newNum + 1, num.value, numLen);
             newNum[numLen + 1] = '\0';
             Node *node = (Node *)newNumberNode(newNum, primaryT.location);
             free(newNum);

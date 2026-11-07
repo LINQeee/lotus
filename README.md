@@ -155,14 +155,61 @@ describing a problem, feel free to contribute.
 
 The project is developed primarily with **CLion**.
 
-There is a project formatter configuration included in the repository. When contributing code, **please use the CLion
-formatter provided by the project** so that changes remain consistent with the existing codebase.
+The C code uses **clang-format 22** with the style defined in [`.clang-format`](.clang-format).
+The major version is recorded in `.clang-format-version`. Keep the editor and command-line formatter on that version.
+Unused and missing direct C includes are checked with **include-what-you-use (IWYU) 0.26**, recorded in `.iwyu-version`.
+IWYU uses CMake's compiler flags and understands declarations, types and macros.
+
+```sh
+./scripts/install-iwyu.sh        # Install IWYU locally once (requires LLVM 22, CMake, make and Python 3)
+./scripts/install-hooks.sh       # Enable Git checks once per clone
+./scripts/style.sh --write       # Remove unused includes, add needed direct includes, then format
+./scripts/style.sh --check       # Check both without changing files
+```
+
+The formatter covers `.c` and `.h` files in `src/` and `lotus-core/`, including new files that are not ignored.
+Generated build directories and deprecated experiments are excluded. Lotus `.lt` files are not formatted.
+Set `CLANG_FORMAT=/path/to/clang-format` if the executable is not found automatically.
+The individual commands are `./scripts/format.sh` and `./scripts/includes.sh`, each with `--write` and `--check`.
+
+IWYU checks sources listed in the root and runtime `CMakeLists.txt` and the project headers they include, for the current
+platform and CMake configuration. Register new C source files in CMake so they are built and checked. Inactive platform
+branches need a check on that platform. The script configures temporary builds; an existing build directory is not required.
+Cleanup is verified in a temporary source tree before applying edits. Needed direct dependencies can be added when an
+unused include previously supplied them indirectly. Existing include groups may be adjusted by IWYU.
+
+The installer builds the pinned IWYU release under ignored `.tools/`, without upgrading the system LLVM.
+Set `LLVM_CONFIG` or `CMAKE` to their executable paths if needed; this machine's Homebrew LLVM and CLion CMake are
+detected automatically. An existing installation can be selected with `IWYU_BINARY`; its matching `iwyu_tool.py` and
+`fix_includes.py` must be in the same directory. Python is used by these upstream tools; no Python test suite is required.
+`.iwyu.imp` maps private Apple SDK headers to public C headers. For an intentional side-effect include, use
+`#include "header.h" // IWYU pragma: keep` with a short explanation of why it must remain.
+See the [IWYU documentation](https://include-what-you-use.org/) and
+[pragma reference](https://github.com/include-what-you-use/include-what-you-use/blob/master/docs/IWYUPragmas.md).
+
+The pre-commit hook checks formatting and includes in the **staged snapshot**, using the staged configuration and headers.
+It does not rewrite files
+or stage changes, so partial staging is preserved. After formatting, review and stage the files you want to commit.
+Include `.clang-format-version`, `.iwyu-version`, `.iwyu.imp` and the other setup files in the initial setup commit.
+
+The pre-push hook checks the actual outgoing commits, including intermediate commits made since this setup was added.
+It uses each commit's source, headers and configuration. Earlier history without the corresponding version file is
+skipped, but each pushed branch or commit-tag tip must pass both checks. A later cleanup commit does not repair an
+earlier invalid outgoing commit: amend or rebase that commit before pushing. Ref deletion needs no checks.
+
+Local Git hooks can be bypassed or disabled. For enforcement shared by all contributors, run
+`./scripts/style.sh --check` in CI with the same tools and make that check required by the hosting service's branch rules.
+
+In CLion, select **Clang-Format** under **Settings → Editor → Code Style → C/C++ → General** and enable the external
+formatter with the same version. On this machine its path is `/opt/homebrew/opt/llvm/bin/clang-format`.
+Use **Tools → Actions on Save → Reformat code** for formatting on save, or the regular Reformat Code action.
+See the [CLion ClangFormat documentation](https://www.jetbrains.com/help/clion/clangformat-as-alternative-formatter.html).
 
 Before opening a pull request:
 
 1. Make sure the project builds successfully.
 2. Check that your changes don't break existing functionality.
-3. Format modified code using the project's CLion formatter.
+3. Run `./scripts/style.sh --check` and fix formatting or include issues.
 4. Keep changes focused and avoid unrelated refactoring.
 
 There is no strict contribution template at the moment. If you're unsure whether an idea fits Lotus, opening an issue or

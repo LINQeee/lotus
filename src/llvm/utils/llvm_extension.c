@@ -1,15 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "../llvm.h"
 #include <llvm-c/Analysis.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/TargetMachine.h>
 #include <llvm-c/Transforms/PassBuilder.h>
 #include <string.h>
 
+#include "../llvm.h"
 #include "../generator/generator.h"
 #include "llvm_extension.h"
+#include "../generator/expression/functions.h"
+#include <llvm-c/Error.h>
+#include <llvm-c/Target.h>
+#include <llvm-c/Types.h>
+#include "../../parser/parser.h"
 
 void LLVMMoveBuilderToEnd(const LLVMBasicBlockRef block) {
     LLVMPositionBuilderAtEnd(cg->builder, block);

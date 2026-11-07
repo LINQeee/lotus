@@ -1,4 +1,3 @@
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +6,7 @@
 #include "../lexer/lexer.h"
 #include "../utils/cutils.h"
 #include "parser.h"
+#include "../llvm/lotus_types.h"
 
 bool isComparison(TokenType type) {
     return type == TOKEN_GT || type == TOKEN_LT || type == TOKEN_GE || type == TOKEN_LE || type == TOKEN_EQ ||
@@ -14,8 +14,8 @@ bool isComparison(TokenType type) {
 }
 
 bool isAssignmentOp(TokenType type) {
-    return type == TOKEN_EQUAL || type == TOKEN_EQ_PLUS || type == TOKEN_EQ_MINUS || type == TOKEN_EQ_PERCENT || type ==
-           TOKEN_EQ_STAR || type == TOKEN_EQ_SLASH;
+    return type == TOKEN_EQUAL || type == TOKEN_EQ_PLUS || type == TOKEN_EQ_MINUS || type == TOKEN_EQ_PERCENT ||
+           type == TOKEN_EQ_STAR || type == TOKEN_EQ_SLASH;
 }
 
 LotusType tokenTypeToLotusType(TokenType type) {
@@ -26,8 +26,7 @@ LotusType tokenTypeToLotusType(TokenType type) {
         case TOKEN_TYPE_LONG: return LOTUS_I64;
         case TOKEN_TYPE_DOUBLE: return LOTUS_F64;
         case TOKEN_TYPE_STRING: return LOTUS_STRING;
-        default: printf("Unknown LOTUS DATATYPE %d\n", type);
-            exit(EXIT_FAILURE);
+        default: printf("Unknown LOTUS DATATYPE %d\n", type); exit(EXIT_FAILURE);
     }
 }
 
@@ -38,7 +37,8 @@ bool isDataType(TokenType type) {
 
 bool isOperator(const TokenType type) {
     return type == TOKEN_PLUS || type == TOKEN_MINUS || type == TOKEN_PERCENT || type == TOKEN_STAR ||
-           type == TOKEN_SLASH || type == TOKEN_DOUBLE_STAR || isComparison(type) || type == TOKEN_AND || type == TOKEN_OR;
+           type == TOKEN_SLASH || type == TOKEN_DOUBLE_STAR || isComparison(type) || type == TOKEN_AND ||
+           type == TOKEN_OR;
 }
 
 FunctionNode *newFunctionNode(const char *name, LotusType returnType, SourceLocation location) {
@@ -168,21 +168,25 @@ NumberNode *newNumberNode(const char *value, SourceLocation location) {
 
     switch (suffix) {
         case 'L':
-        case 'l': node->base.dataType = LOTUS_I64;
+        case 'l':
+            node->base.dataType = LOTUS_I64;
             node->i64 = strtoll(value, NULL, 10);
             break;
 
         case 'F':
-        case 'f': node->base.dataType = LOTUS_F32;
+        case 'f':
+            node->base.dataType = LOTUS_F32;
             node->f32 = strtof(value, NULL);
             break;
 
         case 'D':
-        case 'd': node->base.dataType = LOTUS_F64;
+        case 'd':
+            node->base.dataType = LOTUS_F64;
             node->f64 = strtod(value, NULL);
             break;
 
-        default: if (strchr(value, '.') != NULL) {
+        default:
+            if (strchr(value, '.') != NULL) {
                 node->base.dataType = LOTUS_F64;
                 node->f64 = strtod(value, NULL);
             } else {

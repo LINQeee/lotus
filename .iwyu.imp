@@ -1,0 +1,9 @@
+[
+  { "include": ["<_ctype.h>", "private", "<ctype.h>", "public"] },
+  { "include": ["<_stdio.h>", "private", "<stdio.h>", "public"] },
+  { "include": ["<_stdlib.h>", "private", "<stdlib.h>", "public"] },
+  { "include": ["<_string.h>", "private", "<string.h>", "public"] },
+  { "include": ["<_strings.h>", "private", "<strings.h>", "public"] },
+  { "include": ["<_time.h>", "private", "<time.h>", "public"] },
+  { "include": ["<sys/_types/_size_t.h>", "private", "<stddef.h>", "public"] }
+]

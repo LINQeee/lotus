@@ -1,16 +1,15 @@
 #include "type_checker.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "../llvm/lotus_types.h"
 #include "../utils/cutils.h"
-
 #include "../parser/parser.h"
 #include "diagnostics.h"
 #include "type_rules.h"
 #include "type_scope.h"
+#include "../lexer/lexer.h"
 
 #define INITIAL_FUNCTION_CAPACITY 16
 

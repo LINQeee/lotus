@@ -1,14 +1,18 @@
 #include "llvm.h"
-#include "../native_loader/native_loader.h"
-#include "generator/generator.h"
-#include "utils/llvm_extension.h"
-#include "../utils/cutils.h"
+
 #include <llvm-c/Core.h>
 #include <llvm-c/ExecutionEngine.h>
-#include <llvm-c/Transforms/PassBuilder.h>
 #include <mach/mach_time.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <llvm-c/Target.h>
+
+#include "utils/llvm_extension.h"
+#include "../utils/cutils.h"
+#include "../parser/parser.h"
+#include <llvm-c/Types.h>
+
 Codegen *cg;
 
 void initCodegen() {

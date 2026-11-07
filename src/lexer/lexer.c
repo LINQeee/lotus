@@ -1,11 +1,11 @@
 #include "lexer.h"
 
-#include "../utils/cutils.h"
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+
+#include "../utils/cutils.h"
 
 static const char *source;
 static size_t position;
@@ -19,10 +19,10 @@ typedef struct {
 } Keyword;
 
 static const Keyword KEYWORDS[] = {
-    {"if", TOKEN_IF}, {"else", TOKEN_ELSE}, {"while", TOKEN_WHILE},
-    {"fn", TOKEN_FUNCTION}, {"return", TOKEN_RETURN}, {"continue", TOKEN_CONTINUE},
-    {"next", TOKEN_CONTINUE}, {"break", TOKEN_BREAK}, {"int", TOKEN_TYPE_INT},
-    {"long", TOKEN_TYPE_LONG}, {"float", TOKEN_TYPE_FLOAT}, {"double", TOKEN_TYPE_DOUBLE},
+    {"if", TOKEN_IF},          {"else", TOKEN_ELSE},          {"while", TOKEN_WHILE},
+    {"fn", TOKEN_FUNCTION},    {"return", TOKEN_RETURN},      {"continue", TOKEN_CONTINUE},
+    {"next", TOKEN_CONTINUE},  {"break", TOKEN_BREAK},        {"int", TOKEN_TYPE_INT},
+    {"long", TOKEN_TYPE_LONG}, {"float", TOKEN_TYPE_FLOAT},   {"double", TOKEN_TYPE_DOUBLE},
     {"bool", TOKEN_TYPE_BOOL}, {"string", TOKEN_TYPE_STRING}, {"true", TOKEN_TRUE},
     {"false", TOKEN_FALSE},
 };
@@ -130,20 +130,25 @@ static Token readString(char endSymbol) {
 
         if (c == '\\') {
             switch (current()) {
-                case 'n': advance();
+                case 'n':
+                    advance();
                     c = '\n';
                     break;
-                case 't': advance();
+                case 't':
+                    advance();
                     c = '\t';
                     break;
-                case '\\': advance();
+                case '\\':
+                    advance();
                     c = '\\';
                     break;
-                case '\'': if (endSymbol != '\'') break;
+                case '\'':
+                    if (endSymbol != '\'') break;
                     advance();
                     c = '\'';
                     break;
-                case '"': if (endSymbol != '"') break;
+                case '"':
+                    if (endSymbol != '"') break;
                     advance();
                     c = '"';
                     break;

@@ -1,7 +1,11 @@
 #include "var_manager.h"
-#include "llvm.h"
 
 #include <string.h>
+
+#include "llvm.h"
+#include <llvm-c/Core.h>
+#include <llvm-c/Types.h>
+#include "lotus_types.h"
 
 static void moveAllocaBuilder() {
     LLVMValueRef firstInstr = LLVMGetFirstInstruction(cg->currentAllocaBlock);

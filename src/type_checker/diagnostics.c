@@ -3,7 +3,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+
+#include "../lexer/lexer.h"
 
 static const char *findLineStart(const char *source, size_t targetLine) {
     const char *lineStart = source;

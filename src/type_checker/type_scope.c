@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "../utils/cutils.h"
+#include "../llvm/lotus_types.h"
 
 TypeScope *typeScopeCreate(TypeScope *parent) {
     TypeScope *scope = mallocSafe(sizeof(TypeScope));

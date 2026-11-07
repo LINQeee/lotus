@@ -2,6 +2,8 @@
 #define LLVM_EXTENSION_H
 #include <llvm-c/Types.h>
 
+#include "../../parser/parser.h"
+
 void createMainFunctionAndGenerateCode(const ProgramNode *program);
 
 void optimizeCode();

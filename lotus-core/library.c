@@ -1,10 +1,11 @@
-#include "lotus.h"
 #include <stdio.h>
-
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdbool.h>
+
+#include "lotus.h"
 
 // WARNING
 // BAD CODE HERE MIGHT CRASH THE SHIT OUT OF PROGRAM
@@ -34,14 +35,11 @@ void print(int count, ...) {
     for (int i = 0; i < count; i++) {
         LotusValue val = va_arg(args, LotusValue);
         switch (val.type) {
-            case LOTUS_BOOL: printf("%s", val.value.i64 == 0 ? "false" : "true");
-                break;
+            case LOTUS_BOOL: printf("%s", val.value.i64 == 0 ? "false" : "true"); break;
             case LOTUS_F32:
-            case LOTUS_F64: printf("%f", val.value.f64);
-                break;
+            case LOTUS_F64: printf("%f", val.value.f64); break;
             case LOTUS_I64:
-            case LOTUS_I32: printf("%lld", (long long)val.value.i64);
-                break;
+            case LOTUS_I32: printf("%lld", (long long)val.value.i64); break;
             case LOTUS_STRING: {
                 const LotusString *str = val.value.ptr;
                 printf("%s", str->data);
@@ -62,12 +60,9 @@ bool toBool(const LotusValue value) {
         case LOTUS_BOOL: return value.value.i64 != 0;
         case LOTUS_STRING: {
             const LotusString *str = value.value.ptr;
-            if (strcmp(str->data, "true") == 0)
-                return true;
-            if (strcmp(str->data, "false") == 0)
-                return false;
-            fprintf(stderr, "Illegal value to convert string to bool: %s",
-                    str->data);
+            if (strcmp(str->data, "true") == 0) return true;
+            if (strcmp(str->data, "false") == 0) return false;
+            fprintf(stderr, "Illegal value to convert string to bool: %s", str->data);
             return false;
         }
         default: return false;
@@ -107,7 +102,7 @@ LotusString *input() {
             str->data = realloc(str->data, capacity);
         }
 
-        str->data[length++] = (char) c;
+        str->data[length++] = (char)c;
     }
 
     str->data[length] = '\0';
