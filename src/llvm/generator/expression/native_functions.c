@@ -158,6 +158,16 @@ LLVMValueRef generateNativeCall(const CallNode *node) {
         if (expected == LOTUS_ANY) args[native->variadic ? i + 1 : i] = buildLotusValue(node->arguments[i]);
         else args[native->variadic ? i + 1 : i] = generateExpression(node->arguments[i]);
     }
-    return LLVMBuildCall2(cg->builder, native->fnType, native->llvmFunction, args,
-                          native->variadic ? node->argumentCount + 1 : node->argumentCount, "");
+    LLVMValueRef result = LLVMBuildCall2(cg->builder, native->fnType, native->llvmFunction, args,
+                                         native->variadic ? node->argumentCount + 1 : node->argumentCount, "");
+    for (int i = 0; i < node->argumentCount; i++) {
+        if (node->arguments[i]->dataType != LOTUS_STRING) continue;
+        LLVMValueRef value = args[native->variadic ? i + 1 : i];
+        if (LLVMGetTypeKind(LLVMTypeOf(value)) == LLVMStructTypeKind) {
+            LLVMValueRef payload = LLVMBuildExtractValue(cg->builder, value, 1, "str.payload");
+            value = LLVMBuildIntToPtr(cg->builder, payload, convertType(LOTUS_STRING), "str.argument");
+        }
+        releaseString(value);
+    }
+    return result;
 }

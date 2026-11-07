@@ -18,6 +18,7 @@ Codegen *cg;
 void initCodegen() {
     cg = mallocSafe(sizeof(Codegen));
     cg->varsCount = 0;
+    cg->functionVarsStart = 0;
     cg->loopCount = 0;
     cg->nativeCount = 0;
     cg->functionCount = 0;
@@ -36,8 +37,8 @@ void initCodegen() {
 
     cg->stringType = LLVMStructCreateNamed(cg->context, "String");
 
-    LLVMTypeRef fields[] = {cg->i64Type, LLVMPointerType(cg->i8Type, 0)};
-    LLVMStructSetBody(cg->stringType, fields, 2, false);
+    LLVMTypeRef fields[] = {cg->i64Type, LLVMPointerType(cg->i8Type, 0), cg->i64Type};
+    LLVMStructSetBody(cg->stringType, fields, 3, false);
 }
 
 void codegenProgram(const ProgramNode *program) {

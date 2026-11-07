@@ -36,7 +36,14 @@
 typedef struct {
     size_t length;
     char *data;
+    size_t references; // Zero marks static string literals
 } LotusString;
+
+// Native arguments are borrowed; string results transfer one owned reference
+// Creates an owned string with space for length bytes and a trailing NUL
+LotusString *lotusStringCreate(size_t length);
+void _stringRetain(LotusString *str);
+void _stringRelease(LotusString *str);
 
 typedef enum {
     LOTUS_I32,

@@ -14,4 +14,5 @@ typedef struct {
 LLVMVariable *createVar(const char *name, LLVMValueRef storage, LotusType type);
 
 LLVMVariable *getVar(const char *name);
+void releaseVariables(int start);
 #endif

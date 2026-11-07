@@ -195,6 +195,9 @@ static LotusType checkBinary(TypeChecker *checker, BinaryNode *node) {
 }
 
 static LotusType checkCall(TypeChecker *checker, CallNode *node) {
+    if (strcmp(node->callee->name, "_stringRetain") == 0 || strcmp(node->callee->name, "_stringRelease") == 0)
+        diagnosticError(checker->scriptContent, node->base.location, "string lifetime is managed automatically");
+
     TypeFunction *function = findFunction(checker, node->callee->name);
 
     if (!function)

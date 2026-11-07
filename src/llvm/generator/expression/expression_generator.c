@@ -14,6 +14,20 @@
 #include "../../../parser/parser.h"
 #include "functions.h"
 
+static void updateStringReference(const char *name, LLVMValueRef value) {
+    LLVMNativeFunction *fn = findNative(name);
+    if (!fn) exitWithError("String ownership requires %s; rebuild and load lotus-core", name);
+    LLVMBuildCall2(cg->builder, fn->fnType, fn->llvmFunction, &value, 1, "");
+}
+
+void retainString(LLVMValueRef value) {
+    updateStringReference("_stringRetain", value);
+}
+
+void releaseString(LLVMValueRef value) {
+    updateStringReference("_stringRelease", value);
+}
+
 static LLVMValueRef generateNumber(const NumberNode *node) {
     switch (node->base.dataType) {
         case LOTUS_I32: return LLVMConstInt(cg->i32Type, node->i32, 0);
@@ -29,9 +43,10 @@ static LLVMValueRef generateString(const StringNode *node) {
 
     LLVMValueRef data = LLVMBuildGlobalStringPtr(cg->builder, node->value, "str.data");
     LLVMValueRef length = LLVMConstInt(cg->i64Type, len, 0);
-    LLVMValueRef fields[] = {length, data};
+    LLVMValueRef references = LLVMConstInt(cg->i64Type, 0, 0);
+    LLVMValueRef fields[] = {length, data, references};
 
-    LLVMValueRef stringStruct = LLVMConstNamedStruct(cg->stringType, fields, 2);
+    LLVMValueRef stringStruct = LLVMConstNamedStruct(cg->stringType, fields, 3);
     LLVMValueRef global = LLVMAddGlobal(cg->module, cg->stringType, "str");
     LLVMSetInitializer(global, stringStruct);
 
@@ -117,6 +132,8 @@ static LLVMValueRef buildComparison(const BinaryNode *bNode, LLVMValueRef left, 
         LLVMValueRef args[] = {left, right};
         LLVMValueRef equal =
             LLVMBuildCall2(cg->builder, equalsFn->fnType, equalsFn->llvmFunction, args, 2, "str.equal");
+        releaseString(left);
+        releaseString(right);
         return bNode->op == TOKEN_EQ ? equal : LLVMBuildNot(cg->builder, equal, "str.not_equal");
     }
 
@@ -165,7 +182,11 @@ static LLVMValueRef generateBinary(const BinaryNode *node) {
                 LLVMNativeFunction *concatFn = findNative("_concat");
                 LLVMValueRef args[] = {left, right};
 
-                return LLVMBuildCall2(cg->builder, concatFn->fnType, concatFn->llvmFunction, args, 2, "str.concat");
+                LLVMValueRef result =
+                    LLVMBuildCall2(cg->builder, concatFn->fnType, concatFn->llvmFunction, args, 2, "str.concat");
+                releaseString(left);
+                releaseString(right);
+                return result;
             }
 
             return buildArithmetic(node, left, right);
@@ -193,7 +214,9 @@ static LLVMValueRef generateBinary(const BinaryNode *node) {
 
 static LLVMValueRef generateIdentifier(const char *name) {
     LLVMVariable *var = getVar(name);
-    return LLVMBuildLoad2(cg->builder, convertType(var->type), var->storage, name);
+    LLVMValueRef value = LLVMBuildLoad2(cg->builder, convertType(var->type), var->storage, name);
+    if (var->type == LOTUS_STRING) retainString(value);
+    return value;
 }
 
 LLVMValueRef generateExpression(const Node *node) {

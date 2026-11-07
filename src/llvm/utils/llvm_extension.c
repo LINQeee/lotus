@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "../llvm.h"
+#include "../var_manager.h"
 #include "../generator/generator.h"
 #include "llvm_extension.h"
 #include "../generator/expression/functions.h"
@@ -40,8 +41,10 @@ void createMainFunctionAndGenerateCode(const ProgramNode *program) {
 
     generateNode((Node *)program);
 
-    if (!LLVMGetBasicBlockTerminator(cg->currentBlock))
+    if (!LLVMGetBasicBlockTerminator(cg->currentBlock)) {
+        releaseVariables(0);
         LLVMBuildRet(cg->builder, LLVMConstInt(LLVMInt32TypeInContext(cg->context), 0, 0));
+    }
 }
 
 void verifyCode() {

@@ -14,6 +14,7 @@
 typedef struct {
     LLVMBasicBlockRef continueBlock;
     LLVMBasicBlockRef breakBlock;
+    int varsStart;
 } LoopContext;
 
 typedef struct {
@@ -30,6 +31,7 @@ typedef struct {
 
     LLVMVariable vars[MAX_VARS];
     int varsCount;
+    int functionVarsStart;
 
     LoopContext loops[MAX_LOOP_DEPTH];
     int loopCount;

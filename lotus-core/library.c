@@ -69,14 +69,39 @@ bool toBool(const LotusValue value) {
     }
 }
 
+LotusString *lotusStringCreate(size_t length) {
+    LotusString *str = malloc(sizeof(LotusString));
+    char *data = malloc(length + 1);
+    if (!str || !data) {
+        free(str);
+        free(data);
+        fprintf(stderr, "Cannot allocate string\n");
+        exit(EXIT_FAILURE);
+    }
+    *str = (LotusString){length, data, 1};
+    data[length] = '\0';
+    return str;
+}
+
+void _stringRetain(LotusString *str) {
+    if (str->references) str->references++;
+}
+
+void _stringRelease(LotusString *str) {
+    // don't release static strings
+    if (!str->references) return;
+    if (--str->references) return;
+    free(str->data);
+    free(str);
+}
+
 bool _stringEquals(const LotusString *left, const LotusString *right) {
     return left->length == right->length && memcmp(left->data, right->data, left->length) == 0;
 }
 
 LotusString *_concat(LotusString *str1, LotusString *str2) {
-    LotusString *result = malloc(sizeof(LotusString));
-    result->length = str1->length + str2->length;
-    char *data = malloc(result->length + 1);
+    LotusString *result = lotusStringCreate(str1->length + str2->length);
+    char *data = result->data;
 
     memcpy(data, str1->data, str1->length);
     memcpy(data + str1->length, str2->data, str2->length);
@@ -92,10 +117,8 @@ int randomNum(int min, int max) {
 }
 
 LotusString *input() {
-    LotusString *str = malloc(sizeof(LotusString));
-
     size_t capacity = 16;
-    str->data = malloc(capacity);
+    LotusString *str = lotusStringCreate(capacity - 1);
 
     size_t length = 0;
     int c;
@@ -103,7 +126,13 @@ LotusString *input() {
     while ((c = getchar()) != '\n' && c != EOF) {
         if (length + 1 >= capacity) {
             capacity *= 2;
-            str->data = realloc(str->data, capacity);
+            char *data = realloc(str->data, capacity);
+            if (!data) {
+                _stringRelease(str);
+                fprintf(stderr, "Cannot grow input string\n");
+                exit(EXIT_FAILURE);
+            }
+            str->data = data;
         }
 
         str->data[length++] = (char)c;
@@ -139,4 +168,6 @@ LOTUS_NATIVE_LIBRARY {
     LOTUS_FUNCTION(input, LOTUS_STRING);
     LOTUS_FUNCTION(_concat, LOTUS_STRING, LOTUS_STRING, LOTUS_STRING);
     LOTUS_FUNCTION(_stringEquals, LOTUS_BOOL, LOTUS_STRING, LOTUS_STRING);
+    LOTUS_FUNCTION(_stringRetain, LOTUS_VOID, LOTUS_STRING);
+    LOTUS_FUNCTION(_stringRelease, LOTUS_VOID, LOTUS_STRING);
 }

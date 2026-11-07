@@ -3,6 +3,8 @@
 #include <string.h>
 
 #include "llvm.h"
+#include "generator/expression/expression_generator.h"
+#include "generator/expression/native_functions.h"
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
 #include "lotus_types.h"
@@ -32,4 +34,13 @@ LLVMVariable *getVar(const char *name) {
         }
     }
     return globalFoundVar;
+}
+
+void releaseVariables(int start) {
+    for (int i = cg->varsCount - 1; i >= start; i--) {
+        LLVMVariable *var = &cg->vars[i];
+        if (var->type != LOTUS_STRING) continue;
+        LLVMValueRef value = LLVMBuildLoad2(cg->builder, convertType(LOTUS_STRING), var->storage, "str.cleanup");
+        releaseString(value);
+    }
 }

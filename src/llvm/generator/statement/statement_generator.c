@@ -16,6 +16,7 @@
 static void generateScopedNode(const Node *node) {
     int previousVarsCount = cg->varsCount;
     generateNode(node);
+    if (!LLVMGetBasicBlockTerminator(cg->currentBlock)) releaseVariables(previousVarsCount);
     cg->varsCount = previousVarsCount;
 }
 
@@ -33,6 +34,7 @@ static void generateWhile(const WhileNode *node) {
 
     LoopContext loop;
     loop.breakBlock = exitBlock;
+    loop.varsStart = cg->varsCount;
     loop.continueBlock = condBlock;
     cg->loops[cg->loopCount++] = loop;
 
@@ -46,12 +48,14 @@ static void generateWhile(const WhileNode *node) {
 static void generateBreak(const BreakNode *node) {
     int index = cg->loopCount - node->level;
     if (index < 0) index = 0;
+    releaseVariables(cg->loops[index].varsStart);
     LLVMBuildBr(cg->builder, cg->loops[index].breakBlock);
 }
 
 static void generateContinue(const ContinueNode *node) {
     int index = cg->loopCount - node->level;
     if (index < 0) index = 0;
+    releaseVariables(cg->loops[index].varsStart);
     LLVMBuildBr(cg->builder, cg->loops[index].continueBlock);
 }
 
@@ -82,7 +86,9 @@ static void generateIf(const IfNode *node) {
 }
 
 static void generateReturn(const ReturnNode *node) {
-    if (node->value) LLVMBuildRet(cg->builder, generateExpression(node->value));
+    LLVMValueRef value = node->value ? generateExpression(node->value) : NULL;
+    releaseVariables(cg->functionVarsStart);
+    if (value) LLVMBuildRet(cg->builder, value);
     else LLVMBuildRetVoid(cg->builder);
 }
 
@@ -130,7 +136,11 @@ static void generateAssignment(const AssignmentNode *node) {
     if (var == NULL) exitWithError("Variable '%s' is not declared", node->target->name);
 
     LLVMValueRef value = generateExpression(node->value);
-
+    if (var->type == LOTUS_STRING) {
+        LLVMValueRef previous =
+            LLVMBuildLoad2(cg->builder, lotusTypeToLLVMType(LOTUS_STRING), var->storage, "str.previous");
+        releaseString(previous);
+    }
     LLVMBuildStore(cg->builder, value, var->storage);
 }
 
