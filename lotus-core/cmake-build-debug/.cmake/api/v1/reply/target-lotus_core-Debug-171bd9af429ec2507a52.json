@@ -10,7 +10,9 @@
 	{
 		"commands" : 
 		[
-			"add_library"
+			"add_library",
+			"install",
+			"target_include_directories"
 		],
 		"files" : 
 		[
@@ -25,6 +27,18 @@
 				"command" : 0,
 				"file" : 0,
 				"line" : 8,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 19,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 15,
 				"parent" : 0
 			}
 		]
@@ -49,6 +63,13 @@
 					"define" : "lotus_core_EXPORTS"
 				}
 			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 3,
+					"path" : "/Users/mv/Documents/Projects/compiler/lotus-core"
+				}
+			],
 			"language" : "C",
 			"languageStandard" : 
 			{
@@ -60,11 +81,34 @@
 			},
 			"sourceIndexes" : 
 			[
-				0
+				0,
+				1,
+				2,
+				3,
+				4,
+				5
 			]
 		}
 	],
 	"id" : "lotus_core::@6890427a1f51a3e7e1df",
+	"install" : 
+	{
+		"destinations" : 
+		[
+			{
+				"backtrace" : 2,
+				"path" : "lib/lotus"
+			},
+			{
+				"backtrace" : 2,
+				"path" : "lib/lotus"
+			}
+		],
+		"prefix" : 
+		{
+			"path" : "/usr/local"
+		}
+	},
 	"link" : 
 	{
 		"commandFragments" : 
@@ -89,14 +133,12 @@
 			"name" : "Source Files",
 			"sourceIndexes" : 
 			[
-				0
-			]
-		},
-		{
-			"name" : "Header Files",
-			"sourceIndexes" : 
-			[
-				1
+				0,
+				1,
+				2,
+				3,
+				4,
+				5
 			]
 		}
 	],
@@ -110,8 +152,33 @@
 		},
 		{
 			"backtrace" : 1,
-			"path" : "lotus.h",
-			"sourceGroupIndex" : 1
+			"compileGroupIndex" : 0,
+			"path" : "src/io.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/conversion.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/random.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "internal/string_runtime.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "utils/string_utils.c",
+			"sourceGroupIndex" : 0
 		}
 	],
 	"type" : "SHARED_LIBRARY"

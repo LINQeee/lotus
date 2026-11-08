@@ -7,10 +7,11 @@
 			[
 				{
 					"build" : ".",
-					"jsonFile" : "directory-.-Debug-9ad1a58d4644cf6543fa.json",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-13e107e8b7c4adee8ea6.json",
 					"minimumCMakeVersion" : 
 					{
-						"string" : "4.2"
+						"string" : "3.25"
 					},
 					"projectIndex" : 0,
 					"source" : ".",
@@ -40,7 +41,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "lotus_core::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-lotus_core-Debug-fc9f9189c8d500ce3424.json",
+					"jsonFile" : "target-lotus_core-Debug-171bd9af429ec2507a52.json",
 					"name" : "lotus_core",
 					"projectIndex" : 0
 				}

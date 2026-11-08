@@ -1,8 +1,38 @@
 [
 {
   "directory": "/Users/mv/Documents/Projects/compiler/lotus-core/cmake-build-debug",
-  "command": "/usr/bin/cc -Dlotus_core_EXPORTS -g -std=gnu11 -arch arm64 -fPIC -fcolor-diagnostics -o CMakeFiles/lotus_core.dir/library.c.o -c /Users/mv/Documents/Projects/compiler/lotus-core/library.c",
+  "command": "/usr/bin/cc -Dlotus_core_EXPORTS -I/Users/mv/Documents/Projects/compiler/lotus-core -g -std=gnu11 -arch arm64 -fPIC -fcolor-diagnostics -o CMakeFiles/lotus_core.dir/library.c.o -c /Users/mv/Documents/Projects/compiler/lotus-core/library.c",
   "file": "/Users/mv/Documents/Projects/compiler/lotus-core/library.c",
   "output": "/Users/mv/Documents/Projects/compiler/lotus-core/cmake-build-debug/CMakeFiles/lotus_core.dir/library.c.o"
+},
+{
+  "directory": "/Users/mv/Documents/Projects/compiler/lotus-core/cmake-build-debug",
+  "command": "/usr/bin/cc -Dlotus_core_EXPORTS -I/Users/mv/Documents/Projects/compiler/lotus-core -g -std=gnu11 -arch arm64 -fPIC -fcolor-diagnostics -o CMakeFiles/lotus_core.dir/src/io.c.o -c /Users/mv/Documents/Projects/compiler/lotus-core/src/io.c",
+  "file": "/Users/mv/Documents/Projects/compiler/lotus-core/src/io.c",
+  "output": "/Users/mv/Documents/Projects/compiler/lotus-core/cmake-build-debug/CMakeFiles/lotus_core.dir/src/io.c.o"
+},
+{
+  "directory": "/Users/mv/Documents/Projects/compiler/lotus-core/cmake-build-debug",
+  "command": "/usr/bin/cc -Dlotus_core_EXPORTS -I/Users/mv/Documents/Projects/compiler/lotus-core -g -std=gnu11 -arch arm64 -fPIC -fcolor-diagnostics -o CMakeFiles/lotus_core.dir/src/conversion.c.o -c /Users/mv/Documents/Projects/compiler/lotus-core/src/conversion.c",
+  "file": "/Users/mv/Documents/Projects/compiler/lotus-core/src/conversion.c",
+  "output": "/Users/mv/Documents/Projects/compiler/lotus-core/cmake-build-debug/CMakeFiles/lotus_core.dir/src/conversion.c.o"
+},
+{
+  "directory": "/Users/mv/Documents/Projects/compiler/lotus-core/cmake-build-debug",
+  "command": "/usr/bin/cc -Dlotus_core_EXPORTS -I/Users/mv/Documents/Projects/compiler/lotus-core -g -std=gnu11 -arch arm64 -fPIC -fcolor-diagnostics -o CMakeFiles/lotus_core.dir/src/random.c.o -c /Users/mv/Documents/Projects/compiler/lotus-core/src/random.c",
+  "file": "/Users/mv/Documents/Projects/compiler/lotus-core/src/random.c",
+  "output": "/Users/mv/Documents/Projects/compiler/lotus-core/cmake-build-debug/CMakeFiles/lotus_core.dir/src/random.c.o"
+},
+{
+  "directory": "/Users/mv/Documents/Projects/compiler/lotus-core/cmake-build-debug",
+  "command": "/usr/bin/cc -Dlotus_core_EXPORTS -I/Users/mv/Documents/Projects/compiler/lotus-core -g -std=gnu11 -arch arm64 -fPIC -fcolor-diagnostics -o CMakeFiles/lotus_core.dir/internal/string_runtime.c.o -c /Users/mv/Documents/Projects/compiler/lotus-core/internal/string_runtime.c",
+  "file": "/Users/mv/Documents/Projects/compiler/lotus-core/internal/string_runtime.c",
+  "output": "/Users/mv/Documents/Projects/compiler/lotus-core/cmake-build-debug/CMakeFiles/lotus_core.dir/internal/string_runtime.c.o"
+},
+{
+  "directory": "/Users/mv/Documents/Projects/compiler/lotus-core/cmake-build-debug",
+  "command": "/usr/bin/cc -Dlotus_core_EXPORTS -I/Users/mv/Documents/Projects/compiler/lotus-core -g -std=gnu11 -arch arm64 -fPIC -fcolor-diagnostics -o CMakeFiles/lotus_core.dir/utils/string_utils.c.o -c /Users/mv/Documents/Projects/compiler/lotus-core/utils/string_utils.c",
+  "file": "/Users/mv/Documents/Projects/compiler/lotus-core/utils/string_utils.c",
+  "output": "/Users/mv/Documents/Projects/compiler/lotus-core/cmake-build-debug/CMakeFiles/lotus_core.dir/utils/string_utils.c.o"
 }
 ]
