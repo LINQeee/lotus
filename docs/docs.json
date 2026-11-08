@@ -92,5 +92,14 @@
         "dark": "github-dark"
       }
     }
+  },
+  "fonts": {
+    "family": "IBM Plex Mono"
+  },
+  "background": {
+    "color": {
+      "light": "#FAF9F6",
+      "dark": "#121116"
+    }
   }
 }

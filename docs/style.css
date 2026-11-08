@@ -1,0 +1,116 @@
+:root {
+    --lotus-accent: #6d28d9;
+    --lotus-line: #d6d0df;
+    --lotus-panel: #f2eff6;
+    --lotus-muted: #696273;
+}
+
+html.dark {
+    --lotus-accent: #c4b5fd;
+    --lotus-line: #3c3549;
+    --lotus-panel: #1b1822;
+    --lotus-muted: #b3aabd;
+}
+
+#content {
+    font-size: 0.9375rem;
+    line-height: 1.8;
+}
+
+#page-title {
+    letter-spacing: -0.045em;
+}
+
+#content h2 {
+    border-bottom: 1px dashed var(--lotus-line);
+    padding-bottom: 0.65rem;
+    letter-spacing: -0.025em;
+}
+
+#content .card,
+#content .callout,
+[data-component-part="code-block-root"],
+[data-search-item="trigger"],
+[data-search-item="dialog"] {
+    border-radius: 0;
+    box-shadow: none;
+    border: 1px solid var(--lotus-line);
+}
+
+#content .card {
+    position: relative;
+    background: transparent;
+    transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+#content .card::before,
+#content .card::after {
+    content: "+";
+    position: absolute;
+    color: var(--lotus-accent);
+    font: 16px/1 monospace;
+    pointer-events: none;
+}
+
+#content .card::before {
+    top: -9px;
+    left: -5px;
+}
+
+#content .card::after {
+    right: -5px;
+    bottom: -7px;
+}
+
+#content .card:hover {
+    border-color: var(--lotus-accent);
+    background: var(--lotus-panel);
+}
+
+#content a:focus-visible,
+#sidebar-content a:focus-visible {
+    outline: 2px solid var(--lotus-accent);
+    outline-offset: 4px;
+}
+
+#sidebar-content li[data-active] > a {
+    border-radius: 0;
+    box-shadow: inset 2px 0 var(--lotus-accent);
+}
+
+#content table th {
+    background: var(--lotus-panel);
+}
+
+#content table :is(th, td) {
+    border-bottom: 1px dashed var(--lotus-line);
+}
+
+#content .ascii-banner {
+    margin: 1.5rem 0 2rem;
+    padding: 1.5rem;
+    border: 1px dashed var(--lotus-line);
+    background: var(--lotus-panel);
+}
+
+#content .ascii-art {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--lotus-accent);
+    font: 600 clamp(10px, 2.5vw, 16px)/1.3 ui-monospace, monospace;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+#content .ascii-caption {
+    margin-top: 1.25rem;
+    color: var(--lotus-muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #content .card { transition: none; }
+}

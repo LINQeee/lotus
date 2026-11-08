@@ -6,7 +6,9 @@ keywords: ["Lotus", "quickstart", "installation"]
 
 ## Install
 
-The installer builds Lotus and lotus-core, installs them together and adds `lotus` to your terminal's `PATH`. It may ask for permission to install system dependencies. Keep LLVM and the installed toolchain available after setup.
+Run one command below — no repository clone or manual download is needed. The installer downloads the sources into a temporary folder, installs dependencies, builds Lotus and lotus-core, then adds `lotus` to your terminal's `PATH`.
+
+System permissions may still require a password or Windows elevation. Keep LLVM and the installed toolchain available after setup.
 
 <Tabs>
 <Tab title="macOS">
@@ -19,6 +21,8 @@ curl -fsSL https://raw.githubusercontent.com/LINQeee/lotus/main/scripts/install.
 
 Installs dependencies with Homebrew and Lotus into `~/.local/share/lotus`. Open a new terminal afterward.
 
+[View the Bash installer](https://raw.githubusercontent.com/LINQeee/lotus/main/scripts/install.sh)
+
 </Tab>
 <Tab title="Linux">
 
@@ -29,6 +33,8 @@ curl -fsSL https://raw.githubusercontent.com/LINQeee/lotus/main/scripts/install.
 ```
 
 Installs Lotus into `~/.local/share/lotus`. Open a new terminal afterward. On other distributions, install LLVM 22+, CMake 3.25+, Ninja, Git and Clang first, then append `-s -- --no-deps` to `bash`.
+
+[View the Bash installer](https://raw.githubusercontent.com/LINQeee/lotus/main/scripts/install.sh)
 
 </Tab>
 <Tab title="Windows">
@@ -41,25 +47,23 @@ irm https://raw.githubusercontent.com/LINQeee/lotus/main/scripts/install.ps1 | i
 
 Installs MSYS2/Clang64 dependencies and Lotus into `%LOCALAPPDATA%\Lotus`. The `lotus` launcher works in PowerShell and cmd without opening an MSYS2 shell. New terminals inherit the command from your user `PATH`.
 
+[View the PowerShell installer](https://raw.githubusercontent.com/LINQeee/lotus/main/scripts/install.ps1)
+
 </Tab>
 </Tabs>
-
-<Note>
-Download commands require access to the GitHub repository and published installer files. With a private repository, use an authenticated checkout and the local commands below.
-</Note>
 
 ## Run a program
 
 ```sh
-lotus new hello .
-lotus run hello/main.lt
+lotus new hello-world .
+lotus run hello-world/main.lt
 ```
 
 ```text Output
 Hello, World!
 ```
 
-Edit `hello/main.lt` to write your program. `run` executes immediately through JIT. `lotus build hello/main.lt` creates `main.lt.out` on macOS/Linux or `main.lt.exe` on Windows beside the source, without executing it. See [native library requirements](/cli#executable-builds) before sharing the binary.
+Edit `hello-world/main.lt` to write your program. `run` executes immediately through JIT. `lotus build hello-world/main.lt` creates `main.lt.out` on macOS/Linux or `main.lt.exe` on Windows beside the source, without executing it. See [native library requirements](/cli#executable-builds) before sharing the binary.
 
 ## Install from a checkout
 

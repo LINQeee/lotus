@@ -85,7 +85,7 @@ try {
         Copy-Item (Join-Path $Source 'scripts\install.sh') $script
     } else {
         $ref = if ($env:LOTUS_REF) { $env:LOTUS_REF } else { 'main' }
-        Invoke-WebRequest "https://raw.githubusercontent.com/LINQeee/lotus/$ref/scripts/install.sh" -OutFile $script
+        Invoke-WebRequest "https://raw.githubusercontent.com/LINQeee/lotus/$ref/scripts/install.sh" -UseBasicParsing -OutFile $script
     }
     $env:LOTUS_INSTALL_SCRIPT = $script
     & $invokeBash @'
