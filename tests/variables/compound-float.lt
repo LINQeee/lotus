@@ -1,0 +1,8 @@
+// expect: "3.000000\n"
+
+float x = 2f
+x += 2f
+x *= 2f
+x -= 2f
+x /= 2f
+print(x)

@@ -1,0 +1,6 @@
+// expect: "10.000000\n4.000000\n21.000000\n4.000000\n"
+
+print(7f + 3f)
+print(7f - 3f)
+print(7f * 3f)
+print(8f / 2f)

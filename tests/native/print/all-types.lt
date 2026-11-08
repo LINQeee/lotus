@@ -1,0 +1,4 @@
+// expect: "123.0000004.000000trueok\n\n"
+
+print(1, 2L, 3f, 4.0, true, "ok")
+print("")

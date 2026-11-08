@@ -1,0 +1,3 @@
+// expect: "doublesingle\n"
+
+print("double", 'single')

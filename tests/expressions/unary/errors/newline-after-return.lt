@@ -1,0 +1,6 @@
+// error: "expected return value of type int"
+
+fn f(): int {
+    return
+    2
+}

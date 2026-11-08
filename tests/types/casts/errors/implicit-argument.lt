@@ -1,0 +1,7 @@
+// error: "expected double, got float"
+
+fn f(x: double): double {
+    return x
+}
+
+print(f(2f))

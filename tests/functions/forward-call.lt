@@ -1,0 +1,7 @@
+// expect: "42\n"
+
+print(answer())
+
+fn answer(): int {
+    return 42
+}

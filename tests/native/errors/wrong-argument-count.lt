@@ -1,0 +1,3 @@
+// error: "expects 2 arguments"
+
+sumFloat(1.0)

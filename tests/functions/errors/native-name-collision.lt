@@ -1,0 +1,3 @@
+// error: "function 'print' is already declared"
+
+fn print() {}

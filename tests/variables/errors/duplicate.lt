@@ -1,0 +1,4 @@
+// error: "variable 'x' is already declared"
+
+int x = 1
+int x = 2

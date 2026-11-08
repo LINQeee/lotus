@@ -1,0 +1,4 @@
+// error: "variable 'i' is not declared"
+
+for i in 0..2 {}
+print(i)

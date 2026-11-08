@@ -1,0 +1,67 @@
+// expect: "11\ninner\n12\n10\n2\n3\n4\n0\n2\n10\n5\n17\n20\n21\n7\n10\n10\n99\n10\n"
+
+int value = 10
+if true {
+    int value = value + 1
+    print(value)
+    if true {
+        string value = "inner"
+        print(value)
+    }
+    value += 1
+    print(value)
+}
+print(value)
+if false {
+    int branch = 1
+} else {
+    int branch = 2
+    print(branch)
+}
+int branch = 3
+print(branch)
+if true int temporary = 1
+int temporary = 4
+print(temporary)
+int i = 0
+while i < 3 {
+    int value = i
+    i += 1
+    if i == 2 continue
+    print(value)
+}
+print(value)
+while false int hidden = 2
+int hidden = 5
+print(hidden)
+
+fn local(value: int): int {
+    if true {
+        int value = value + 10
+        print(value)
+    }
+    int i = 0
+    while i < 2 {
+        int value = i + 20
+        print(value)
+        i += 1
+    }
+    return value
+}
+
+print(local(7))
+print(value)
+
+fn globalValue(): int {
+    return value
+}
+
+print(globalValue())
+
+fn other(): int {
+    int value = 99
+    return value
+}
+
+print(other())
+print(globalValue())

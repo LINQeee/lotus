@@ -1,0 +1,5 @@
+// error: "expected int, got bool"
+
+fn f(a: int) {}
+
+f(true)

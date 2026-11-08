@@ -1,0 +1,6 @@
+// expect: "10\n4\n21\n4\n"
+
+print(7L + 3L)
+print(7L - 3L)
+print(7L * 3L)
+print(8L / 2L)

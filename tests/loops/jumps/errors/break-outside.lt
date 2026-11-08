@@ -1,0 +1,3 @@
+// error: "cannot be used outside a loop"
+
+break

@@ -1,0 +1,8 @@
+// expect: "true\ntrue\nfalse\nfalse\nfalse\ntrue\n"
+
+print(2d < 3d)
+print(2d <= 3d)
+print(2d > 3d)
+print(2d >= 3d)
+print(2d == 3d)
+print(2d != 3d)

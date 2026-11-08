@@ -1,0 +1,3 @@
+// error: "same integer type"
+
+for i in 0..2L {}

@@ -1,0 +1,7 @@
+// error: "cannot return int"
+
+fn f(): long {
+    return 2
+}
+
+print(f())

@@ -1,0 +1,12 @@
+// expect: "false\ntrue\n2\n"
+
+int calls = 0
+
+fn side(): bool {
+    calls += 1
+    return true
+}
+
+print(false & side())
+print(true | side())
+print(calls)

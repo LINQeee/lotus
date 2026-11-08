@@ -1,0 +1,5 @@
+// expect: "7\n"
+
+int snake_case2 = 3
+int camelCase = 4
+print(snake_case2 + camelCase)

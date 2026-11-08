@@ -1,0 +1,4 @@
+// error: "cannot assign float to double"
+
+double value = 0.0
+value = 2f

@@ -1,0 +1,5 @@
+// expect: "true\n3\n"
+
+int n = randomNum(2, 6)
+print(n >= 2 & n <= 6)
+print(randomNum(3, 3))

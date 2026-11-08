@@ -1,0 +1,42 @@
+// expect: "true\nfalse\nfalse\ntrue\nfalse\nfalse\ntrue\ntrue\ntrue\nfalse\ntrue\ntrue\ntrue\ntrue\n2\nfalse\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\n"
+// input: "A\u0000x\nA\u0000y\nA\u0000x\n"
+// ir: ["call i1 @_stringEquals"]
+
+print("same" == "same")
+print("same" != "same")
+print("ab" == "ac")
+print("ab" != "ac")
+print("ab" == "abc")
+print("abc" == "ab")
+print("" == "")
+print("" != "a")
+string joined = "hel" + "lo"
+print(joined == "hello")
+print(joined != "hello")
+print(joined == joined)
+print("Привет" == "При" + "вет")
+
+fn equalStrings(left: string, right: string): bool {
+    return left == right
+}
+
+print(equalStrings("a" + "b", "ab"))
+int calls = 0
+
+fn nextString(): string {
+    calls += 1
+    return "once"
+}
+
+print(nextString() == nextString())
+print(calls)
+string first = input()
+string second = input()
+string third = input()
+print(first == second)
+print(first != second)
+print(first == third)
+print(2 == 2)
+print(2 != 3)
+print(2.0 == 2.0)
+print(true != false)

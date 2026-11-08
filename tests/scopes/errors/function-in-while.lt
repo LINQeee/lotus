@@ -1,0 +1,4 @@
+// error: "functions can only be declared at top level"
+
+while false 
+fn inner() {}

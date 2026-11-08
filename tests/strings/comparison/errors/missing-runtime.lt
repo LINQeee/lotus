@@ -1,0 +1,4 @@
+// error: "String comparison requires _stringEquals"
+// runtime: "none"
+
+bool equal = "a" == "a"

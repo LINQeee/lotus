@@ -1,0 +1,4 @@
+// expect: "3\n3\n"
+
+for i in 3..3 print(i)
+for i in 3..3 step 1 print(i)

@@ -1,0 +1,14 @@
+{
+  "testsDir": "tests",
+  "resultsDir": "tests/.results",
+  "compiler": "cmake-build-debug/compiler",
+  "cmake": "/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake",
+  "runtimeBuild": "lotus-core/cmake-build-debug",
+  "runtimeLibrary": "libs/liblotus_core.dylib",
+  "timeout": 10,
+  "setupTimeout": 120,
+  "build": true,
+  "verbose": false,
+  "runtime": "normal",
+  "entryAllocas": true
+}

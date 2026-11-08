@@ -1,0 +1,146 @@
+// expect: "hello\nhello\ntrue\nhello\ntemporary\nnative\nreturned\nhello!\nhello\nold!\nold!\nnew\nrxxx\nreturned\na long input string that grows its buffer\ntrue\ntrue\ntrue\ntrue\ndone\n"
+// input: "a long input string that grows its buffer\n\ntail\n"
+// runtime: "memory"
+// log: ["String memory: live=0 "]
+
+string original = "hel" + "lo"
+string alias = original
+original = "new" + " value"
+print(alias)
+alias = alias
+print(alias)
+string compound = "a" + "b"
+compound += compound
+print(compound == "abab")
+
+fn identity(text: string): string {
+    return text
+}
+
+print(identity(alias))
+print(identity("tem" + "porary"))
+print(nativeAlias("na" + "tive"))
+
+fn localReturn(): string {
+    string local = "re" + "turned"
+    return local
+}
+
+print(localReturn())
+
+fn reassign(text: string): string {
+    text = text + "!"
+    return text
+}
+
+print(reassign(alias))
+print(alias)
+string shared = "o" + "ld"
+
+fn replaceShared(): string {
+    shared = "n" + "ew"
+    return "!"
+}
+
+print(shared + replaceShared())
+shared = "o" + "ld"
+print(shared, replaceShared())
+print(shared)
+
+fn recurse(text: string, n: int): string {
+    if n == 0 return text
+    return recurse(text + "x", n - 1)
+}
+
+print(recurse("r", 3))
+
+fn early(flag: bool) {
+    string outer = "out" + "er"
+    if flag {
+        string inner = outer + "inner"
+        return
+    }
+}
+
+early(true)
+early(false)
+
+fn loopReturn(): string {
+    string outer = "ret" + "urn"
+    while true {
+        string inner = outer + "ed"
+        return inner
+    }
+}
+
+print(loopReturn())
+int i = 0
+while i < 100000 {
+    string discarded = "a" + "b"
+    identity(discarded + "c")
+    toBool("tr" + "ue")
+    i += 1
+    if i % 2 == 0 continue
+    while true {
+        string deeper = discarded + "d"
+        break @2
+    }
+}
+// Exercise long-running loops separately from leveled break.
+i = 0
+while i < 100000 {
+    string temporary = "a" + "b"
+    i += 1
+    while true {
+        string nested = temporary + "c"
+        continue @2
+    }
+}
+i = 0
+while i < 100000 {
+    string temporary = "a" + "b"
+    i += 1
+}
+string line = input()
+print(line)
+line = input()
+print(line == "")
+line = input()
+print(line == "tail")
+print(("a" + "b") == ("a" + "b"))
+print(("a" + "b") != ("a" + "c"))
+
+fn repeatedInput() {
+    int j = 0
+    while j < 100000 {
+        string empty = input()
+        input()
+        j += 1
+    }
+}
+
+repeatedInput()
+
+fn forMemory(): string {
+    for outer in 0..!100000 {
+        string temporary = "a" + "b"
+        for inner in 0..2 {
+            string nested = temporary + "c"
+            continue @2
+        }
+    }
+    for outer in 0..!3 {
+        string temporary = "a" + "b"
+        while true {
+            string nested = temporary + "c"
+            break @2
+        }
+    }
+    for j in 0..1 {
+        string result = "do" + "ne"
+        return result
+    }
+    return "unreachable"
+}
+
+print(forMemory())

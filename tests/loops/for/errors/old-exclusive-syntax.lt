@@ -1,0 +1,3 @@
+// error: "Unexpected token"
+
+for i in 0..<2 {}

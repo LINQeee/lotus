@@ -1,0 +1,80 @@
+// expect: "-3\n-5\n3\n-4\n-1.500000\n-2.500000\n-3\n-3.000000\n6.250000\n-6.250000\n11\n-2147483648\n-9223372036854775808\n-5\n-0.000000\n-6\n1\nbefore\nelse\nafter\n5\ndone\n"
+// ir: ["fneg double", "sub i32 0,"]
+
+int x = 3
+long y = 4l
+float f = 1.5f
+double d = 2.5
+print(-x)
+print(-(x + 2))
+print(--x)
+print(-y)
+print(-f)
+print(-d)
+print((long)-x)
+print(-(double)x)
+print(-d ** 2.0)
+print(-(d ** 2.0))
+print(8 - -x)
+print(-2147483648)
+print(-9223372036854775808l)
+
+fn negateInt(number: int): int {
+    return -number
+}
+
+fn negateDouble(number: double): double {
+    return -number
+}
+
+print(negateInt(5))
+print(negateDouble(0.0))
+int calls = 0
+
+fn once(): int {
+    calls += 1
+    return 6
+}
+
+print(-once())
+print(calls)
+
+fn empty() {
+    return
+}
+
+empty()
+
+fn early() {
+    print("before")
+    return // Do not parse the next line as a return value.
+    print("unreachable")
+}
+
+early()
+
+fn conditional(flag: bool) {
+    if flag return else print("else")
+    print("after")
+}
+
+conditional(true)
+conditional(false)
+
+fn loopExit() {
+    while true {
+        return
+    }
+    print("unreachable")
+}
+
+loopExit()
+
+fn multiline(): int {
+    return (
+        2 + 3
+    )
+}
+
+print(multiline())
+print("done")

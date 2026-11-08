@@ -1,0 +1,8 @@
+// expect: "truefalsefalse\ntruefalse\nfalsetrue\nfalsetrue\ntruefalse\ntruefalse\n"
+
+print(toBool(1), toBool(0), toBool(-1))
+print(toBool(1L), toBool(0L))
+print(toBool(0f), toBool(1f))
+print(toBool(0.0), toBool(1.0))
+print(toBool(true), toBool(false))
+print(toBool("true"), toBool("false"))

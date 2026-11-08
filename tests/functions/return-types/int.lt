@@ -1,0 +1,7 @@
+// expect: "2\n"
+
+fn identity(x: int): int {
+    return x
+}
+
+print(identity(2))

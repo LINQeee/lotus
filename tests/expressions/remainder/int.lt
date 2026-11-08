@@ -1,0 +1,4 @@
+// expect: "-1\n2\n"
+
+print(-7 % 3)
+print(7 / 3)

@@ -1,0 +1,5 @@
+// error: "expects 1 argument, got 0"
+
+fn f(a: int) {}
+
+f()

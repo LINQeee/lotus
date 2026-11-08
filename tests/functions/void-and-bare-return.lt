@@ -1,0 +1,11 @@
+// expect: "1\n"
+
+fn quiet() {
+    return
+}
+
+fn empty() {}
+
+quiet()
+empty()
+print(1)

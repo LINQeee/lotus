@@ -1,0 +1,7 @@
+// expect: "true\n"
+
+fn identity(x: bool): bool {
+    return x
+}
+
+print(identity(true))

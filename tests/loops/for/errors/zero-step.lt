@@ -1,0 +1,3 @@
+// error: "must not be zero"
+
+for i in 0..2 step 0 {}

@@ -1,0 +1,5 @@
+// expect: "42\n-7\n0\n"
+
+print(toInt("42"))
+print(toInt("-7"))
+print(toInt("oops"))

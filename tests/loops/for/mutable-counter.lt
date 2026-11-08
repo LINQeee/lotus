@@ -1,0 +1,6 @@
+// expect: "0\n4\n5\n"
+
+for i in 0..5 {
+    print(i)
+    if i == 0 i = 3
+}

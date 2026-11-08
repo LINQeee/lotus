@@ -1,0 +1,96 @@
+// expect: "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n"
+
+fn branches(flag: bool): int {
+    if flag return 1 else return 2
+}
+
+fn fallback(flag: bool): int {
+    if flag return 3
+    return 4
+}
+
+fn nested(a: bool, b: bool): int {
+    if a {
+        if b return 5 else return 6
+    } else return 7
+}
+
+fn literal(): int {
+    if true return 8
+}
+
+fn loopReturn(): int {
+    while true {
+        return 9
+    }
+}
+
+fn loopBreak(): int {
+    while true {
+        break
+    }
+    return 10
+}
+
+fn outerBreak(): int {
+    while true {
+        while true {
+            break @2
+        }
+    }
+    return 11
+}
+
+fn innerBreak(): int {
+    while true {
+        while true {
+            break
+        }
+        return 12
+    }
+}
+
+fn deadBreak(): int {
+    while true {
+        if false break
+        return 13
+    }
+}
+
+fn empty() {}
+
+// These functions are checked and verified, but must not be executed.
+
+fn forever(): int {
+    while true {}
+}
+
+fn foreverContinue(): int {
+    while true {
+        continue
+    }
+}
+
+fn outerContinue(): int {
+    while true {
+        while true {
+            continue @2
+        }
+        break
+    }
+}
+
+print(branches(true))
+print(branches(false))
+print(fallback(true))
+print(fallback(false))
+print(nested(true, true))
+print(nested(true, false))
+print(nested(false, false))
+print(literal())
+print(loopReturn())
+print(loopBreak())
+print(outerBreak())
+print(innerBreak())
+print(deadBreak())
+empty()

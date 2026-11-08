@@ -1,0 +1,7 @@
+// expect: "abc\n"
+
+fn identity(x: string): string {
+    return x
+}
+
+print(identity("abc"))

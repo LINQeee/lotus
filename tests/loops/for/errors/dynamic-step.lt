@@ -1,0 +1,4 @@
+// error: "nonzero integer literal"
+
+int s = 2
+for i in 0..2 step s {}

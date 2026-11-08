@@ -1,0 +1,5 @@
+// expect: "1\n2\n3\n"
+
+if true print(1) else print(0)
+if false print(0) else print(2)
+if false print(0) else if true print(3) else print(0)

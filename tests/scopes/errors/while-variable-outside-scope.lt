@@ -1,0 +1,6 @@
+// error: "variable 'secret' is not declared"
+
+while false {
+    int secret = 1
+}
+print(secret)

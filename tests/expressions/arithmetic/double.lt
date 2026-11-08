@@ -1,0 +1,6 @@
+// expect: "10.000000\n4.000000\n21.000000\n4.000000\n"
+
+print(7d + 3d)
+print(7d - 3d)
+print(7d * 3d)
+print(8d / 2d)

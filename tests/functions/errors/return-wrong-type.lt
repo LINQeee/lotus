@@ -1,0 +1,5 @@
+// error: "cannot return string from function returning int"
+
+fn f(): int {
+    return "a"
+}

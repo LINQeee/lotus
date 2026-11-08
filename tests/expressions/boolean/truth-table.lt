@@ -1,0 +1,4 @@
+// expect: "truefalsefalsefalse\ntruetruetruefalse\n"
+
+print(true & true, true & false, false & true, false & false)
+print(true | true, true | false, false | true, false | false)

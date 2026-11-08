@@ -1,0 +1,7 @@
+// expect: "2\n"
+
+fn identity(x: long): long {
+    return x
+}
+
+print(identity(2L))

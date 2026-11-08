@@ -1,0 +1,8 @@
+// expect: "0\n1\n2\n3\n"
+
+int i = 0
+while i < 3 {
+    print(i)
+    i += 1
+}
+print(i)

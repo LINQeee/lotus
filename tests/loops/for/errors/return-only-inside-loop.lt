@@ -1,0 +1,5 @@
+// error: "can reach its end"
+
+fn f(): int {
+    for i in 0..2 return i
+}

@@ -1,0 +1,8 @@
+// expect: "3\n"
+
+long x = 2L
+x += 2L
+x *= 2L
+x -= 2L
+x /= 2L
+print(x)

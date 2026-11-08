@@ -1,0 +1,4 @@
+// error: "Expected"
+
+if true {
+    print(1)

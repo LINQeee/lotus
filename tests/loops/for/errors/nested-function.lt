@@ -1,0 +1,5 @@
+// error: "functions can only be declared at top level"
+
+for i in 0..2 {
+    fn inner() {}
+}

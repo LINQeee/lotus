@@ -1,0 +1,6 @@
+// expect: "hello\n\n\n"
+// input: "hello\n\n"
+
+print(input())
+print(input())
+print(input())

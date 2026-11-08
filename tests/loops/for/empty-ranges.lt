@@ -1,0 +1,6 @@
+// expect: ""
+
+for i in 0..2 step -1 print(0)
+for i in 2..0 step 1 print(0)
+for i in 1!..!2 print(0)
+for i in 3!..3 print(0)

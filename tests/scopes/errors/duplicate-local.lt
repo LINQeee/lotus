@@ -1,0 +1,6 @@
+// error: "variable 'x' is already declared"
+
+if true {
+    int x = 1
+    int x = 2
+}

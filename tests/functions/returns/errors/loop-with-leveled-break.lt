@@ -1,0 +1,8 @@
+// no-log: ["###### GENERATED IR:", "###### RUNNING main():"]
+// error: "can reach its end"
+
+fn f(): int {
+    while true {
+        for i in 0..2 break @2
+    }
+}

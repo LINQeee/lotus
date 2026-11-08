@@ -1,0 +1,9 @@
+// expect: "1\n3\n"
+
+int i = 0
+while true {
+    i += 1
+    if i == 2 next
+    if i == 4 break
+    print(i)
+}

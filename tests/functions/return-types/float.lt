@@ -1,0 +1,7 @@
+// expect: "2.000000\n"
+
+fn identity(x: float): float {
+    return x
+}
+
+print(identity(2f))

@@ -1,0 +1,5 @@
+// error: "function 'f' is already declared"
+
+fn f() {}
+
+fn f() {}

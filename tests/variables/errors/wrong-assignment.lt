@@ -1,0 +1,4 @@
+// error: "cannot assign bool to int"
+
+int x = 1
+x = true

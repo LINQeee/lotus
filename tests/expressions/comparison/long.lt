@@ -1,0 +1,8 @@
+// expect: "true\ntrue\nfalse\nfalse\nfalse\ntrue\n"
+
+print(2L < 3L)
+print(2L <= 3L)
+print(2L > 3L)
+print(2L >= 3L)
+print(2L == 3L)
+print(2L != 3L)

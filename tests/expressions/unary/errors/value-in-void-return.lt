@@ -1,0 +1,5 @@
+// error: "void function cannot return a value"
+
+fn f() {
+    return 1
+}

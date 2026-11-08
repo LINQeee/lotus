@@ -1,0 +1,4 @@
+// error: "variable 'secret' is not declared"
+
+if true int secret = 1
+print(secret)

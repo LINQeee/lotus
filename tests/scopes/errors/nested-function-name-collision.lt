@@ -1,0 +1,7 @@
+// error: "functions can only be declared at top level"
+
+fn inner() {}
+
+fn outer() {
+    fn inner() {}
+}

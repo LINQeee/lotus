@@ -1,0 +1,7 @@
+// expect: "newab\n"
+
+string a = "a" + "b"
+string b = a
+a = "new"
+b = b
+print(a, b)

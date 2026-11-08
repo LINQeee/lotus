@@ -1,0 +1,5 @@
+// expect: "true\nfalse\nfalsetrue\n"
+
+print(true | false & false)
+print((true | false) & false)
+print(true == false, true != false)

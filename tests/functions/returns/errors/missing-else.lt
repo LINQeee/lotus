@@ -1,0 +1,6 @@
+// no-log: ["###### GENERATED IR:", "###### RUNNING main():"]
+// error: "can reach its end without returning int"
+
+fn f(flag: bool): int {
+    if flag return 1
+}

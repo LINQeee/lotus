@@ -1,0 +1,5 @@
+// error: "functions can only be declared at top level"
+
+if true {
+    fn inner() {}
+}

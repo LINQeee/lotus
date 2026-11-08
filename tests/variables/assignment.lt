@@ -1,0 +1,11 @@
+// expect: "9\nb\ntrue\n"
+
+int a = 1
+a = 9
+print(a)
+string s = "a"
+s = "b"
+print(s)
+bool b = false
+b = true
+print(b)

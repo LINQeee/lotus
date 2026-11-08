@@ -1,0 +1,7 @@
+// expect: "2\n"
+
+// a comment
+
+int value = 2 // trailing
+print(value)
+// eof

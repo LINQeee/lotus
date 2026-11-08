@@ -1,0 +1,4 @@
+// expect: "ab\ntrue\n"
+
+print(_concat("a", "b"))
+print(_stringEquals("a", "a"))

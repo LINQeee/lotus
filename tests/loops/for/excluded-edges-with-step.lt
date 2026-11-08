@@ -1,0 +1,4 @@
+// expect: "1\n3\n5\n4\n2\n0\n"
+
+for i in 0!..5 step 2 print(i)
+for i in 5!..0 step -2 print(i)

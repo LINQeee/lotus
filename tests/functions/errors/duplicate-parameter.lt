@@ -1,0 +1,3 @@
+// error: "variable 'a' is already declared"
+
+fn f(a: int, a: int) {}

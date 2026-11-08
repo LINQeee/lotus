@@ -1,0 +1,11 @@
+// no-log: ["###### GENERATED IR:", "###### RUNNING main():"]
+// error: "can reach its end without returning int"
+
+fn f(): int {
+    while true {
+        while true {
+            break @2
+        }
+        return 1
+    }
+}

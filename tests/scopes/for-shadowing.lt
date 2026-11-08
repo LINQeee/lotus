@@ -1,0 +1,5 @@
+// expect: "10\n11\n12\n10\n"
+
+int i = 10
+for i in i..12 print(i)
+print(i)

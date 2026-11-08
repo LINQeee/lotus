@@ -1,0 +1,4 @@
+// expect: "a\nb\t\\\"\nit's\n"
+
+print("a\nb\t\\\"")
+print('it\'s')

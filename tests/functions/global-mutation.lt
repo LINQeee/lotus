@@ -1,0 +1,10 @@
+// expect: "5\n"
+
+int x = 1
+
+fn change() {
+    x = 5
+}
+
+change()
+print(x)

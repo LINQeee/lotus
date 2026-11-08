@@ -1,0 +1,3 @@
+// expect: "3.750000\n"
+
+print(sumFloat(1.5, 2.25))

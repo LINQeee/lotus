@@ -1,0 +1,4 @@
+// expect: "1\n"
+
+while false print(0)
+print(1)

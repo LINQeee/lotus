@@ -1,0 +1,5 @@
+// error: "variable 'i' is already declared"
+
+for i in 0..2 {
+    int i = 0
+}

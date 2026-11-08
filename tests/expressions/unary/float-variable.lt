@@ -1,0 +1,4 @@
+// expect: "-2.000000\n"
+
+float x = 2f
+print(-x)

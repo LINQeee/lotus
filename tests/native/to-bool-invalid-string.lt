@@ -1,0 +1,4 @@
+// expect: "false\n"
+// log: ["Illegal value to convert string to bool: other"]
+
+print(toBool("other"))

@@ -1,0 +1,5 @@
+// error: "level must be greater than zero"
+
+while true {
+    break @0
+}

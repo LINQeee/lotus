@@ -1,0 +1,14 @@
+// expect: "12\n"
+
+int n = 0
+
+fn tick(): int {
+    n += 1
+    return n
+}
+
+fn pair(a: int, b: int): int {
+    return a * 10 + b
+}
+
+print(pair(tick(), tick()))

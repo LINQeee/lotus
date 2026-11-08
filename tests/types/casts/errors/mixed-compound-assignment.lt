@@ -1,0 +1,4 @@
+// error: "cannot be applied"
+
+long value = 2l
+value += 2

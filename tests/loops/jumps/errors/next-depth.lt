@@ -1,0 +1,5 @@
+// error: "exceeds loop depth"
+
+while true {
+    next @2
+}

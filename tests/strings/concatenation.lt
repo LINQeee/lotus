@@ -1,0 +1,5 @@
+// expect: "abc\nab\n"
+
+string a = "a" + "b"
+print(a + "c")
+print("" + a)

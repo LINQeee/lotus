@@ -1,0 +1,52 @@
+// expect: "2.000000\n3.000000\n-7\n-9\n-11\n4.000000\n-13\n5.000000\n6.000000\n5.000000\ntrue\nunchanged\n4\n2.200000\n3.000000\n4.000000\n5.000000\n6.000000\n7.000000\n5\n8.000000\ntrue\n8\n"
+// ir: ["sext i32", "fpext float"]
+
+fn widenInt(number: int): long {
+    return (long)number
+}
+
+fn widenFloat(number: float): double {
+    return (double)number
+}
+
+fn takeLong(number: long): long {
+    return number
+}
+
+fn takeDouble(number: double): double {
+    return number
+}
+
+fn localConversion(number: float): double {
+    double local = (double)number
+    local = (double)number
+    return local
+}
+
+double value = (double)2f
+print(value)
+value = (double)3f
+print(value)
+long wide = (long)-7
+print(wide)
+wide = (long)-9
+print(wide)
+print(widenInt(-11))
+print(widenFloat(4f))
+print(takeLong((long)-13))
+print(takeDouble((double)5f))
+print(localConversion(6f))
+print(sumFloat((double)2f, (double)3f))
+print(true)
+print("unchanged")
+print((long)(2 + 2))
+print((double)2.2f)
+print((float)3)
+print((double)4)
+print((float)5l)
+print((double)6l)
+print((double)(long)7)
+print((long)2 + (long)3)
+print(2.0 ** (double)3)
+print((double)2f == 2.0)
+print((int)8)

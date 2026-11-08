@@ -1,0 +1,11 @@
+// expect: "3\n2\n1\n2\n"
+
+int count = 0
+
+fn bound(x: int): int {
+    count += 1
+    return x
+}
+
+for i in bound(3)..bound(1) print(i)
+print(count)
