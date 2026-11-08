@@ -32,9 +32,21 @@ esac
 if [[ -f "$tempDir/entries" ]]; then
     # Gitlinks reference commits in another repository, not files in this snapshot.
     while IFS= read -r -d '' entry; do
-        [[ "$entry" != 160000\ * ]] || continue
+        if [[ "$entry" == 160000\ * ]]; then
+            if [[ "${entry#*$'\t'}" == lotus-core ]]; then
+                read -r fileMode field object <<< "${entry%%$'\t'*}"
+                [[ "$mode" != --staged ]] || object=$field
+                mkdir -p "$tree/lotus-core"
+                git -C lotus-core archive "$object" | tar -x -C "$tree/lotus-core"
+            fi
+            continue
+        fi
         printf '%s\0' "${entry#*$'\t'}"
     done < "$tempDir/entries" > "$tempDir/paths"
+fi
+if [[ "$mode" != --staged && "$mode" != --ref && -e lotus-core/.git ]]; then
+    git -C lotus-core ls-files --cached --others --exclude-standard -z |
+        while IFS= read -r -d '' file; do printf 'lotus-core/%s\0' "$file"; done >> "$tempDir/paths"
 fi
 while IFS= read -r -d '' file; do
     case "$file" in

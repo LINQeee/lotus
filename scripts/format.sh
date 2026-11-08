@@ -23,7 +23,22 @@ if [[ "$mode" == --ref ]]; then
     ref=$(git rev-parse --verify "$2^{commit}")
 fi
 
+coreRef=
+case "$mode" in
+    --staged) entry=$(git ls-files --stage -- lotus-core) ;;
+    --ref) entry=$(git ls-tree "$ref" -- lotus-core) ;;
+    *) entry= ;;
+esac
+if [[ "$entry" == 160000\ * ]]; then
+    read -r fileMode field coreRef <<< "${entry%%$'\t'*}"
+    [[ "$mode" != --staged ]] || coreRef=$field
+fi
+
 readFile() {
+    if [[ -n "$coreRef" && "$1" == lotus-core/* ]]; then
+        git -C lotus-core show "$coreRef:${1#lotus-core/}"
+        return
+    fi
     case "$mode" in
         --staged) git show ":$1" ;;
         --ref) git show "$ref:$1" ;;
@@ -77,6 +92,13 @@ case "$mode" in
 esac
 
 formatRoot=$root
+if [[ -n "$coreRef" ]]; then
+    git -C lotus-core ls-tree -r --name-only -z "$coreRef" |
+        while IFS= read -r -d '' file; do printf 'lotus-core/%s\0' "$file"; done >> "$tempDir/paths"
+elif [[ "$mode" != --staged && "$mode" != --ref && -e lotus-core/.git ]]; then
+    git -C lotus-core ls-files --cached --others --exclude-standard -z |
+        while IFS= read -r -d '' file; do printf 'lotus-core/%s\0' "$file"; done >> "$tempDir/paths"
+fi
 if [[ "$mode" == --staged || "$mode" == --ref ]]; then
     formatRoot="$tempDir/tree"
     mkdir -p "$formatRoot"
