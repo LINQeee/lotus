@@ -28,6 +28,7 @@ static const char *operatorName(const TokenType op) {
     switch (op) {
         case TOKEN_PLUS: return "+";
         case TOKEN_MINUS: return "-";
+        case TOKEN_EXCLAMATION: return "!";
         case TOKEN_STAR: return "*";
         case TOKEN_SLASH: return "/";
         case TOKEN_PERCENT: return "%";

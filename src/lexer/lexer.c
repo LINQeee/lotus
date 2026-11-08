@@ -197,7 +197,7 @@ static Token readSymbol() {
     if (match("**")) return makeToken(TOKEN_DOUBLE_STAR, 2);
 
     switch (current()) {
-        case '!': return makeToken(TOKEN_EXCLUDE, 1);
+        case '!': return makeToken(TOKEN_EXCLAMATION, 1);
         case '-': return makeToken(TOKEN_MINUS, 1);
         case '+': return makeToken(TOKEN_PLUS, 1);
         case '*': return makeToken(TOKEN_STAR, 1);

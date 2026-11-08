@@ -1,0 +1,5 @@
+// error: "unary '!' requires bool, got void"
+
+fn empty() {}
+
+print(!empty())

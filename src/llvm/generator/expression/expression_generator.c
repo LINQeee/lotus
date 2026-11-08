@@ -224,6 +224,7 @@ LLVMValueRef generateExpression(const Node *node) {
         case NODE_UNARY: {
             const UnaryNode *unary = (const UnaryNode *)node;
             LLVMValueRef value = generateExpression(unary->operand);
+            if (unary->op == TOKEN_EXCLAMATION) return LLVMBuildNot(cg->builder, value, "not_tmp");
             if (node->dataType == LOTUS_F32 || node->dataType == LOTUS_F64)
                 return LLVMBuildFNeg(cg->builder, value, "neg_tmp");
             return LLVMBuildNeg(cg->builder, value, "neg_tmp");

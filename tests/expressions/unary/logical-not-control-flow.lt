@@ -1,0 +1,17 @@
+// expect: "3\n2\n2\n"
+
+for i in 1!..!4 {
+    if !(i == 2) print(i)
+}
+
+for i in 4!..!1 {
+    if !(i != 2) print(i)
+}
+
+int count = 0
+bool done = false
+while !done {
+    count += 1
+    done = count == 2
+}
+print(count)

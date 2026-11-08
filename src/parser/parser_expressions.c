@@ -56,6 +56,9 @@ static Node *parseExpressionPrec(const int minPrecedence) {
 static Node *parsePrimary() {
     const Token primaryT = current();
 
+    if (matchCurrent(TOKEN_EXCLAMATION))
+        return (Node *)newUnaryNode(TOKEN_EXCLAMATION, parsePrimary(), primaryT.location);
+
     if (isCurrent(TOKEN_MINUS)) {
         if (peekNext().type == TOKEN_NUMBER) {
             advance();

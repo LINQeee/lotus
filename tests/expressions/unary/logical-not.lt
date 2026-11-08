@@ -1,0 +1,16 @@
+// expect: "falsetrue\nfalse\ntrue\ntrue\nfalse\ntrue\ntrue\n"
+// ir: ["xor i1"]
+
+bool enabled = true
+print(!true, !false)
+print(!enabled)
+print(!!enabled)
+print(!(2 == 3))
+print(!false & false)
+print(!true | true)
+
+fn invert(value: bool): bool {
+    return !value
+}
+
+print(invert(false))

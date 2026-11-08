@@ -1,0 +1,13 @@
+// expect: "false\n1\nfalse\n2\n"
+
+int calls = 0
+
+fn tick(): bool {
+    calls += 1
+    return calls == 1
+}
+
+print(!tick())
+print(calls)
+print(!!tick())
+print(calls)

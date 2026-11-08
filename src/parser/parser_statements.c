@@ -53,9 +53,9 @@ static Node *parseFor() {
     node->variable = newIdentifierNode(name.value, LOTUS_UNKNOWN, name.location);
     expect(TOKEN_IN);
     node->start = parseExpression();
-    node->excludeStart = matchCurrent(TOKEN_EXCLUDE);
+    node->excludeStart = matchCurrent(TOKEN_EXCLAMATION);
     expect(TOKEN_RANGE);
-    node->excludeEnd = matchCurrent(TOKEN_EXCLUDE);
+    node->excludeEnd = matchCurrent(TOKEN_EXCLAMATION);
     node->end = parseExpression();
     if (matchCurrent(TOKEN_STEP)) node->step = parseExpression();
     if (parenthesized) expect(TOKEN_RPAREN);

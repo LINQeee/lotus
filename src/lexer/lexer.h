@@ -29,7 +29,7 @@ typedef enum {
     TOKEN_FOR,
     TOKEN_IN,
     TOKEN_RANGE,
-    TOKEN_EXCLUDE,
+    TOKEN_EXCLAMATION,
     TOKEN_STEP,
     TOKEN_BREAK,
     TOKEN_FUNCTION,

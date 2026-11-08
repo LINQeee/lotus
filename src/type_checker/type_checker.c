@@ -255,7 +255,11 @@ static LotusType checkExpression(TypeChecker *checker, Node *node) {
         case NODE_UNARY: {
             UnaryNode *unary = (UnaryNode *)node;
             LotusType type = checkExpression(checker, unary->operand);
-            if (!isNumericType(type))
+            if (unary->op == TOKEN_EXCLAMATION) {
+                if (type != LOTUS_BOOL)
+                    diagnosticError(checker->scriptContent, node->location, "unary '!' requires bool, got %s",
+                                    lotusTypeName(type));
+            } else if (!isNumericType(type))
                 diagnosticError(checker->scriptContent, node->location, "unary '-' requires a number, got %s",
                                 lotusTypeName(type));
             node->dataType = type;

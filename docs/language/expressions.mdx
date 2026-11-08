@@ -16,6 +16,7 @@ keywords: ["Lotus", "expressions"]
 | `&`, `\|` | Two booleans | `bool` |
 | `+` | Two strings | Concatenated string |
 | Unary `-` | Numeric expression | Same numeric type |
+| Unary `!` | Boolean expression | Inverted `bool` |
 
 ```lotus arithmetic.lt
 print(2 + 3 * 4)
@@ -41,7 +42,7 @@ From lowest to highest:
 4. `+`, `-`
 5. `*`, `/`, `%`
 6. `**`
-7. Casts, unary minus and primary expressions
+7. Casts, unary `-` / `!` and primary expressions
 
 Binary operators at the same precedence associate left to right, **including power**. Use parentheses to express another grouping.
 
@@ -58,7 +59,22 @@ print(-(2.0 ** 2.0))
 ```
 
 <Warning>
-Boolean `&` and `|` evaluate both operands. They do not short-circuit. `!` currently marks an excluded range boundary, not logical negation.
+Boolean `&` and `|` evaluate both operands. They do not short-circuit.
 </Warning>
 
-Unary minus supports variables, grouped expressions and calls; its operand is evaluated once.
+## Logical negation
+
+```lotus logical-not.lt
+bool enabled = true
+print(!enabled)
+print(!!enabled)
+print(!(2 == 3))
+```
+
+```text Output
+false
+true
+true
+```
+
+`!` requires `bool`; numbers and strings are not converted implicitly. Unary `!` and `-` evaluate their operand once and bind tighter than binary operators. Beside `..` in a range, `!` still [excludes a boundary](/language/control-flow#include-or-exclude-boundaries).

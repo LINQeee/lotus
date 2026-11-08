@@ -1,0 +1,3 @@
+// error: "unary '!' requires bool, got int"
+
+print(!1)
