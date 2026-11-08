@@ -216,6 +216,18 @@ static void printNode(const Node *node, const char *prefix, bool isLast) {
             break;
         }
 
+        case NODE_FOR: {
+            const ForNode *cycle = (const ForNode *)node;
+            printPrefix(prefix, isLast);
+            printf("For %s (%s..%s)\n", cycle->variable->name, cycle->excludeStart ? "!" : "",
+                   cycle->excludeEnd ? "!" : "");
+            printNode(cycle->start, childPrefix, false);
+            printNode(cycle->end, childPrefix, false);
+            if (cycle->step) printNode(cycle->step, childPrefix, false);
+            printNode(cycle->body, childPrefix, true);
+            break;
+        }
+
         case NODE_WHILE: {
             const WhileNode *whileNode = (const WhileNode *)node;
 

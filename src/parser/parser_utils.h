@@ -42,6 +42,8 @@ NumberNode *newNumberNode(const char *value, SourceLocation location);
 
 BinaryNode *newBinaryNode(TokenType operator, Node * left, Node *right, SourceLocation location);
 
+ForNode *newForNode(SourceLocation location);
+
 WhileNode *newWhileNode(Node *condition, Node *body, SourceLocation location);
 
 BooleanNode *newBooleanNode(bool value, SourceLocation location);

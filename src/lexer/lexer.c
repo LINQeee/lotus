@@ -19,12 +19,25 @@ typedef struct {
 } Keyword;
 
 static const Keyword KEYWORDS[] = {
-    {"if", TOKEN_IF},          {"else", TOKEN_ELSE},          {"while", TOKEN_WHILE},
-    {"fn", TOKEN_FUNCTION},    {"return", TOKEN_RETURN},      {"continue", TOKEN_CONTINUE},
-    {"next", TOKEN_CONTINUE},  {"break", TOKEN_BREAK},        {"int", TOKEN_TYPE_INT},
-    {"long", TOKEN_TYPE_LONG}, {"float", TOKEN_TYPE_FLOAT},   {"double", TOKEN_TYPE_DOUBLE},
-    {"bool", TOKEN_TYPE_BOOL}, {"string", TOKEN_TYPE_STRING}, {"true", TOKEN_TRUE},
+    {"if", TOKEN_IF},
+    {"else", TOKEN_ELSE},
+    {"while", TOKEN_WHILE},
+    {"fn", TOKEN_FUNCTION},
+    {"return", TOKEN_RETURN},
+    {"continue", TOKEN_CONTINUE},
+    {"next", TOKEN_CONTINUE},
+    {"break", TOKEN_BREAK},
+    {"int", TOKEN_TYPE_INT},
+    {"long", TOKEN_TYPE_LONG},
+    {"float", TOKEN_TYPE_FLOAT},
+    {"double", TOKEN_TYPE_DOUBLE},
+    {"bool", TOKEN_TYPE_BOOL},
+    {"string", TOKEN_TYPE_STRING},
+    {"true", TOKEN_TRUE},
     {"false", TOKEN_FALSE},
+    {"for", TOKEN_FOR},
+    {"in", TOKEN_IN},
+    {"step", TOKEN_STEP},
 };
 
 static char current() {
@@ -102,7 +115,7 @@ static Token readNumber() {
 
     while (isdigit((unsigned char)current())) advance();
 
-    if (current() == '.') {
+    if (current() == '.' && !match("..")) {
         advance();
 
         while (isdigit((unsigned char)current())) advance();
@@ -172,6 +185,7 @@ static Token readString(char endSymbol) {
     return (Token){TOKEN_STRING, value};
 }
 static Token readSymbol() {
+    if (match("..")) return makeToken(TOKEN_RANGE, 2);
     if (match("==")) return makeToken(TOKEN_EQ, 2);
     if (match("!=")) return makeToken(TOKEN_NEQ, 2);
     if (match("<=")) return makeToken(TOKEN_LE, 2);
@@ -184,6 +198,7 @@ static Token readSymbol() {
     if (match("**")) return makeToken(TOKEN_DOUBLE_STAR, 2);
 
     switch (current()) {
+        case '!': return makeToken(TOKEN_EXCLUDE, 1);
         case '-': return makeToken(TOKEN_MINUS, 1);
         case '+': return makeToken(TOKEN_PLUS, 1);
         case '*': return makeToken(TOKEN_STAR, 1);

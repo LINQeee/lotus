@@ -17,6 +17,7 @@ typedef enum {
     NODE_PROGRAM,
     NODE_IF,
     NODE_WHILE,
+    NODE_FOR,
     NODE_BREAK,
     NODE_CONTINUE,
     NODE_RETURN,
@@ -106,6 +107,17 @@ typedef struct {
     Node *condition;
     Node *body;
 } WhileNode;
+
+typedef struct {
+    Node base;
+    IdentifierNode *variable;
+    Node *start;
+    Node *end;
+    Node *step;
+    bool excludeStart;
+    bool excludeEnd;
+    Node *body;
+} ForNode;
 
 typedef struct {
     Node base;

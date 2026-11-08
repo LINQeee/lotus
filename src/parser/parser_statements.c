@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "../utils/cutils.h"
 #include "./parser.h"
@@ -45,6 +46,23 @@ static Node *parseContinue() {
     }
     return (Node *)node;
 }
+static Node *parseFor() {
+    ForNode *node = newForNode(expect(TOKEN_FOR).location);
+    bool parenthesized = matchCurrent(TOKEN_LPAREN);
+    Token name = expect(TOKEN_IDENTIFIER);
+    node->variable = newIdentifierNode(name.value, LOTUS_UNKNOWN, name.location);
+    expect(TOKEN_IN);
+    node->start = parseExpression();
+    node->excludeStart = matchCurrent(TOKEN_EXCLUDE);
+    expect(TOKEN_RANGE);
+    node->excludeEnd = matchCurrent(TOKEN_EXCLUDE);
+    node->end = parseExpression();
+    if (matchCurrent(TOKEN_STEP)) node->step = parseExpression();
+    if (parenthesized) expect(TOKEN_RPAREN);
+    node->body = parseBlock();
+    return (Node *)node;
+}
+
 static Node *parseWhile() {
     SourceLocation whileLoc = expect(TOKEN_WHILE).location;
     return (Node *)newWhileNode(parseExpression(), parseBlock(), whileLoc);
@@ -144,6 +162,7 @@ Node *parseStatement() {
         case TOKEN_IF: return parseIf();
 
         case TOKEN_WHILE: return parseWhile();
+        case TOKEN_FOR: return parseFor();
 
         case TOKEN_TYPE_INT:
         case TOKEN_TYPE_LONG:

@@ -209,6 +209,12 @@ BinaryNode *newBinaryNode(const TokenType operator, Node *left, Node *right, Sou
     return node;
 }
 
+ForNode *newForNode(SourceLocation location) {
+    ForNode *node = mallocSafe(sizeof(ForNode));
+    *node = (ForNode){.base = {NODE_FOR, LOTUS_VOID, location}};
+    return node;
+}
+
 WhileNode *newWhileNode(Node *condition, Node *body, SourceLocation location) {
     WhileNode *node = malloc(sizeof(WhileNode));
     node->base.type = NODE_WHILE;

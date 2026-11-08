@@ -352,6 +352,30 @@ static void checkIf(TypeChecker *checker, const IfNode *node) {
     if (node->elseBranch) checkScopedStatement(checker, node->elseBranch);
 }
 
+static void checkFor(TypeChecker *checker, ForNode *node) {
+    LotusType type = checkExpression(checker, node->start);
+    LotusType endType = checkExpression(checker, node->end);
+    if (!isIntegerType(type) || type != endType)
+        diagnosticError(checker->scriptContent, node->base.location,
+                        "for bounds must have the same integer type (int or long)");
+    if (node->step) {
+        LotusType stepType = checkExpression(checker, node->step);
+        if (node->step->type != NODE_NUMBER || stepType != type)
+            diagnosticError(checker->scriptContent, node->step->location,
+                            "for step must be a nonzero integer literal of the range type");
+        const NumberNode *step = (const NumberNode *)node->step;
+        if ((type == LOTUS_I32 ? step->i32 : step->i64) == 0)
+            diagnosticError(checker->scriptContent, node->step->location, "for step must not be zero");
+    }
+    enterScope(checker);
+    node->variable->base.dataType = type;
+    declareVariable(checker, node->variable->name, type, node->variable->base.location);
+    checker->loopDepth++;
+    checkStatement(checker, node->body);
+    checker->loopDepth--;
+    leaveScope(checker);
+}
+
 static void checkWhile(TypeChecker *checker, const WhileNode *node) {
     checkCondition(checker, node->condition, "while");
     checker->loopDepth++;
@@ -424,6 +448,14 @@ static bool canFallThrough(const Node *node, ReturnLoop *loop) {
             return thenFallsThrough || elseFallsThrough;
         }
 
+        case NODE_FOR: {
+            const ForNode *cycle = (const ForNode *)node;
+            ReturnLoop inner = {loop, false};
+            canFallThrough(cycle->body, &inner);
+            // A range can be empty; a return inside it does not prove a function returns.
+            return true;
+        }
+
         case NODE_WHILE: {
             const WhileNode *cycle = (const WhileNode *)node;
             const BooleanNode *condition =
@@ -483,6 +515,8 @@ static void checkStatement(TypeChecker *checker, Node *node) {
         case NODE_RETURN: checkReturn(checker, (ReturnNode *)node); break;
 
         case NODE_IF: checkIf(checker, (IfNode *)node); break;
+
+        case NODE_FOR: checkFor(checker, (ForNode *)node); break;
 
         case NODE_WHILE: checkWhile(checker, (WhileNode *)node); break;
 
