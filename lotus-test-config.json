@@ -1,7 +1,7 @@
 {
   "testsDir": "tests",
   "resultsDir": "tests/.results",
-  "compiler": "cmake-build-debug/compiler",
+  "compiler": "cmake-build-debug/lotus",
   "cmake": "/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake",
   "runtimeBuild": "lotus-core/cmake-build-debug",
   "runtimeLibrary": "libs/liblotus_core.dylib",
