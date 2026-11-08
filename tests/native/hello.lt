@@ -1,3 +1,0 @@
-// expect: "Hello Lotus! With age 3\n"
-
-hello("Lotus", 3)

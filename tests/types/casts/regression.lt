@@ -1,3 +1,4 @@
+// runtime: "memory"
 // expect: "2.000000\n3.000000\n-7\n-9\n-11\n4.000000\n-13\n5.000000\n6.000000\n5.000000\ntrue\nunchanged\n4\n2.200000\n3.000000\n4.000000\n5.000000\n6.000000\n7.000000\n5\n8.000000\ntrue\n8\n"
 // ir: ["sext i32", "fpext float"]
 
@@ -36,7 +37,7 @@ print(widenFloat(4f))
 print(takeLong((long)-13))
 print(takeDouble((double)5f))
 print(localConversion(6f))
-print(sumFloat((double)2f, (double)3f))
+print(nativeAdd((double)2f, (double)3f))
 print(true)
 print("unchanged")
 print((long)(2 + 2))

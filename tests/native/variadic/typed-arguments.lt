@@ -1,0 +1,4 @@
+// runtime: "memory"
+// expect: "2\n"
+
+print(nativeSum(1, 2, 3, -4))

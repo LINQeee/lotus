@@ -1,3 +1,4 @@
+// runtime: "memory"
 // error: "expected int, got bool"
 
-addMany(true)
+nativeSum(true)

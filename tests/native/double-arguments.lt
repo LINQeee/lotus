@@ -1,0 +1,4 @@
+// runtime: "memory"
+// expect: "3.750000\n"
+
+print(nativeAdd(1.5, 2.25))

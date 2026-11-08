@@ -1,3 +1,4 @@
+// runtime: "memory"
 // error: "expects 2 arguments"
 
-sumFloat(1.0)
+nativeAdd(1.0)

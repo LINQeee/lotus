@@ -1,3 +1,0 @@
-// expect: "2\n"
-
-print(addMany(1, 2, 3, -4))
