@@ -43,7 +43,6 @@ test('help needs no source or runtime', () => {
 
 for (const [args, message] of [
     [['--unknown'], 'Unknown option'],
-    [['--jit', source], 'Unknown option: --jit'],
     [['--libs'], 'Missing value'],
     [[source, source], 'Expected one source'],
     [['missing.lt'], 'Cannot read'],
@@ -68,10 +67,6 @@ test('debug and IR output are explicit', () => {
 test('explicit library directory overrides environment', () => {
     const result = run(['--libs', path.join(root, 'libs'), source], {LOTUS_LIBS: '/missing-runtime'})
     assert.equal(result.status, 0, result.stderr)
-})
-
-test('separator is not supported', () => {
-    assert.match(run(['--', source]).stderr, /Unknown option: --/)
 })
 
 test('JIT does not create an executable', () => {

@@ -6,3 +6,4 @@ root=$(git rev-parse --show-toplevel)
 cd "$root"
 echo "Running all Lotus tests before commit..."
 node tools/lotus-test/bin/lotus-test.mjs
+node --test scripts/test-cli.mjs

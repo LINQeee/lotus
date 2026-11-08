@@ -39,4 +39,5 @@ done < "$tempDir/unique"
 if [[ -s "$tempDir/tips" ]]; then
     echo "Running all Lotus tests before push..."
     node tools/lotus-test/bin/lotus-test.mjs
+    node --test scripts/test-cli.mjs
 fi
