@@ -32,7 +32,7 @@ bool areComparable(LotusType left, LotusType right) {
     return false;
 }
 
-bool isValidBinaryOperation(TokenType operator, LotusType left, LotusType right) {
+bool isValidBinaryOperation(TokenKind operator, LotusType left, LotusType right) {
     if (left != right) return false;
 
     switch (operator) {
@@ -62,7 +62,7 @@ bool isValidBinaryOperation(TokenType operator, LotusType left, LotusType right)
     }
 }
 
-LotusType binaryResultType(TokenType operator, LotusType left, LotusType right) {
+LotusType binaryResultType(TokenKind operator, LotusType left, LotusType right) {
     switch (operator) {
         case TOKEN_PLUS:
             if (left == LOTUS_STRING && right == LOTUS_STRING) return LOTUS_STRING;

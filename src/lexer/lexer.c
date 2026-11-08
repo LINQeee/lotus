@@ -14,7 +14,7 @@ static const char *currentFilePath;
 
 typedef struct {
     const char *word;
-    TokenType type;
+    TokenKind type;
 } Keyword;
 
 static const Keyword KEYWORDS[] = {
@@ -82,7 +82,7 @@ static char *copySource(size_t start, size_t length) {
 
     return value;
 }
-static Token makeToken(TokenType type, int length) {
+static Token makeToken(TokenKind type, int length) {
     Token token = {type, copySource(position, length)};
 
     for (size_t i = 0; i < length; i++) advance();
@@ -90,7 +90,7 @@ static Token makeToken(TokenType type, int length) {
     return token;
 }
 
-static TokenType getKeywordType(const char *word) {
+static TokenKind getKeywordType(const char *word) {
     for (size_t i = 0; i < sizeof(KEYWORDS) / sizeof(KEYWORDS[0]); i++) {
         if (strcmp(word, KEYWORDS[i].word) == 0) return KEYWORDS[i].type;
     }

@@ -28,7 +28,7 @@ const char *lotusTypeName(LotusType type) {
     return "<unknown>";
 }
 
-const char *tokenTypeName(TokenType type) {
+const char *tokenTypeName(TokenKind type) {
     switch (type) {
         case TOKEN_PLUS: return "+";
         case TOKEN_MINUS: return "-";
@@ -62,8 +62,8 @@ const char *tokenTypeName(TokenType type) {
 }
 
 NumericKind getNumericKind(LotusType type) {
-    if (type == LOTUS_I32 || type == LOTUS_I64) return INTEGER;
-    if (type == LOTUS_F32 || type == LOTUS_F64) return FLOAT;
+    if (type == LOTUS_I32 || type == LOTUS_I64) return NUMERIC_INTEGER;
+    if (type == LOTUS_F32 || type == LOTUS_F64) return NUMERIC_FLOAT;
     exitWithError("Unknown numeric kind of type: %d", type);
 }
 

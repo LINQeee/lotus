@@ -6,15 +6,15 @@
 #include "../llvm/lotus_types.h"
 #include "parser.h"
 
-bool isComparison(TokenType type);
+bool isComparison(TokenKind type);
 
-bool isAssignmentOp(TokenType type);
+bool isAssignmentOp(TokenKind type);
 
-bool isOperator(TokenType type);
+bool isOperator(TokenKind type);
 
-bool isDataType(TokenType type);
+bool isDataType(TokenKind type);
 
-LotusType tokenTypeToLotusType(TokenType type);
+LotusType tokenTypeToLotusType(TokenKind type);
 
 FunctionNode *newFunctionNode(const char *name, LotusType returnType, SourceLocation location);
 
@@ -40,7 +40,7 @@ StringNode *newStringNode(const char *value, SourceLocation location);
 
 NumberNode *newNumberNode(const char *value, SourceLocation location);
 
-BinaryNode *newBinaryNode(TokenType operator, Node * left, Node *right, SourceLocation location);
+BinaryNode *newBinaryNode(TokenKind operator, Node * left, Node *right, SourceLocation location);
 
 ForNode *newForNode(SourceLocation location);
 
@@ -50,7 +50,7 @@ BooleanNode *newBooleanNode(bool value, SourceLocation location);
 
 CastNode *newCastNode(LotusType type, Node *operand, SourceLocation location);
 
-UnaryNode *newUnaryNode(TokenType op, Node *operand, SourceLocation location);
+UnaryNode *newUnaryNode(TokenKind op, Node *operand, SourceLocation location);
 
 void programAddStatement(ProgramNode *program, Node *statement);
 #endif

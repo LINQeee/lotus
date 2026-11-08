@@ -20,16 +20,16 @@ Token previous() {
 Token peekNext() {
     return tokens[pos + 1];
 }
-bool isCurrent(TokenType type) {
+bool isCurrent(TokenKind type) {
     return current().type == type;
 }
-bool matchCurrent(TokenType type) {
+bool matchCurrent(TokenKind type) {
     if (!isCurrent(type)) return false;
 
     advance();
     return true;
 }
-Token expect(TokenType type) {
+Token expect(TokenKind type) {
     if (!isCurrent(type)) exitWithError("Expected %d but got %d (%s)", type, current().type, current().value);
     return advance();
 }

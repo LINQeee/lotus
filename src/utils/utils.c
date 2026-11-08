@@ -24,7 +24,7 @@ static const char *typeName(const LotusType type) {
     }
 }
 
-static const char *operatorName(const TokenType op) {
+static const char *operatorName(const TokenKind op) {
     switch (op) {
         case TOKEN_PLUS: return "+";
         case TOKEN_MINUS: return "-";

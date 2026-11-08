@@ -11,7 +11,7 @@
 static Node *parsePrimary();
 static Node *parseUnary();
 
-static int getPrecedence(TokenType type) {
+static int getPrecedence(TokenKind type) {
     switch (type) {
         case TOKEN_OR: return 1;
 
@@ -40,7 +40,7 @@ static Node *parseExpressionPrec(const int minPrecedence) {
     Node *left = parseUnary();
 
     while (true) {
-        TokenType op = current().type;
+        TokenKind op = current().type;
         int precedence = getPrecedence(op);
 
         if (precedence < minPrecedence) break;

@@ -96,7 +96,7 @@ static Node *parseAssignment() {
 
     if (matchCurrent(TOKEN_EQUAL)) value = parseExpression();
     else {
-        TokenType op;
+        TokenKind op;
         switch (current().type) {
             case TOKEN_EQ_PLUS: op = TOKEN_PLUS; break;
             case TOKEN_EQ_MINUS: op = TOKEN_MINUS; break;

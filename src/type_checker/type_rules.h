@@ -18,9 +18,9 @@ LotusType commonNumericType(LotusType left, LotusType right);
 
 bool areComparable(LotusType left, LotusType right);
 
-bool isValidBinaryOperation(TokenType operator, LotusType left, LotusType right);
+bool isValidBinaryOperation(TokenKind operator, LotusType left, LotusType right);
 
-LotusType binaryResultType(TokenType operator, LotusType left, LotusType right);
+LotusType binaryResultType(TokenKind operator, LotusType left, LotusType right);
 
 bool isValidCast(LotusType target, LotusType source);
 #endif

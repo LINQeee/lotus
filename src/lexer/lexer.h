@@ -58,7 +58,7 @@ typedef enum {
     TOKEN_LBRACKET,
     TOKEN_RBRACKET,
     TOKEN_DOUBLE_STAR
-} TokenType;
+} TokenKind;
 
 typedef struct {
     const char *file;
@@ -68,7 +68,7 @@ typedef struct {
 } SourceLocation;
 
 typedef struct {
-    TokenType type;
+    TokenKind type;
     char *value;
 
     SourceLocation location;

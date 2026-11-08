@@ -8,17 +8,17 @@
 #include "parser.h"
 #include "../llvm/lotus_types.h"
 
-bool isComparison(TokenType type) {
+bool isComparison(TokenKind type) {
     return type == TOKEN_GT || type == TOKEN_LT || type == TOKEN_GE || type == TOKEN_LE || type == TOKEN_EQ ||
            type == TOKEN_NEQ;
 }
 
-bool isAssignmentOp(TokenType type) {
+bool isAssignmentOp(TokenKind type) {
     return type == TOKEN_EQUAL || type == TOKEN_EQ_PLUS || type == TOKEN_EQ_MINUS || type == TOKEN_EQ_PERCENT ||
            type == TOKEN_EQ_STAR || type == TOKEN_EQ_SLASH;
 }
 
-LotusType tokenTypeToLotusType(TokenType type) {
+LotusType tokenTypeToLotusType(TokenKind type) {
     switch (type) {
         case TOKEN_TYPE_INT: return LOTUS_I32;
         case TOKEN_TYPE_FLOAT: return LOTUS_F32;
@@ -30,12 +30,12 @@ LotusType tokenTypeToLotusType(TokenType type) {
     }
 }
 
-bool isDataType(TokenType type) {
+bool isDataType(TokenKind type) {
     return type == TOKEN_TYPE_INT || type == TOKEN_TYPE_STRING || type == TOKEN_TYPE_BOOL || type == TOKEN_TYPE_FLOAT ||
            type == TOKEN_TYPE_DOUBLE || type == TOKEN_TYPE_LONG;
 }
 
-bool isOperator(const TokenType type) {
+bool isOperator(const TokenKind type) {
     return type == TOKEN_PLUS || type == TOKEN_MINUS || type == TOKEN_PERCENT || type == TOKEN_STAR ||
            type == TOKEN_SLASH || type == TOKEN_DOUBLE_STAR || isComparison(type) || type == TOKEN_AND ||
            type == TOKEN_OR;
@@ -199,7 +199,7 @@ NumberNode *newNumberNode(const char *value, SourceLocation location) {
     return node;
 }
 
-BinaryNode *newBinaryNode(const TokenType operator, Node *left, Node *right, SourceLocation location) {
+BinaryNode *newBinaryNode(const TokenKind operator, Node *left, Node *right, SourceLocation location) {
     BinaryNode *node = malloc(sizeof(BinaryNode));
     node->base.type = NODE_BINARY;
     node->base.location = location;
@@ -231,7 +231,7 @@ CastNode *newCastNode(LotusType type, Node *operand, SourceLocation location) {
     return node;
 }
 
-UnaryNode *newUnaryNode(TokenType op, Node *operand, SourceLocation location) {
+UnaryNode *newUnaryNode(TokenKind op, Node *operand, SourceLocation location) {
     UnaryNode *node = mallocSafe(sizeof(UnaryNode));
     node->base = (Node){NODE_UNARY, LOTUS_UNKNOWN, location};
     node->op = op;

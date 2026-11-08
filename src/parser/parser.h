@@ -54,7 +54,7 @@ typedef struct {
 
 typedef struct {
     Node base;
-    TokenType op;
+    TokenKind op;
 
     Node *left;
     Node *right;
@@ -62,7 +62,7 @@ typedef struct {
 
 typedef struct {
     Node base;
-    TokenType op;
+    TokenKind op;
 
     Node *operand;
     bool postfix;
@@ -162,9 +162,9 @@ typedef struct {
 
 Token current();
 Token advance();
-Token expect(TokenType type);
-bool isCurrent(TokenType type);
-bool matchCurrent(TokenType type);
+Token expect(TokenKind type);
+bool isCurrent(TokenKind type);
+bool matchCurrent(TokenKind type);
 Token peekNext();
 Token previous();
 
