@@ -19,7 +19,7 @@ keywords: ["Lotus", "expressions"]
 | Unary `!` | Boolean expression | Inverted `bool` |
 | `++`, `--` | Numeric variable | Same numeric type |
 
-```lotus arithmetic.lt
+```rust arithmetic.lt
 print(2 + 3 * 4)
 print(7 / 3)
 print(-7 % 3)
@@ -48,7 +48,7 @@ From lowest to highest:
 
 Binary operators at the same precedence associate left to right, **including power**. Use parentheses to express another grouping.
 
-```lotus grouping.lt
+```rust grouping.lt
 print(2.0 ** 3.0 ** 2.0)
 print(-2.0 ** 2.0)
 print(-(2.0 ** 2.0))
@@ -66,7 +66,7 @@ Boolean `&` and `|` evaluate both operands. They do not short-circuit.
 
 ## Logical negation
 
-```lotus logical-not.lt
+```rust logical-not.lt
 bool enabled = true
 print(!enabled)
 print(!!enabled)
@@ -86,7 +86,7 @@ true
 
 `++` adds one; `--` subtracts one. Prefix returns the updated value; postfix returns the old value. Both update the variable immediately.
 
-```lotus update.lt
+```rust update.lt
 int x = 1
 print(++x) // 2, x = 2
 print(x++) // 2, x = 3

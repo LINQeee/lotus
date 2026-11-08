@@ -18,7 +18,7 @@ The runner builds the compiler/runtime, then runs `.lt` files through `lotus run
 
 Place it under `tests/<feature>/`, with a descriptive filename:
 
-```lotus ascending-iterating-for-loop.lt
+```rust ascending-iterating-for-loop.lt
 // expect: "1\n2\n3\n"
 
 for i in 1..3 print(i)
@@ -26,7 +26,7 @@ for i in 1..3 print(i)
 
 For rejected programs, use a diagnostic substring:
 
-```lotus implicit-cast.lt
+```rust implicit-cast.lt
 // error: "cannot assign float to double"
 
 double value = 2f

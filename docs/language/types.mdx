@@ -28,7 +28,7 @@ Numeric suffixes also accept uppercase/lowercase variants: `L/l`, `F/f`, `D/d`.
 
 Declarations, assignments, arguments and returns require matching types. Numeric operators also require matching operand types.
 
-```lotus casts.lt
+```rust casts.lt
 double value = (double)2.2f
 long total = (long)(2 + 2)
 print(value)
@@ -51,7 +51,7 @@ Integer-to-floating conversions may round large values. Narrowing, floating-to-i
 
 ## Cast the operation you intend
 
-```lotus division.lt
+```rust division.lt
 print((double)(5 / 2))
 print((double)5 / (double)2)
 ```
