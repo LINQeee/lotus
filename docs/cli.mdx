@@ -1,0 +1,55 @@
+---
+title: "Command line"
+description: "Run, build and check a Lotus source file."
+keywords: ["Lotus", "cli"]
+---
+
+```sh
+lotus run hello.lt
+lotus build hello.lt
+./hello.lt.out
+lotus check hello.lt
+```
+
+| Command | Result |
+| --- | --- |
+| `run FILE` or `FILE` | Execute through JIT; no binary is created |
+| `build FILE` | Create `<FILE>.out` beside the source; do not execute it |
+| `check FILE` | Parse and type-check; do not generate or execute code |
+
+Pass one source file. Relative paths use the working directory; quote paths containing spaces. Use `./-example.lt` for a name starting with a dash. Program arguments and stdin source input are not supported.
+
+Successful `build` and `check` are silent. Normal `run` prints program output. Failures return a nonzero exit code and diagnostics on stderr.
+
+## Options
+
+| Option | Purpose |
+| --- | --- |
+| `--libs DIR` | Select the native library directory |
+| `--debug` | Print typed AST and, for run/build, unoptimized IR; run also prints timing |
+| `--emit-ir FILE` | Save optimized IR with run/build; overwrite that output file |
+| `-h`, `--help` | Show usage |
+
+Debug output goes to stdout. `--emit-ir` is not available with `check`.
+
+## Native libraries
+
+```sh
+lotus run --libs ./libs hello.lt
+```
+
+`--libs` **replaces** the default directory. Include `lotus-core` there if the program uses its functions. This loads native dynamic libraries, not `.lt` modules; custom libraries need [Lotus registration](/development/native).
+
+Selection order:
+
+1. `--libs DIR`
+2. Environment variable `LOTUS_LIBS`
+3. `LOTUS_RUNTIME_DIR`, recorded at compiler build time
+
+The build default is the checkout's absolute `libs/` path. Override it during configuration with `-DLOTUS_RUNTIME_DIR=/path/to/libs`.
+
+## Executable builds
+
+`build` uses LLVM to emit an object and `cc` to link it. Set `CC` to another compiler executable if needed; supply a command or path without extra flags. `run` does not require the linker.
+
+A subsequent build replaces `<FILE>.out`. Native libraries remain dynamically linked, with their directories recorded in the binary. Copying the binary does not bundle those libraries or make it portable to another OS or architecture.

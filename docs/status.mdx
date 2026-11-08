@@ -1,24 +1,20 @@
 ---
 title: "Current support"
-description: "What works today and what is not implemented yet."
+description: "Implemented features and current limits."
+keywords: ["Lotus", "status"]
 ---
 
-Lotus is pre-alpha. Use the supported constructs below; syntax and the native ABI can change.
+Lotus is pre-alpha and currently targets macOS. Other platforms are not verified.
 
 | Available | Not implemented |
 | --- | --- |
-| Six primitive types and explicit numeric casts | Arrays, structs and generics |
+| Explicit types and numeric casts | Implicit conversions, arrays, structs, generics |
 | Top-level functions and recursion | Nested functions and closures |
-| Conditions, while loops and range loops | Iterable collections and range values |
-| Automatic string reference counting | General garbage collection |
-| Native C libraries and LLVM JIT execution | A supported standalone executable workflow |
-| Feature tests and local benchmarks | Source-file CLI arguments and module imports |
+| Conditions, while and integer-range loops | Iterable collections and range values |
+| Strings with automatic reference counting | String indexing and Unicode normalization |
+| JIT execution and executable builds | REPL, cross-compilation and bundled distributions |
+| Native C extensions | `.lt` module imports and package management |
 
-The current backend and test runtime target macOS. String ARC does not imply complete compiler-memory cleanup; see [testing boundaries](/development/tests#coverage).
+Executable builds depend on native libraries; see [CLI requirements](/cli). String reference counting covers runtime strings, not all compiler allocations.
 
-<CardGroup cols={2}>
-  <Card title="Try the language" icon="terminal" href="/quickstart">Build and run the current implementation.</Card>
-  <Card title="Help improve it" icon="code-pull-request" href="/development/workflow">Use the project's checks and style.</Card>
-</CardGroup>
-
-Source and license: [GitHub](https://github.com/LINQeee/lotus) · [LICENSE](https://github.com/LINQeee/lotus/blob/main/LICENSE).
+For supported syntax, start with [types](/language/types). To work on the implementation, follow [the contributor workflow](/development/workflow).

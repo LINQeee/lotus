@@ -1,6 +1,7 @@
 ---
 title: "Conditions and loops"
 description: "Branch, iterate and control nested loops."
+keywords: ["Lotus", "control flow"]
 ---
 
 ## Conditions
@@ -104,8 +105,8 @@ After the body or `continue`, the fixed step is added to the current counter. As
 | `break @2` | Exit two nested loops |
 | `continue @2` | Continue the enclosing loop two levels out |
 
-Levels count both `for` and `while`. Invalid levels are rejected. String locals are released when their scope is exited.
+Levels count both `for` and `while`. Invalid levels are rejected.
 
 <Note>
-Ranges currently exist only in `for` headers. Iterable collections, dynamic steps, `downTo` and `..<` are not supported.
+Ranges exist only in `for` headers; they cannot be stored as values. Steps cannot be variables or runtime expressions.
 </Note>

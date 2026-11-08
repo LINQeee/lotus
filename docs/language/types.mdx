@@ -1,9 +1,10 @@
 ---
 title: "Types and casts"
 description: "Keep types explicit, including numeric conversions."
+keywords: ["Lotus", "types"]
 ---
 
-Lotus has six value types. Write types explicitly and use casts for numeric conversions.
+Declare types explicitly. Numeric conversions require a cast.
 
 | Type | Meaning | Example |
 | --- | --- | --- |
@@ -61,7 +62,3 @@ print((double)5 / (double)2)
 ```
 
 Casts bind tighter than binary operators. `(long)2 + 2` is a type error; `(long)(2 + 2)` converts the sum. Chained casts such as `(double)(long)2` are allowed.
-
-<Note>
-A native `any` parameter preserves the argument's type tag. Its internal representation does not enable implicit casts in Lotus.
-</Note>

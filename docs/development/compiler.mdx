@@ -1,39 +1,38 @@
 ---
 title: "Compiler map"
-description: "Where to change each stage of the language."
+description: "Find the code for a language change."
+keywords: ["Lotus", "compiler"]
 ---
 
-Lotus checks source types before generating LLVM IR. Use this map to locate the code and tests for a language change.
-
 ```text
-Source → Lexer → AST → Type checker → LLVM IR → Verify → Optimize → JIT
+Source → Lexer → AST → Type checker → LLVM IR → Verify → Optimize
+                                                        ├─ run: JIT
+                                                        └─ build: object → linker → binary
 ```
+
+`check` stops after type checking. See [CLI reference](/cli) for AST/IR inspection.
 
 | Location | Responsibility |
 | --- | --- |
-| `src/lexer/` | Tokens, keywords and source positions |
-| `src/parser/` | Expressions, statements and AST construction |
-| `src/type_checker/` | Types, scopes and return-path analysis |
-| `src/llvm/` | IR generation, variables, optimization and JIT |
-| `src/native_loader/` | Native libraries and function registration |
-| `src/utils/` | Diagnostics helpers and AST printing |
-| `lotus-core/` | Runtime implementation and native interface |
-| `tests/` | Executable feature cases |
-| `tools/lotus-test/` | Test runner submodule |
-| `benchmarks/` | Equivalent workloads across languages |
-| `docs/` | Mintlify source pages |
+| `src/main.c` | Arguments, source loading and compilation pipeline |
+| `src/lexer/` | Tokens and source locations |
+| `src/parser/` | AST and syntax |
+| `src/type_checker/` | Types, scope and return paths |
+| `src/llvm/generator/` | Expression and statement IR |
+| `src/llvm/var_manager.*` | Variables and string cleanup |
+| `src/llvm/llvm.c`, `executable.c` | JIT and executable builds |
+| `src/native_loader/` | Dynamic libraries and function registration |
+| `lotus-core/` | Native runtime and string ownership |
+| `tests/` | Language behavior cases |
+| `tools/lotus-test/src/` | Runner, assertions and memory instrumentation |
 
-## When changing a feature
+## Change a feature
 
-1. Update the necessary lexer/parser/AST pieces.
-2. Define its type and scope rules.
+1. Update syntax and AST only where needed.
+2. Define type and scope rules in the type checker.
 3. Generate IR consistent with those rules and string ownership.
-4. Add a focused `.lt` test and update the relevant documentation page.
+4. Add focused tests and update the relevant language page.
 
-Source errors should be diagnosed before JIT execution. Verify generated IR when changing control flow. Build both sides when changing the runtime ABI.
+Verify execution and diagnostics, not just C compilation. For ABI changes, rebuild the compiler, runtime and native extensions together.
 
-The compiler prints IR before optimization and writes optimized `output.ll` after execution. This file is diagnostic output; a supported standalone executable workflow is not implemented.
-
-<Note>
-`src/deprecated_or_experiment_files/` is excluded from the active build. Do not use it as the current language specification.
-</Note>
+`src/deprecated_or_experiment_files/` is excluded from the active build and is not a specification.

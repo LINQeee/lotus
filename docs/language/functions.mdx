@@ -1,6 +1,7 @@
 ---
 title: "Functions and returns"
 description: "Typed parameters, explicit results and checked return paths."
+keywords: ["Lotus", "functions"]
 ---
 
 ```text functions.lt
@@ -56,4 +57,4 @@ A value-returning function must not reach its end without a result. Void functio
 | Return only inside a `for` | Not sufficient; the range is treated as possibly empty |
 | Missing return on a reachable path | Type error before IR generation |
 
-Literal `true`/`false` conditions and leveled loop jumps are analyzed. General constant evaluation and termination proofs are not performed. Unreachable statements still undergo type checking.
+The analysis recognizes literal boolean conditions, not arbitrary constant expressions. Unreachable statements are still type-checked.

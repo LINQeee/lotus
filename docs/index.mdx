@@ -1,9 +1,22 @@
 ---
 title: "Lotus"
-description: "A concise, statically typed language with LLVM execution."
+description: "Choose a path: write a program, learn the language or contribute."
+keywords: ["Lotus", "index"]
 ---
 
-Write explicit types, small functions and range loops. Run them through LLVM and use native C functions when needed.
+Lotus is an experimental, statically typed language implemented with LLVM and a native C runtime.
+
+<Columns cols={1}>
+  <Card title="Get started" icon="terminal" href="/quickstart">
+    Build Lotus on macOS and run your first program.
+  </Card>
+  <Card title="Learn the language" icon="code" href="/language/types">
+    Types, variables, functions, loops and strings.
+  </Card>
+  <Card title="Contribute" icon="code-pull-request" href="/development/workflow">
+    Set up checks, write tests or extend the compiler.
+  </Card>
+</Columns>
 
 ```text hello.lt
 fn sum(a: int, b: int): int {
@@ -17,21 +30,6 @@ print(sum(20, 22))
 42
 ```
 
-<CardGroup cols={2}>
-  <Card title="Run your first program" icon="terminal" href="/quickstart">
-    Build the compiler and runtime on macOS.
-  </Card>
-  <Card title="Explore the language" icon="code" href="/language/types">
-    Types, explicit casts, functions and loops.
-  </Card>
-  <Card title="Use range loops" icon="repeat" href="/language/control-flow">
-    Forward and reverse iteration with explicit boundaries.
-  </Card>
-  <Card title="Contribute a test" icon="flask" href="/development/tests">
-    A small `.lt` file and an expected result.
-  </Card>
-</CardGroup>
-
 <Note>
-Lotus is pre-alpha. Syntax and native interfaces can change. See [current support](/status) before relying on a feature.
+Lotus is pre-alpha. Syntax and the native ABI may change. Check [current support](/status) before choosing it for a project.
 </Note>

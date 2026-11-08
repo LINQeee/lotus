@@ -1,6 +1,7 @@
 ---
 title: "Strings"
 description: "Concatenate, compare and share strings without manual cleanup."
+keywords: ["Lotus", "strings"]
 ---
 
 ```text strings.lt
@@ -30,7 +31,7 @@ false
 Strings use reference counting. A variable holds its string until reassignment or scope exit. Temporary expressions release references after use; returns and loop jumps also perform cleanup.
 
 <Note>
-Literal strings live for the program's lifetime. This is single-threaded string ownership, not a general garbage collector or exact last-use analysis.
+Literals live for the program's lifetime. Reference counting is single-threaded and does not free variables at their last use.
 </Note>
 
 See [runtime I/O](/runtime) for `input` and `print`, or [native ownership](/development/native) when writing C extensions.

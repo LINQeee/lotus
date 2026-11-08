@@ -1,57 +1,22 @@
 ---
 title: "Language tests"
-description: "One .lt program, one expected result."
+description: "Run feature tests and describe expected behavior."
+keywords: ["Lotus", "tests"]
 ---
 
-Lotus integration tests compile and run `.lt` programs against expectations in comments. Requires Node.js 20+ and the [macOS toolchain](/quickstart).
-
-## Run the local checkout
-
-From the compiler root:
+Requires Node.js 20+ and the [build toolchain](/quickstart). From the compiler root:
 
 ```sh
-git submodule update --init --recursive
 npm ci --prefix tools/lotus-test
 node tools/lotus-test/bin/lotus-test.mjs
 node tools/lotus-test/bin/lotus-test.mjs loops/for
 ```
 
-To use the local checkout as the global `lotus-test` command:
-
-```sh
-cd tools/lotus-test
-npm link
-```
-
-Local edits apply immediately; run `npm ci` after dependency changes. To install or update a separate GitHub copy:
-
-```sh
-npm install -g git+https://github.com/LINQeee/lotus-test.git
-```
-
-For a specific Git tag, append `#TAG`, replacing `TAG` with its name.
-
-## Configuration
-
-`lotus-test-config.json` is found from the working directory upward. Config paths are relative to this file; CLI `--compiler PATH` is relative to the working directory. All keys are required.
-
-| Key | Meaning |
-| --- | --- |
-| `testsDir`, `resultsDir` | Test discovery and output directories |
-| `compiler` | Compiler executable |
-| `cmake` | Command from PATH or executable path; environment `CMAKE` overrides it |
-| `runtimeBuild`, `runtimeLibrary` | Runtime build directory and shared library |
-| `timeout`, `setupTimeout` | Positive deadlines in seconds for a test and each setup command |
-| `build`, `verbose` | Build before testing; print individual results |
-| `runtime` | Default `normal`, `none` or `memory` runtime |
-| `entryAllocas` | Require allocas in function entry blocks |
-
-CLI overrides config; test directives override `runtime` and `entryAllocas`. Defaults: build both projects, normal runtime, entry allocas checked, 10-second test and 120-second setup deadlines.
+The runner builds the compiler/runtime, then runs `.lt` files through `lotus run`. Each test uses its original source, a separate process and a temporary working directory. Runtime modes are prepared once per run in separate directories.
 
 ## Write a test
 
-<Tabs>
-<Tab title="Output">
+Place it under `tests/<feature>/`, with a descriptive filename:
 
 ```text ascending-iterating-for-loop.lt
 // expect: "1\n2\n3\n"
@@ -59,8 +24,7 @@ CLI overrides config; test directives override `runtime` and `entryAllocas`. Def
 for i in 1..3 print(i)
 ```
 
-</Tab>
-<Tab title="Diagnostic">
+For rejected programs, use a diagnostic substring:
 
 ```text implicit-cast.lt
 // error: "cannot assign float to double"
@@ -68,79 +32,74 @@ for i in 1..3 print(i)
 double value = 2f
 ```
 
-</Tab>
-<Tab title="Input">
+All directive values use JSON. Exactly one `expect` or `error` is required.
 
-```text echo.lt
-// input: "hello\n"
-// expect: "hello\n"
+| Directive | Meaning |
+| --- | --- |
+| `expect: "..."` | Exact program stdout, including final newlines |
+| `error: "..."` | Exit 1 with this diagnostic before execution |
+| `input: "..."` | Stdin text, followed by EOF |
+| `ir: ["..."]` | Required text in IR before optimization |
+| `log: ["..."]` / `no-log: ["..."]` | Required / forbidden stdout or stderr text |
+| `entry-allocas: false` | Disable entry-block allocation checking for this case |
+| `runtime: "normal"` | Use the configured runtime library |
+| `runtime: "none"` | Load no runtime libraries |
+| `runtime: "memory"` | Use the instrumented string runtime |
 
-print(input())
-```
+`runtime` and entry-allocation checks inherit config values when omitted. `expect` excludes debug output; use log assertions for stderr. Invalid directives report `DIRECTIVE ERROR` with the source location and skip execution of that case. Crashes, timeouts and missing execution markers fail the test.
 
-</Tab>
-</Tabs>
-
-Place cases under `tests/<feature>/`. Each runs in a separate process with a temporary source; your root `test.lt` is unchanged.
-
-## Results
-
-A spinner shows the current test, then a status line per root group. Failures show details; `--verbose` lists every result. Full output goes to logs.
+## Run options and results
 
 | Option | Effect |
 | --- | --- |
-| `-v`, `--verbose` | Print every test result |
-| `--no-build` | Reuse existing binaries |
-| `--compiler PATH` | Select another compiler build |
-| `--timeout SECONDS` | Override the per-test deadline |
-| `-h`, `--help` | Show usage inside a configured project |
+| `--no-build` | Reuse compiler/runtime binaries; memory instrumentation still builds |
+| `--compiler PATH` | Choose another compiler executable |
+| `--timeout SECONDS` | Set the per-test deadline |
+| `-v`, `--verbose` | List individual results |
+| `-h`, `--help` | Show usage in a configured project |
 
-Each run gets a directory under `resultsDir`, normally `tests/.results/`. Colors stay enabled; redirection and `TERM=dumb` disable animation. Exit codes: **0** pass, **1** failed tests, **2** setup/selection error.
+Output uses colors and one summary per root group. A terminal spinner shows the current test; verbose mode and redirected output omit animation. Failures show details and log paths under `resultsDir`.
 
-## Expectations and checks
+Exit codes: **0** pass, **1** failed cases, **2** setup or selection error.
 
-All directive values use JSON. Exactly one `expect` or `error` is required.
+## Configuration
 
-| Directive | Checks |
+`lotus-test-config.json` is located by searching upward from the working directory. All fields are required; values come from the config, not built-in defaults.
+
+| Fields | Purpose |
 | --- | --- |
-| `expect: "..."` | Exact program stdout, including spaces and final newlines |
-| `error: "..."` | Exit 1 and diagnostic substring before program execution |
-| `input: "..."` | Stdin contents, followed by EOF; `\u0000` represents NUL |
-| `ir: ["..."]` | Required substrings in unoptimized generated IR |
-| `log: ["..."]` / `no-log: ["..."]` | Required / forbidden stdout or stderr text |
-| `entry-allocas: true` | Stack allocations only in function entry blocks; enabled by default, set `false` to disable |
-| `runtime: "normal"` | Use the configured runtime library |
-| `runtime: "none"` | No runtime, for missing-helper diagnostics |
-| `runtime: "memory"` | Instrumented string runtime |
+| `testsDir`, `resultsDir` | Test and log directories |
+| `compiler` | Compiler executable |
+| `cmake` | CMake command/path; overridden by environment `CMAKE` |
+| `runtimeBuild`, `runtimeLibrary` | Runtime build directory and library file |
+| `timeout`, `setupTimeout` | Positive deadlines in seconds |
+| `build`, `verbose` | Build before tests; list individual results |
+| `runtime` | Default runtime mode |
+| `entryAllocas` | Check that stack allocations stay in entry blocks |
 
-`DIRECTIVE ERROR` reports file, line, comment and reason. Unknown/duplicate keys, invalid JSON/types and missing/conflicting expectations fail that test without executing it; others continue.
+Config paths are relative to the config file. CLI options override config; CLI `--compiler` is relative to the working directory. The checked-in config enables entry-allocation checks.
 
-`expect` excludes compiler diagnostics. Stderr is checked only by log assertions. Crashes, timeouts and missing execution markers always fail.
+<Accordion title="Install a global command">
+For a command using your local runner checkout:
+
+```sh
+cd tools/lotus-test
+npm link
+```
+
+Local edits then apply immediately. To install or update an independent copy, use `npm install -g git+https://github.com/LINQeee/lotus-test.git`; append `#TAG` to select a specific Git tag.
+</Accordion>
 
 ## Coverage
 
-| Root group | Focus |
-| --- | --- |
-| `lexer`, `parser` | Tokens, comments, suffixes, escapes and malformed input |
-| `types`, `expressions` | Cast matrix, operators, types and precedence |
-| `variables`, `scopes` | Assignment, shadowing and name resolution |
-| `conditionals`, `loops` | Branches, ranges, mutable counters and leveled jumps |
-| `functions` | Calls, recursion, return types and return paths |
-| `strings`, `native` | String behavior, runtime functions, input and boxing |
-| `memory` | ARC across aliases, calls, returns, scopes and repeated allocation |
+Feature folders cover syntax, types, expressions, scope, control flow, functions, strings and native calls. Add cases there; edit `tools/lotus-test/src/` only when changing the runner itself.
 
-<Note>
-Memory mode rebuilds the project's `lotus_core` CMake target with ASan/UBSan and malloc/free counters, even with `--no-build`. New sources and registrations are picked up automatically. `CC` selects Clang. LeakSanitizer is disabled; counters track runtime allocations. JIT code is not sanitizer-instrumented. These tests do not imply complete compiler-memory cleanup or 100% C line coverage.
-</Note>
+Memory tests build lotus-core with ASan/UBSan and allocation counters. `CC` selects Clang. LeakSanitizer is disabled and JIT code is not instrumented; these checks do not prove complete compiler-memory cleanup.
 
-## Runner development
+CLI tests separately cover run/build/check, files, runtime paths and IR export:
 
-Add language cases under `tests/`; change `tools/lotus-test/` only when runner behavior needs to change.
+```sh
+node --test scripts/test-cli.mjs
+```
 
-| Module | Responsibility |
-| --- | --- |
-| `config.mjs`, `schema.mjs` | CLI options, config lookup and validation |
-| `checks.mjs` | Directives, output, diagnostics and IR assertions |
-| `process.mjs`, `runtime.mjs` | Subprocesses, timeouts, builds and runtime selection |
-| `reporter.mjs`, `run.mjs` | Terminal results and orchestration |
-| `memory/`, `string-memory-runtime.c` | Instrumented runtime build and test-only native functions |
+Build first, or run the language suite. `LOTUS_COMPILER` selects another CLI executable. Both suites run in the Git hooks.

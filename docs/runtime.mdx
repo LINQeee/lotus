@@ -1,17 +1,18 @@
 ---
 title: "Runtime functions"
-description: "The functions registered by lotus-core."
+description: "Functions provided by lotus-core."
+keywords: ["Lotus", "runtime"]
 ---
 
-Build and load `lotus-core` alongside the compiler. Functions below are available without imports.
+These functions are available when `lotus-core` is [loaded](/cli#native-libraries); no import statement is needed.
 
 | Function | Result | Behavior |
 | --- | --- | --- |
-| `print(values...)` | void | Concatenates printed values, then adds a newline; at least one argument |
-| `input()` | `string` | Reads through newline or EOF; omits the newline |
-| `toInt(text: string)` | `int` | Uses C `atoi`; not a checked parsing API |
-| `toBool(value: any)` | `bool` | Conversion rules below |
-| `randomNum(min: int, max: int)` | `int` | Inclusive bounds; provide a valid non-overflowing range |
+| `print(values...)` | No value | Print one or more values without separators, then a newline |
+| `input()` | `string` | Read through newline or EOF; omit the newline |
+| `toInt(text: string)` | `int` | Parse using C `atoi`; no reliable validation or overflow reporting |
+| `toBool(value: any)` | `bool` | Apply the rules below |
+| `randomNum(min: int, max: int)` | `int` | Inclusive range; bounds must be valid and non-overflowing |
 
 ```text runtime.lt
 print("sum=", 1 + 2 + 3)
@@ -25,23 +26,19 @@ sum=6
 42
 ```
 
-## Printing and input
+## I/O behavior
 
-`print` adds no separators between arguments. Floats use six decimal places. Empty input and EOF return an empty string; an embedded NUL stops printed string output even though string equality remains length-aware.
+Floats print six decimal places. `input()` returns an empty string for an empty line or EOF. Printed strings stop at an embedded NUL; [string equality](/language/strings) compares all bytes.
 
 ## Boolean conversion
 
 | Input | Result |
 | --- | --- |
-| Numeric value | `true` only when greater than zero |
-| `bool` | Unchanged |
+| Number | `true` only when greater than zero |
+| Boolean | Unchanged |
 | String `"true"` or `"false"` | Corresponding boolean |
 | Another string | Diagnostic on stderr and `false` |
 
-## Runtime helpers
-
-`_concat(string, string)` and `_stringEquals(string, string)` implement concatenation and equality. Prefer the language operators. `_stringRetain` and `_stringRelease` are reserved for generated/native code and cannot be called from Lotus.
-
 <Warning>
-`randomNum` reseeds from the current time on every call. It is a prototype helper, not a source of reproducible or secure randomness. `toInt` does not report invalid input or overflow reliably.
+`randomNum` reseeds on every call and is not suitable for secure or reproducible randomness. Use `toInt` only when its unchecked conversion is acceptable.
 </Warning>

@@ -15,31 +15,37 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Language",
+        "tab": "Get started",
         "groups": [
           {
             "group": "Start here",
             "pages": [
               "index",
-              "quickstart"
+              "quickstart",
+              "cli",
+              "status"
             ]
-          },
+          }
+        ]
+      },
+      {
+        "tab": "Language",
+        "groups": [
           {
             "group": "Language guide",
             "pages": [
               "language/types",
               "language/variables",
               "language/expressions",
-              "language/functions",
               "language/control-flow",
+              "language/functions",
               "language/strings"
             ]
           },
           {
-            "group": "Reference",
+            "group": "Standard library",
             "pages": [
-              "runtime",
-              "status"
+              "runtime"
             ]
           }
         ]
@@ -52,14 +58,13 @@
             "pages": [
               "development/workflow",
               "development/tests",
-              "development/benchmarks",
-              "development/native",
               "development/compiler"
             ]
           },
           {
-            "group": "Documentation",
+            "group": "Extend and maintain",
             "pages": [
+              "development/native",
               "development/documentation"
             ]
           }

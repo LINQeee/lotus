@@ -1,6 +1,7 @@
 ---
 title: "Variables and scope"
 description: "Declare mutable values and keep names local to their blocks."
+keywords: ["Lotus", "variables"]
 ---
 
 ```text variables.lt
@@ -21,7 +22,7 @@ Lotus!5
 
 ## Scope and shadowing
 
-Each `if`/`else` branch and loop body has a scope, including a single-statement body without braces. Functions have their own local scope.
+Each branch, loop body and function has a scope, even without braces.
 
 ```text shadowing.lt
 int value = 10

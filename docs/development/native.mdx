@@ -1,14 +1,17 @@
 ---
-title: "Native C functions"
-description: "Register functions and follow the string ownership contract."
+title: "Native C extensions"
+description: "Expose C functions to Lotus and follow string ownership rules."
+keywords: ["Lotus", "native"]
 ---
 
-Include `lotus-core/lotus.h`, export functions with the names you register, and provide a `lotusRegister` entry point through the macros.
+## Register a function
+
+Create `example.c` in the compiler checkout:
 
 ```c example.c
 #include "lotus.h"
 
-int twice(int value) {
+LOTUS_EXPORT int twice(int value) {
     return value * 2;
 }
 
@@ -17,75 +20,62 @@ LOTUS_NATIVE_LIBRARY {
 }
 ```
 
-Build a dynamic library and place it in `libs/`:
+Build into the directory containing your runtime:
 
 ```sh
 clang -dynamiclib -I lotus-core example.c -o libs/libexample.dylib
 ```
 
-The compiler loads libraries from `../libs` relative to its working directory. Registered functions can then be called directly from Lotus.
+Create `example.lt` and run `lotus run --libs ./libs example.lt`:
 
-## Develop lotus-core
-
-`lotus-core` is a [separate repository](/development/workflow#repositories) mounted inside the compiler checkout.
-
-| Path in lotus-core | Purpose |
-| --- | --- |
-| `lotus.h` | Native ABI, value types and registration macros |
-| `library.c` | Registration entry point |
-| `src/` | I/O, conversions and random numbers |
-| `internal/` | Compiler runtime functions with `_` names |
-| `utils/` | C helpers used to implement the library |
-
-Add implementation files to the `lotus_core` target in `CMakeLists.txt`. Register language-callable functions in `library.c`; C-only helpers need no registration. Keep registered symbols exported: the current JIT resolves them by name.
-
-From a standalone lotus-core checkout:
-
-```sh
-cmake -S . -B build
-cmake --build build --target lotus_core
+```text example.lt
+print(twice(21))
 ```
 
-This requires CMake 4.2+ and C11 and writes the library to `../libs/`. Test changes with [the language runner](/development/tests) from a compiler checkout.
+```text Output
+42
+```
 
-## Types and registration
+The loader calls each library's `lotusRegister` entry point. Registered functions must be exported under their registered names. `--libs` replaces the library directory; retain lotus-core there for standard functions.
 
-| Lotus type | Native tag | Representation |
+## Native types
+
+| Lotus type | Tag | C representation |
 | --- | --- | --- |
-| `int` | `LOTUS_I32` | 32-bit integer |
-| `long` | `LOTUS_I64` | 64-bit integer |
-| `float` | `LOTUS_F32` | C `float` |
-| `double` | `LOTUS_F64` | C `double` |
-| `bool` | `LOTUS_BOOL` | C `bool` |
+| `int` | `LOTUS_I32` | 32-bit signed integer |
+| `long` | `LOTUS_I64` | 64-bit signed integer |
+| `float` | `LOTUS_F32` | `float` |
+| `double` | `LOTUS_F64` | `double` |
+| `bool` | `LOTUS_BOOL` | `bool` |
 | `string` | `LOTUS_STRING` | `LotusString *` |
-| No result | `LOTUS_VOID` | C `void` |
-| Native boxed argument | `LOTUS_ANY` | `LotusValue` with a type tag and payload |
+| No result | `LOTUS_VOID` | `void` |
+| Boxed native argument | `LOTUS_ANY` | `LotusValue` with type tag and payload |
 
-`LOTUS_FUNCTION(name, result, args...)` registers a fixed signature. `LOTUS_VARIADIC` registers a variadic function; see `print` in `lotus-core/src/io.c` for the current count/argument ABI. Keep type tags and layouts synchronized with the compiler.
+`LOTUS_FUNCTION(name, result, args...)` registers a fixed signature. `LOTUS_VARIADIC` uses a leading argument count; follow `print` in `lotus-core/src/io.c` for its ABI. Native `any` parameters do not enable implicit language casts.
 
 ## String ownership
 
-| Operation | Responsibility |
+| Operation | Contract |
 | --- | --- |
-| Receive a string argument | Borrow it for the duration of the call |
-| Store a borrowed string beyond the call | Retain it, then release when done |
+| Receive a string, including a boxed string | Borrow it for the call |
+| Keep an argument beyond the call | Retain it; release when done |
 | Return a new string | Transfer one owned reference |
-| Return a borrowed argument | Retain it before returning |
-| Receive a boxed string in `LotusValue` | Same borrowed-argument rules |
+| Return a borrowed string | Retain before returning |
 
-```c
-#include "internal/string_runtime.h"
+`LotusString` stores `length`, `data` and `references`. `_stringRetain` and `_stringRelease` manage references. Zero references mark an immortal literal, not an unowned allocation. Do not mutate shared strings or return stack storage; reference counting is single-threaded.
 
-LotusString *identity(LotusString *value) {
-    _stringRetain(value);
-    return value;
-}
-```
+`_concat` and `_stringEquals` support language operators. Lifetime helpers cannot be called from Lotus source.
 
-Inside lotus-core, include `utils/string_utils.h` to use `lotusStringCreate(length)`. This helper is not registered with Lotus or exported from the shared library. It allocates an owned string with reference count one and space for a trailing NUL. Fill its bytes before returning it. `_stringRelease` frees dynamic strings after the last reference is dropped.
+## Work on lotus-core
 
-<Warning>
-Do not mutate shared strings or return a pointer to stack storage. A zero reference count means an immortal static string, not a dynamic string waiting to be retained. Reference counting is single-threaded.
-</Warning>
+| Path | Purpose |
+| --- | --- |
+| `lotus.h` | ABI and registration macros |
+| `library.c` | Language function registration |
+| `src/` | Public runtime functions |
+| `internal/` | Compiler helpers named with `_` |
+| `utils/` | C-only implementation helpers |
 
-`LotusString` contains `length`, `data` and `references`. Rebuild the compiler, runtime and extensions together when its ABI changes.
+`utils/string_utils.h` provides `lotusStringCreate(length)`: one owned reference, storage for the bytes and trailing NUL. Fill the bytes before returning the string. This helper is neither registered nor exported.
+
+Add new C sources to the runtime's CMake target. [Build instructions](/quickstart) and [tests](/development/tests) use the compiler checkout; standalone runtime builds also write to `../libs/`. Rebuild compiler, runtime and extensions together after ABI changes.
