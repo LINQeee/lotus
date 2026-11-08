@@ -22,13 +22,20 @@ trap 'rm -rf "$tempDir"' EXIT
 tree="$tempDir/tree"
 mkdir -p "$tree"
 case "$mode" in
-    --staged) git ls-files --cached -z > "$tempDir/paths" ;;
+    --staged) git ls-files --stage -z > "$tempDir/entries" ;;
     --ref)
         ref=$(git rev-parse --verify "$2^{commit}")
-        git ls-tree -r --name-only -z "$ref" > "$tempDir/paths"
+        git ls-tree -r -z "$ref" > "$tempDir/entries"
         ;;
     *) git ls-files --cached --others --exclude-standard -z > "$tempDir/paths" ;;
 esac
+if [[ -f "$tempDir/entries" ]]; then
+    # Gitlinks reference commits in another repository, not files in this snapshot.
+    while IFS= read -r -d '' entry; do
+        [[ "$entry" != 160000\ * ]] || continue
+        printf '%s\0' "${entry#*$'\t'}"
+    done < "$tempDir/entries" > "$tempDir/paths"
+fi
 while IFS= read -r -d '' file; do
     case "$file" in
         .tools/*|src/deprecated_or_experiment_files/*|cmake-build-*/*|*/cmake-build-*/*|*/CMakeFiles/*) continue ;;
@@ -58,8 +65,7 @@ iwyu=$(command -v "$iwyu")
 iwyu=$(cd "$(dirname "$iwyu")" && pwd)/$(basename "$iwyu")
 export IWYU_BINARY="$iwyu"
 toolDir=$(dirname "$iwyu")
-cmake=${CMAKE:-$(command -v cmake || true)}
-cmake=${cmake:-/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake}
+source "$root/scripts/cmake.sh"
 if [[ "$(uname -s)" == Darwin && -z "${SDKROOT:-}" ]]; then
     export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
 fi

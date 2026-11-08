@@ -9,8 +9,7 @@ if [[ "$version" != 0.26 ]]; then
     exit 1
 fi
 
-cmake=${CMAKE:-$(command -v cmake || true)}
-cmake=${cmake:-/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake}
+source "$root/scripts/cmake.sh"
 llvmConfig=${LLVM_CONFIG:-$(command -v llvm-config-22 || command -v llvm-config || true)}
 llvmConfig=${llvmConfig:-/opt/homebrew/opt/llvm/bin/llvm-config}
 if [[ "$("$llvmConfig" --version)" != 22.* ]]; then
