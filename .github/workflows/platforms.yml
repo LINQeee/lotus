@@ -1,50 +1,85 @@
-name: User platforms
+name: Lotus · Build & test
 on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
 jobs:
   unix:
+    name: ${{ matrix.name }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-15, macos-15-intel]
+        include:
+          - os: ubuntu-24.04
+            name: Linux · x64
+          - os: macos-15
+            name: macOS · Apple Silicon
+          - os: macos-15-intel
+            name: macOS · Intel
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Get source and submodules
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install LLVM and build Lotus
+      - name: Install toolchain and Lotus
+        id: install
         run: bash scripts/install.sh --source "$PWD" --prefix "$RUNNER_TEMP/lotus" --no-path
-      - name: Test installed CLI, JIT, runtime and native builds
+      - name: Verify CLI · JIT · runtime · native builds
+        id: tests
         env:
           LOTUS_COMPILER: ${{ runner.temp }}/lotus/bin/lotus
         run: node --test scripts/test-cli.mjs
+      - name: Publish result summary
+        if: always()
+        env:
+          PLATFORM: ${{ matrix.name }}
+          INSTALL: ${{ steps.install.outcome }}
+          TESTS: ${{ steps.tests.outcome }}
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ### $PLATFORM
+          | Check | Result |
+          | :--- | :--- |
+          | Build & install | $INSTALL |
+          | CLI, JIT, runtime & native builds | $TESTS |
+          EOF
   windows:
+    name: Windows · x64
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
+      - name: Get source and submodules
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: msys2/setup-msys2@v2
+      - name: Set up MSYS2 · LLVM · Clang
+        uses: msys2/setup-msys2@v2
         id: msys2
         with:
           msystem: CLANG64
           update: true
           install: git mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-llvm mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-ninja
-      - name: Build and install from PowerShell
+      - name: Install Lotus with PowerShell
+        id: install
         shell: pwsh
         run: |
           $msysRoot = '${{ steps.msys2.outputs.msys2-location }}'
           ./scripts/install.ps1 -Source $PWD -Prefix "$env:RUNNER_TEMP\Lotus install" -MsysRoot $msysRoot -NoDeps -NoPath
+      - name: Verify Windows launcher
+        id: launcher
+        shell: pwsh
+        run: |
           & "$env:RUNNER_TEMP\Lotus install\cmd\lotus.cmd" --help
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-      - name: Test installed CLI, JIT, runtime and native builds
+      - name: Verify CLI · JIT · runtime · native builds
+        id: tests
         shell: pwsh
         run: |
           $msysRoot = '${{ steps.msys2.outputs.msys2-location }}'
@@ -52,3 +87,19 @@ jobs:
           $env:LOTUS_COMPILER = "$env:RUNNER_TEMP\Lotus install\bin\lotus.exe"
           node --test scripts/test-cli.mjs
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Publish result summary
+        if: always()
+        shell: pwsh
+        env:
+          INSTALL: ${{ steps.install.outcome }}
+          LAUNCHER: ${{ steps.launcher.outcome }}
+          TESTS: ${{ steps.tests.outcome }}
+        run: |
+          @"
+          ### Windows · x64
+          | Check | Result |
+          | :--- | :--- |
+          | Build & install | $env:INSTALL |
+          | Windows launcher | $env:LAUNCHER |
+          | CLI, JIT, runtime & native builds | $env:TESTS |
+          "@ >> $env:GITHUB_STEP_SUMMARY
