@@ -27,3 +27,4 @@ npm-debug.log*
 lotus-core/.idea/
 *.md
 !README.md
+test.lt
