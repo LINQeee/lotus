@@ -84,5 +84,18 @@
     "socials": {
       "github": "https://github.com/LINQeee/lotus"
     }
+  },
+  "styling": {
+    "codeblocks": {
+      "theme": {
+        "light": "github-light",
+        "dark": "github-dark"
+      },
+      "languages": {
+        "custom": [
+          "/assets/lotus.tmLanguage.json"
+        ]
+      }
+    }
   }
 }

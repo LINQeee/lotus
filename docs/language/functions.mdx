@@ -4,7 +4,7 @@ description: "Typed parameters, explicit results and checked return paths."
 keywords: ["Lotus", "functions"]
 ---
 
-```text functions.lt
+```lotus functions.lt
 fn sum(a: int, b: int): int {
     return a + b
 }
@@ -27,7 +27,7 @@ print(sum(20, 22))
 
 Omit the result type for a void function:
 
-```text early-return.lt
+```lotus early-return.lt
 fn greet(enabled: bool) {
     if enabled {
         print("hello")

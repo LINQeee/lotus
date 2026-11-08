@@ -4,7 +4,7 @@ description: "Declare mutable values and keep names local to their blocks."
 keywords: ["Lotus", "variables"]
 ---
 
-```text variables.lt
+```lotus variables.lt
 int count = 2
 count += 3
 string label = "Lotus"
@@ -24,7 +24,7 @@ Lotus!5
 
 Each branch, loop body and function has a scope, even without braces.
 
-```text shadowing.lt
+```lotus shadowing.lt
 int value = 10
 if true {
     int value = value + 1

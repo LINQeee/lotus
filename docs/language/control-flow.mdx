@@ -8,7 +8,7 @@ keywords: ["Lotus", "control flow"]
 
 `if` and `while` require a `bool`. Braces are optional for one statement.
 
-```text branches.lt
+```lotus branches.lt
 int value = 3
 if value > 0 print("positive")
 else print("non-positive")
@@ -28,7 +28,7 @@ positive
 
 ## Range loops
 
-```text ranges.lt
+```lotus ranges.lt
 for i in 1..3 print(i)
 for i in 3..1 print(i)
 ```
@@ -60,7 +60,7 @@ Equal included bounds produce one iteration. Excluding an equal bound, or crossi
 
 ### Choose a step
 
-```text steps.lt
+```lotus steps.lt
 for i in 0!..5 step 2 print(i)
 for i in 5!..0 step -2 print(i)
 ```
@@ -81,7 +81,7 @@ for i in 5!..0 step -2 print(i)
 
 ### Change the counter
 
-```text mutable-counter.lt
+```lotus mutable-counter.lt
 for i in 0..5 {
     print(i)
     if i == 0 i = 3
