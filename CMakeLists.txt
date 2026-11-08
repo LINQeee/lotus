@@ -3,7 +3,10 @@ project(compiler C)
 
 set(CMAKE_C_STANDARD 11)
 
-set(LLVM_DIR "/opt/homebrew/opt/llvm/lib/cmake/llvm")
+find_program(LLVM_CONFIG NAMES llvm-config llvm-config-22 HINTS /opt/homebrew/opt/llvm/bin)
+if(LLVM_CONFIG AND NOT LLVM_DIR)
+    execute_process(COMMAND ${LLVM_CONFIG} --cmakedir OUTPUT_VARIABLE LLVM_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
 
 find_package(LLVM REQUIRED CONFIG)
 
@@ -14,6 +17,7 @@ add_definitions(${LLVM_DEFINITIONS})
 
 add_executable(compiler
         src/main.c
+        src/llvm/executable.c
         src/lexer/lexer.c
         src/llvm/llvm.c
         src/parser/parser.c
@@ -59,3 +63,7 @@ add_executable(compiler
 target_link_libraries(compiler
         LLVM
 )
+set_target_properties(compiler PROPERTIES OUTPUT_NAME lotus)
+set(LOTUS_RUNTIME_DIR "${CMAKE_SOURCE_DIR}/libs" CACHE PATH "Default native library directory")
+target_compile_definitions(compiler PRIVATE LOTUS_RUNTIME_DIR="${LOTUS_RUNTIME_DIR}")
+install(TARGETS compiler RUNTIME DESTINATION bin)

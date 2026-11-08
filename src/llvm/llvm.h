@@ -1,5 +1,6 @@
 #ifndef LLVM_H
 #define LLVM_H
+#include <stdbool.h>
 // magic number to be honest TODO: dynamic var realloc
 #define MAX_VARS 4096
 #define MAX_LOOP_DEPTH 256
@@ -54,7 +55,7 @@ typedef struct {
 
 extern Codegen *cg;
 
-void codegenProgram(const ProgramNode *program);
+int codegenProgram(const ProgramNode *program, bool debug, const char *irPath, const char *outputBuildPath);
 
 void initCodegen();
 #endif

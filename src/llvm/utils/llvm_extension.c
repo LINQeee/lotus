@@ -57,7 +57,7 @@ void verifyCode() {
     LLVMDisposeMessage(error);
 }
 
-static LLVMTargetMachineRef getTargetMachine() {
+LLVMTargetMachineRef getTargetMachine() {
     char *triple = LLVMGetDefaultTargetTriple();
     LLVMTargetRef target;
     char *error = NULL;
@@ -69,8 +69,8 @@ static LLVMTargetMachineRef getTargetMachine() {
         return NULL;
     }
 
-    LLVMTargetMachineRef targetMachine = LLVMCreateTargetMachine(target, triple, "", "", LLVMCodeGenLevelDefault,
-                                                                 LLVMRelocDefault, LLVMCodeModelDefault);
+    LLVMTargetMachineRef targetMachine =
+        LLVMCreateTargetMachine(target, triple, "", "", LLVMCodeGenLevelDefault, LLVMRelocPIC, LLVMCodeModelDefault);
 
     LLVMTargetDataRef dataLayout = LLVMCreateTargetDataLayout(targetMachine);
     LLVMSetModuleDataLayout(cg->module, dataLayout);

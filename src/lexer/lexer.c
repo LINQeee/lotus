@@ -2,7 +2,6 @@
 
 #include <ctype.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "../utils/cutils.h"
@@ -268,7 +267,6 @@ Token *tokenize(const char *code, const char *fileName) {
         }
 
         tokens[pos++] = t;
-        printf("ADDED TOKEN {type: %d, value: \"%s\"}\n", t.type, t.value);
     }
     tokens[pos] = t;
     return tokens;

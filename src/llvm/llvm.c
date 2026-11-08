@@ -1,4 +1,5 @@
 #include "llvm.h"
+#include "executable.h"
 
 #include <llvm-c/Core.h>
 #include <llvm-c/ExecutionEngine.h>
@@ -41,7 +42,7 @@ void initCodegen() {
     LLVMStructSetBody(cg->stringType, fields, 3, false);
 }
 
-void codegenProgram(const ProgramNode *program) {
+int codegenProgram(const ProgramNode *program, bool debug, const char *irPath, const char *outputBuildPath) {
     createMainFunctionAndGenerateCode(program);
     verifyCode();
     LLVMLinkInMCJIT();
@@ -49,22 +50,33 @@ void codegenProgram(const ProgramNode *program) {
     LLVMInitializeNativeAsmPrinter();
     LLVMInitializeNativeAsmParser();
 
-    char *ir = LLVMPrintModuleToString(cg->module);
-    printf("\n\n###### GENERATED IR:\n%s\n", ir);
-    LLVMDisposeMessage(ir);
+    if (debug) {
+        char *ir = LLVMPrintModuleToString(cg->module);
+        printf("\n\n###### GENERATED IR:\n%s\n", ir);
+        LLVMDisposeMessage(ir);
+    }
 
     optimizeCode();
 
-    LLVMExecutionEngineRef engine;
     char *error = NULL;
-    if (LLVMCreateExecutionEngineForModule(&engine, cg->module, &error)) {
-        printf("JIT ERROR: %s\n", error);
+    if (irPath && LLVMPrintModuleToFile(cg->module, irPath, &error)) {
+        fprintf(stderr, "Cannot write IR: %s\n", error);
         LLVMDisposeMessage(error);
-        return;
+        return 1;
+    }
+
+    if (outputBuildPath) return buildExecutable(outputBuildPath);
+
+    LLVMExecutionEngineRef engine;
+    if (LLVMCreateExecutionEngineForModule(&engine, cg->module, &error)) {
+        fprintf(stderr, "JIT ERROR: %s\n", error);
+        LLVMDisposeMessage(error);
+        return 1;
     }
     uint64_t addr = LLVMGetFunctionAddress(engine, "main");
     int (*mainFunc)() = (int (*)())addr;
-    printf("###### RUNNING main():\n");
+    if (!addr) exitWithError("JIT did not produce main");
+    if (debug) printf("###### RUNNING main():\n");
     uint64_t start = mach_absolute_time();
     int result = mainFunc();
     uint64_t end = mach_absolute_time();
@@ -72,10 +84,7 @@ void codegenProgram(const ProgramNode *program) {
     mach_timebase_info(&timebase);
     uint64_t elapsed_ticks = end - start;
     uint64_t elapsed_ms = (elapsed_ticks * timebase.numer) / (timebase.denom * 1000000);
-    printf("\n\n###### EXECUTED MAIN FUNCTION IN %llu ms:\nExit code: %d\n", elapsed_ms, result);
-
-    LLVMPrintModuleToFile(cg->module, "output.ll", &error);
-
-    // link and run executable "clang output.ll -L../libs -llotus_core
-    // -Wl,-rpath,@loader_path/../libs -o output && time ./output"
+    if (debug) printf("\n\n###### EXECUTED MAIN FUNCTION IN %llu ms:\nExit code: %d\n", elapsed_ms, result);
+    LLVMDisposeExecutionEngine(engine);
+    return result;
 }

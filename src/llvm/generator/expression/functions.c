@@ -109,7 +109,6 @@ void generateFunction(const FunctionNode *node) {
 
 LLVMValueRef generateCall(const CallNode *node) {
     char *name = (node->callee)->name;
-    printf("%s\n", name);
 
     LLVMUserFunction *fn = findFunction(name);
 
