@@ -1,0 +1,54 @@
+name: User platforms
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  unix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install LLVM and build Lotus
+        run: bash scripts/install.sh --source "$PWD" --prefix "$RUNNER_TEMP/lotus" --no-path
+      - name: Test installed CLI, JIT, runtime and native builds
+        env:
+          LOTUS_COMPILER: ${{ runner.temp }}/lotus/bin/lotus
+        run: node --test scripts/test-cli.mjs
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: msys2/setup-msys2@v2
+        id: msys2
+        with:
+          msystem: CLANG64
+          update: true
+          install: git mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-llvm mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-ninja
+      - name: Build and install from PowerShell
+        shell: pwsh
+        run: |
+          $msysRoot = '${{ steps.msys2.outputs.msys2-location }}'
+          ./scripts/install.ps1 -Source $PWD -Prefix "$env:RUNNER_TEMP\Lotus install" -MsysRoot $msysRoot -NoDeps -NoPath
+          & "$env:RUNNER_TEMP\Lotus install\cmd\lotus.cmd" --help
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Test installed CLI, JIT, runtime and native builds
+        shell: pwsh
+        run: |
+          $msysRoot = '${{ steps.msys2.outputs.msys2-location }}'
+          $env:PATH = "$msysRoot\clang64\bin;$env:PATH"
+          $env:LOTUS_COMPILER = "$env:RUNNER_TEMP\Lotus install\bin\lotus.exe"
+          node --test scripts/test-cli.mjs
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
