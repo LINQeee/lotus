@@ -1,0 +1,24 @@
+// expect: "1\n2\n3\n4\n1\n3\n4\n5\n4\n5\n4\n"
+
+int x = 0
+while x++ < 3 {
+    print(x)
+}
+print(x)
+for i in 1..4 {
+    print(i++)
+}
+fn takeNext(): int {
+    return x++
+}
+fn previous(): int {
+    return --x
+}
+print(takeNext())
+print(x)
+print(previous())
+fn local(value: int): int {
+    return ++value
+}
+print(local(x))
+print(x)

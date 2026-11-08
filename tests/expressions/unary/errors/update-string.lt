@@ -1,0 +1,4 @@
+// error: "'++' and '--' require a numeric variable"
+
+string value = "hello"
+--value

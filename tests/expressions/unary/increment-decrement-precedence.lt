@@ -1,0 +1,12 @@
+// expect: "-2\n3\n8\n4\n3\n10\n6\n2\n4\n"
+
+int x = 2
+print(-x++)
+print(x)
+print(2 * ++x)
+print((long)x--)
+print((x)++)
+print(x++ + ++x)
+print(x)
+print(x-- - --x)
+print(x)

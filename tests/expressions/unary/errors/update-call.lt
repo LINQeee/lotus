@@ -1,0 +1,6 @@
+// error: "'++' and '--' require a numeric variable"
+
+fn value(): int {
+    return 1
+}
+print(value()++)

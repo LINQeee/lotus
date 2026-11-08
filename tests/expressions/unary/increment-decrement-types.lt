@@ -1,0 +1,17 @@
+// expect: "5\n5\n5\n5\n2.500000\n2.500000\n1.500000\n1.500000\n2.500000\n2.500000\n2.500000\n2.500000\n"
+
+long l = 5l
+float f = 1.5f
+double d = 2.5
+print(l++)
+print(--l)
+print(l--)
+print(++l)
+print(++f)
+print(f--)
+print(f++)
+print(--f)
+print(d--)
+print(++d)
+print(d++)
+print(--d)

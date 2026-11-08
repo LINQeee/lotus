@@ -1,0 +1,3 @@
+// error: "'++' and '--' require a numeric variable"
+
+print(--1)
