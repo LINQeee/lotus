@@ -29,7 +29,6 @@ html.dark {
 
 #content .card,
 #content .callout,
-[data-component-part="code-block-root"],
 [data-search-item="trigger"],
 [data-search-item="dialog"] {
     border-radius: 0;
@@ -82,8 +81,22 @@ html.dark {
     background: var(--lotus-panel);
 }
 
+#content table {
+    border-collapse: collapse;
+}
+
 #content table :is(th, td) {
-    border-bottom: 1px dashed var(--lotus-line);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+#content table tr {
+    border-bottom: 1px solid var(--lotus-line);
+}
+
+#content :not(pre) > code {
+    border-radius: 0;
 }
 
 #content .ascii-banner {
