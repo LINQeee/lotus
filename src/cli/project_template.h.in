@@ -1,0 +1,1 @@
+static const unsigned char PROJECT_TEMPLATE[] = {@PROJECT_TEMPLATE_BYTES@};

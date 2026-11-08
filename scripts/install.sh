@@ -213,8 +213,9 @@ if [[ $updatePath == 1 ]]; then
 fi
 printf '\n\033[1;32m  ✓ Compiler and runtime installed\033[0m\n'
 if [[ $updatePath == 1 ]]; then
-    printf '  Open a new terminal, then run:\n\n    \033[1mlotus run hello.lt\033[0m\n'
+    printf '  Open a new terminal and create your first project:\n\n    \033[1mlotus new hello-world .\033[0m\n'
 else
     printf '  PATH unchanged · executable: %s/bin/lotus\n' "$prefix"
+    printf '  Create your first project:\n\n    %q new hello-world .\n' "$prefix/bin/lotus"
 fi
 printf '\n'

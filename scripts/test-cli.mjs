@@ -42,6 +42,43 @@ test('help needs no source or runtime', () => {
     assert.match(result.stdout, /Usage: lotus/)
 })
 
+test('new creates a runnable project from the bundled template without loading runtime', () => {
+    const name = 'привет world'
+    const result = run(['new', name, temp], {LOTUS_LIBS: '/missing-runtime'})
+    assert.equal(result.status, 0, result.stderr)
+    const file = path.join(temp, name, 'main.lt')
+    assert.equal(fs.readFileSync(file, 'utf8'), fs.readFileSync(path.join(root, 'templates/main.lt'), 'utf8'))
+    const execution = run(['run', file])
+    assert.equal(execution.status, 0, execution.stderr)
+    assert.equal(execution.stdout.replaceAll('\r\n', '\n'), 'Hello, World!\n')
+})
+
+test('new preserves an existing directory and its files', () => {
+    const directory = path.join(temp, 'existing')
+    fs.mkdirSync(directory)
+    fs.writeFileSync(path.join(directory, 'main.lt'), 'keep me')
+    const result = run(['new', 'existing', '.'])
+    assert.equal(result.status, 1)
+    assert.match(result.stderr, /Cannot create project/)
+    assert.equal(fs.readFileSync(path.join(directory, 'main.lt'), 'utf8'), 'keep me')
+})
+
+test('new reports invalid arguments and missing parent directories', () => {
+    for (const args of [[], ['name'], ['name', '.', 'extra']]) {
+        const result = run(['new', ...args])
+        assert.equal(result.status, 1)
+        assert.match(result.stderr, /Usage: lotus new NAME PATH/)
+    }
+    for (const name of ['', '.', '..', '../escape', 'nested/name', 'nested\\name']) {
+        const result = run(['new', name, '.'])
+        assert.equal(result.status, 1)
+        assert.match(result.stderr, /Expected a project name/)
+    }
+    assert.match(run(['new', 'name', 'missing-parent']).stderr, /Cannot create project/)
+    assert.match(run(['new', 'name', '']).stderr, /Expected a parent directory/)
+    assert.equal(run(['new', '--help']).status, 0)
+})
+
 for (const [args, message] of [
     [['--unknown'], 'Unknown option'],
     [['--libs'], 'Missing value'],

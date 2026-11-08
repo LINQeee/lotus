@@ -12,6 +12,7 @@
 #include "utils/utils.h"
 #include "utils/cutils.h"
 #include "llvm/llvm.h"
+#include "cli/project.h"
 
 #ifdef _WIN32
 #define EXECUTABLE_SUFFIX ".exe"
@@ -21,15 +22,18 @@
 
 typedef struct {
     const char *file, *libs, *irPath;
+    const char *projectName, *projectPath;
     bool check, debug, build, help;
 } Options;
 
 static void printHelp(void) {
     puts("Usage: lotus [run|build|check] [options] FILE\n"
+         "       lotus new NAME PATH\n"
          "\n"
          "  run              Execute through JIT (default)\n"
          "  build            Build FILE" EXECUTABLE_SUFFIX " without executing\n"
          "  check            Parse and type-check without execution\n"
+         "  new NAME PATH    Create PATH/NAME with a starter main.lt\n"
          "  --libs DIR       Native library directory (overrides LOTUS_LIBS)\n"
          "  --debug          Print AST, IR and execution timing\n"
          "  --emit-ir FILE   Save optimized LLVM IR\n"
@@ -48,6 +52,16 @@ static LLVMMemoryBufferRef readScript(const char *path) {
 
 static Options parseArgs(int argc, char **argv) {
     Options options = {.libs = getenv("LOTUS_LIBS")};
+    if (argc > 1 && !strcmp(argv[1], "new")) {
+        if (argc == 3 && (!strcmp(argv[2], "--help") || !strcmp(argv[2], "-h"))) {
+            options.help = true;
+            return options;
+        }
+        if (argc != 4) exitWithError("Usage: lotus new NAME PATH");
+        options.projectName = argv[2];
+        options.projectPath = argv[3];
+        return options;
+    }
     int first = 1;
     if (argc > 1 && (!strcmp(argv[1], "run") || !strcmp(argv[1], "build") || !strcmp(argv[1], "check"))) {
         options.check = !strcmp(argv[1], "check");
@@ -75,6 +89,10 @@ static Options parseArgs(int argc, char **argv) {
 
 int main(int argc, char **argv) {
     Options options = parseArgs(argc, argv);
+    if (options.projectName) {
+        createProject(options.projectName, options.projectPath);
+        return 0;
+    }
     if (options.help || !options.file) {
         printHelp();
         return options.help ? 0 : 1;

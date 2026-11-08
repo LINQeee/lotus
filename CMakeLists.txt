@@ -24,6 +24,7 @@ add_definitions(${LLVM_DEFINITIONS})
 
 add_executable(compiler
         src/main.c
+        src/cli/project.c
         src/llvm/executable.c
         src/lexer/lexer.c
         src/llvm/llvm.c
@@ -66,6 +67,12 @@ add_executable(compiler
         src/type_checker/type_scope.h
         src/llvm/llvm.h
 )
+
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS templates/main.lt)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/templates/main.lt" PROJECT_TEMPLATE_BYTES HEX)
+string(REGEX REPLACE "(..)" "0x\\1," PROJECT_TEMPLATE_BYTES "${PROJECT_TEMPLATE_BYTES}")
+configure_file(src/cli/project_template.h.in generated/project_template.h @ONLY)
+target_include_directories(compiler PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 if(TARGET LLVM)
     target_link_libraries(compiler PRIVATE LLVM)

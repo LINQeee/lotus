@@ -1,0 +1,8 @@
+// Welcome to Lotus!
+//
+// Get started: https://lotus-8e1f9387.mintlify.site/quickstart
+// Language guide: https://lotus-8e1f9387.mintlify.site/language/types
+//
+// Run this file: lotus run main.lt
+
+print("Hello, World!")

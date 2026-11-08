@@ -120,9 +120,10 @@ if (-not $NoPath) {
 Write-Host "`n  OK  Lotus is ready" -ForegroundColor Green
 Write-Host "  Installed in $Prefix"
 if ($NoPath) {
-    Write-Host "  PATH unchanged. Run: & '$bin\lotus.cmd' run hello.lt"
+    Write-Host "  PATH unchanged. Create your first project:"
+    Write-Host "`n    & '$bin\lotus.cmd' new hello-world ." -ForegroundColor Cyan
 } else {
-    Write-Host '  Open a new terminal, then run:'
-    Write-Host "`n    lotus run hello.lt" -ForegroundColor Cyan
+    Write-Host '  Open a new terminal and create your first project:'
+    Write-Host "`n    lotus new hello-world ." -ForegroundColor Cyan
 }
 Write-Host ''
