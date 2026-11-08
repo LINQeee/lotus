@@ -194,6 +194,8 @@ static Token readSymbol() {
     if (match("*=")) return makeToken(TOKEN_EQ_STAR, 2);
     if (match("/=")) return makeToken(TOKEN_EQ_SLASH, 2);
     if (match("%=")) return makeToken(TOKEN_EQ_PERCENT, 2);
+    if (match("++")) return makeToken(TOKEN_INCREMENT, 2);
+    if (match("--")) return makeToken(TOKEN_DECREMENT, 2);
     if (match("**")) return makeToken(TOKEN_DOUBLE_STAR, 2);
 
     switch (current()) {

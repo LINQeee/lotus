@@ -28,6 +28,8 @@ static const char *operatorName(const TokenType op) {
     switch (op) {
         case TOKEN_PLUS: return "+";
         case TOKEN_MINUS: return "-";
+        case TOKEN_INCREMENT: return "++";
+        case TOKEN_DECREMENT: return "--";
         case TOKEN_EXCLAMATION: return "!";
         case TOKEN_STAR: return "*";
         case TOKEN_SLASH: return "/";
@@ -169,7 +171,8 @@ static void printNode(const Node *node, const char *prefix, bool isLast) {
         case NODE_UNARY: {
             const UnaryNode *unary = (const UnaryNode *)node;
             printPrefix(prefix, isLast);
-            printf("Unary \"%s\" : %s\n", operatorName(unary->op), typeName(node->dataType));
+            printf("%s \"%s\" : %s\n", unary->postfix ? "Postfix" : "Unary", operatorName(unary->op),
+                   typeName(node->dataType));
             printNode(unary->operand, childPrefix, true);
             break;
         }

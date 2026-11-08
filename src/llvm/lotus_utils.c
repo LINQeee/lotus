@@ -32,6 +32,8 @@ const char *tokenTypeName(TokenType type) {
     switch (type) {
         case TOKEN_PLUS: return "+";
         case TOKEN_MINUS: return "-";
+        case TOKEN_INCREMENT: return "++";
+        case TOKEN_DECREMENT: return "--";
         case TOKEN_EXCLAMATION: return "!";
         case TOKEN_STAR: return "*";
         case TOKEN_SLASH: return "/";

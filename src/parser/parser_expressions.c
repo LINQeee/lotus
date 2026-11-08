@@ -9,6 +9,7 @@
 #include "../llvm/lotus_types.h"
 
 static Node *parsePrimary();
+static Node *parseUnary();
 
 static int getPrecedence(TokenType type) {
     switch (type) {
@@ -36,7 +37,7 @@ static int getPrecedence(TokenType type) {
 }
 
 static Node *parseExpressionPrec(const int minPrecedence) {
-    Node *left = parsePrimary();
+    Node *left = parseUnary();
 
     while (true) {
         TokenType op = current().type;
@@ -53,11 +54,22 @@ static Node *parseExpressionPrec(const int minPrecedence) {
     return left;
 }
 
-static Node *parsePrimary() {
+static Node *parsePostfix(Node *operand) {
+    while ((isCurrent(TOKEN_INCREMENT) || isCurrent(TOKEN_DECREMENT)) &&
+           current().location.line == previous().location.line) {
+        Token op = advance();
+        UnaryNode *node = newUnaryNode(op.type, operand, op.location);
+        node->postfix = true;
+        operand = (Node *)node;
+    }
+    return operand;
+}
+
+static Node *parseUnary() {
     const Token primaryT = current();
 
-    if (matchCurrent(TOKEN_EXCLAMATION))
-        return (Node *)newUnaryNode(TOKEN_EXCLAMATION, parsePrimary(), primaryT.location);
+    if (matchCurrent(TOKEN_EXCLAMATION) || matchCurrent(TOKEN_INCREMENT) || matchCurrent(TOKEN_DECREMENT))
+        return (Node *)newUnaryNode(primaryT.type, parseUnary(), primaryT.location);
 
     if (isCurrent(TOKEN_MINUS)) {
         if (peekNext().type == TOKEN_NUMBER) {
@@ -70,11 +82,17 @@ static Node *parsePrimary() {
             newNum[numLen + 1] = '\0';
             Node *node = (Node *)newNumberNode(newNum, primaryT.location);
             free(newNum);
-            return node;
+            return parsePostfix(node);
         }
         advance();
-        return (Node *)newUnaryNode(TOKEN_MINUS, parsePrimary(), primaryT.location);
+        return (Node *)newUnaryNode(TOKEN_MINUS, parseUnary(), primaryT.location);
     }
+    return parsePostfix(parsePrimary());
+}
+
+static Node *parsePrimary() {
+    const Token primaryT = current();
+
     if (isCurrent(TOKEN_IDENTIFIER) && peekNext().type == TOKEN_LPAREN) {
         Token id = advance();
         IdentifierNode *idN = newIdentifierNode(id.value, LOTUS_FUNCTION, id.location);
@@ -102,7 +120,7 @@ static Node *parsePrimary() {
         if (isDataType(current().type)) {
             LotusType type = tokenTypeToLotusType(advance().type);
             expect(TOKEN_RPAREN);
-            return (Node *)newCastNode(type, parsePrimary(), primaryT.location);
+            return (Node *)newCastNode(type, parseUnary(), primaryT.location);
         }
         Node *expr = parseExpressionPrec(0);
         expect(TOKEN_RPAREN);

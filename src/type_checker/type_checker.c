@@ -255,7 +255,10 @@ static LotusType checkExpression(TypeChecker *checker, Node *node) {
         case NODE_UNARY: {
             UnaryNode *unary = (UnaryNode *)node;
             LotusType type = checkExpression(checker, unary->operand);
-            if (unary->op == TOKEN_EXCLAMATION) {
+            if (unary->op == TOKEN_INCREMENT || unary->op == TOKEN_DECREMENT) {
+                if (unary->operand->type != NODE_IDENTIFIER || !isNumericType(type))
+                    diagnosticError(checker->scriptContent, node->location, "'++' and '--' require a numeric variable");
+            } else if (unary->op == TOKEN_EXCLAMATION) {
                 if (type != LOTUS_BOOL)
                     diagnosticError(checker->scriptContent, node->location, "unary '!' requires bool, got %s",
                                     lotusTypeName(type));
@@ -531,6 +534,7 @@ static void checkStatement(TypeChecker *checker, Node *node) {
         case NODE_FUNCTION: checkFunction(checker, (FunctionNode *)node); break;
 
         case NODE_CALL:
+        case NODE_UNARY:
         case NODE_BINARY:
         case NODE_IDENTIFIER:
         case NODE_NUMBER:

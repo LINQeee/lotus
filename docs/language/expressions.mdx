@@ -17,6 +17,7 @@ keywords: ["Lotus", "expressions"]
 | `+` | Two strings | Concatenated string |
 | Unary `-` | Numeric expression | Same numeric type |
 | Unary `!` | Boolean expression | Inverted `bool` |
+| `++`, `--` | Numeric variable | Same numeric type |
 
 ```lotus arithmetic.lt
 print(2 + 3 * 4)
@@ -42,7 +43,8 @@ From lowest to highest:
 4. `+`, `-`
 5. `*`, `/`, `%`
 6. `**`
-7. Casts, unary `-` / `!` and primary expressions
+7. Casts and prefix `-`, `!`, `++`, `--`
+8. Postfix `++`, `--` and primary expressions
 
 Binary operators at the same precedence associate left to right, **including power**. Use parentheses to express another grouping.
 
@@ -78,3 +80,18 @@ true
 ```
 
 `!` requires `bool`; numbers and strings are not converted implicitly. Unary `!` and `-` evaluate their operand once and bind tighter than binary operators. Beside `..` in a range, `!` still [excludes a boundary](/language/control-flow#include-or-exclude-boundaries).
+
+
+## Increment and decrement
+
+`++` adds one; `--` subtracts one. Prefix returns the updated value; postfix returns the old value. Both update the variable immediately.
+
+```lotus update.lt
+int x = 1
+print(++x) // 2, x = 2
+print(x++) // 2, x = 3
+print(--x) // 2, x = 2
+print(x--) // 2, x = 1
+```
+
+Only `int`, `long`, `float` and `double` variables are accepted. Literals, calls and computed expressions cannot be updated. Postfix operators must be on the same line as their operand. Write `-(-x)` for double negation: `--x` decrements `x`.

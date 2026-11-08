@@ -236,5 +236,6 @@ UnaryNode *newUnaryNode(TokenType op, Node *operand, SourceLocation location) {
     node->base = (Node){NODE_UNARY, LOTUS_UNKNOWN, location};
     node->op = op;
     node->operand = operand;
+    node->postfix = false;
     return node;
 }

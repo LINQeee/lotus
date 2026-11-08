@@ -219,10 +219,30 @@ static LLVMValueRef generateIdentifier(const char *name) {
     return value;
 }
 
+static LLVMValueRef generateUpdate(const UnaryNode *node) {
+    LLVMVariable *var = getVar(((IdentifierNode *)node->operand)->name);
+    LLVMTypeRef type = convertType(var->type);
+    LLVMValueRef value = LLVMBuildLoad2(cg->builder, type, var->storage, "update_old");
+    bool increment = node->op == TOKEN_INCREMENT;
+    LLVMValueRef updated;
+    if (var->type == LOTUS_F32 || var->type == LOTUS_F64) {
+        LLVMValueRef one = LLVMConstReal(type, 1);
+        updated =
+            increment ? LLVMBuildFAdd(cg->builder, value, one, "inc") : LLVMBuildFSub(cg->builder, value, one, "dec");
+    } else {
+        LLVMValueRef one = LLVMConstInt(type, 1, 0);
+        updated =
+            increment ? LLVMBuildAdd(cg->builder, value, one, "inc") : LLVMBuildSub(cg->builder, value, one, "dec");
+    }
+    LLVMBuildStore(cg->builder, updated, var->storage);
+    return node->postfix ? value : updated;
+}
+
 LLVMValueRef generateExpression(const Node *node) {
     switch (node->type) {
         case NODE_UNARY: {
             const UnaryNode *unary = (const UnaryNode *)node;
+            if (unary->op == TOKEN_INCREMENT || unary->op == TOKEN_DECREMENT) return generateUpdate(unary);
             LLVMValueRef value = generateExpression(unary->operand);
             if (unary->op == TOKEN_EXCLAMATION) return LLVMBuildNot(cg->builder, value, "not_tmp");
             if (node->dataType == LOTUS_F32 || node->dataType == LOTUS_F64)

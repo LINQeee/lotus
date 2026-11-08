@@ -7,7 +7,7 @@ float f = 1.5f
 double d = 2.5
 print(-x)
 print(-(x + 2))
-print(--x)
+print(-(-x))
 print(-y)
 print(-f)
 print(-d)

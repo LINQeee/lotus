@@ -65,6 +65,7 @@ typedef struct {
     TokenType op;
 
     Node *operand;
+    bool postfix;
 } UnaryNode;
 
 typedef struct {
@@ -165,6 +166,7 @@ Token expect(TokenType type);
 bool isCurrent(TokenType type);
 bool matchCurrent(TokenType type);
 Token peekNext();
+Token previous();
 
 ProgramNode *buildAST(const Token *tokensToParse);
 

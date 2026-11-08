@@ -14,6 +14,9 @@ Token current() {
 Token advance() {
     return tokens[pos++];
 }
+Token previous() {
+    return tokens[pos - 1];
+}
 Token peekNext() {
     return tokens[pos + 1];
 }
