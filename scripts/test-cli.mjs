@@ -9,6 +9,7 @@ import {fileURLToPath} from 'node:url'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const compiler = path.resolve(process.env.LOTUS_COMPILER ?? path.join(root, 'cmake-build-debug/lotus'))
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'lotus-cli-'))
+const suffix = process.platform === 'win32' ? '.exe' : '.out'
 const source = path.join(temp, 'hello world.lt')
 fs.writeFileSync(source, 'fn twice(n: int): int { return n * 2 }\nprint(twice(21))\n')
 after(() => fs.rmSync(temp, {recursive: true, force: true}))
@@ -18,7 +19,7 @@ const run = (args, env = {}) => spawnSync(compiler, args, {
 
 const expectOutput = result => {
     assert.equal(result.status, 0, result.stderr)
-    assert.equal(result.stdout, '42\n')
+    assert.equal(result.stdout.replaceAll('\r\n', '\n'), '42\n')
     assert.equal(result.stderr, '')
 }
 
@@ -60,7 +61,7 @@ test('debug and IR output are explicit', () => {
     const output = path.join(temp, 'saved.ll')
     const result = run(['run', '--debug', '--emit-ir', output, source])
     assert.equal(result.status, 0, result.stderr)
-    assert.match(result.stdout, /###### RUNNING main\(\):\n42\n/)
+    assert.match(result.stdout, /###### RUNNING main\(\):\r?\n42\r?\n/)
     assert.match(fs.readFileSync(output, 'utf8'), /define[^\n]* i32 @main/)
 })
 
@@ -74,14 +75,14 @@ test('JIT does not create an executable', () => {
     fs.copyFileSync(source, file)
     const result = run(['run', file])
     expectOutput(result)
-    assert.equal(fs.existsSync(`${file}.out`), false)
+    assert.equal(fs.existsSync(`${file}${suffix}`), false)
 })
 
 test('build creates an executable without running it', () => {
     const result = run(['build', source])
     assert.equal(result.status, 0, result.stderr)
     assert.equal(result.stdout, '')
-    const executable = spawnSync(`${source}.out`, {cwd: '/', encoding: 'utf8'})
+    const executable = spawnSync(`${source}${suffix}`, {cwd: os.tmpdir(), encoding: 'utf8'})
     expectOutput(executable)
 })
 
@@ -127,4 +128,43 @@ test('build exports IR without executing', () => {
     assert.equal(result.status, 0, result.stderr)
     assert.equal(result.stdout, '')
     assert.match(fs.readFileSync(output, 'utf8'), /define[^\n]* i32 @main/)
+})
+
+test('native arguments keep their values across the platform ABI', () => {
+    const file = path.join(temp, 'native values.lt')
+    fs.writeFileSync(file, `
+print(1, "|", 2l, "|", 3.5f, "|", 4.5, "|", true, "|", "hello")
+print(toBool(1), toBool(0), toBool("true"), toBool(1.5))
+long big = 9223372036854775807l
+print(big)
+double exponent = (double)toInt("3")
+print(2.0 ** exponent)
+string value = "a"
+for i in 1..100 value += "b"
+print(value == "a" + value)
+`)
+    const expected = '1|2|3.500000|4.500000|true|hello\ntruefalsetruetrue\n9223372036854775807\n8.000000\nfalse\n'
+    const jit = run(['run', file])
+    assert.equal(jit.status, 0, jit.stderr)
+    assert.equal(jit.stdout.replaceAll('\r\n', '\n'), expected)
+    const build = run(['build', file])
+    assert.equal(build.status, 0, build.stderr)
+    const executable = spawnSync(`${file}${suffix}`, {cwd: os.tmpdir(), encoding: 'utf8'})
+    assert.equal(executable.status, 0, executable.stderr)
+    assert.equal(executable.stdout.replaceAll('\r\n', '\n'), expected)
+})
+
+
+test('UTF-8 paths and runtime strings work with redirected input', () => {
+    const file = path.join(temp, 'пример.lt')
+    fs.writeFileSync(file, 'print(input() + "世界")\n')
+    const options = {cwd: temp, encoding: 'utf8', input: 'привет\n', env: {...process.env, LOTUS_LIBS: path.join(root, 'libs')}}
+    const jit = spawnSync(compiler, ['run', file], options)
+    assert.equal(jit.status, 0, jit.stderr)
+    assert.equal(jit.stdout.replaceAll('\r\n', '\n'), 'привет世界\n')
+    const build = run(['build', file])
+    assert.equal(build.status, 0, build.stderr)
+    const executable = spawnSync(`${file}${suffix}`, [], options)
+    assert.equal(executable.status, 0, executable.stderr)
+    assert.equal(executable.stdout.replaceAll('\r\n', '\n'), 'привет世界\n')
 })
