@@ -5,8 +5,11 @@ src/deprecated_or_experiment_files
 libs/**
 .tools/
 /cmake-build-debug/
-/lotus-core/cmake-build-debug/
 /tests/.results/
+node_modules/
+/docs/.mint/
+/docs/.mintlify/
+npm-debug.log*
 
 *.exe
 *.out
