@@ -1,14 +1,2 @@
-//int a = 5
-//int b = 0
-//if (a == 5) {
-//    int b = 5
-//    print(b)
-//}
-//
-//print(b)
-int a = 10
-fn sum() {
-    print(a)
-}
-
-print(a)
+// write your code here and run it using cli
+print('Hello World!')
