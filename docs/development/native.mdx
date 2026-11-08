@@ -49,9 +49,9 @@ The loader calls each library's `lotusRegister` entry point. Registered function
 | `bool` | `LOTUS_BOOL` | `bool` |
 | `string` | `LOTUS_STRING` | `LotusString *` |
 | No result | `LOTUS_VOID` | `void` |
-| Boxed native argument | `LOTUS_ANY` | `LotusValue` with type tag and payload |
+| Boxed native argument | `LOTUS_ANY` | `const LotusValue *` with type tag and payload |
 
-`LOTUS_FUNCTION(name, result, args...)` registers a fixed signature. `LOTUS_VARIADIC` uses a leading argument count; follow `print` in `lotus-core/src/io.c` for its ABI. Native `any` parameters do not enable implicit language casts.
+`LOTUS_FUNCTION(name, result, args...)` registers a fixed signature. `LOTUS_VARIADIC` uses a leading argument count; follow `print` in `lotus-core/src/io.c` for its ABI. Boxed arguments are passed by pointer on every platform to avoid platform-specific struct calling conventions. The pointer is borrowed for the call; rebuild existing native libraries for this ABI. Native `any` parameters do not enable implicit language casts.
 
 ## String ownership
 
