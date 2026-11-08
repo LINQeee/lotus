@@ -1,0 +1,71 @@
+---
+title: "Quickstart"
+description: "Build Lotus and run a small program on macOS."
+---
+
+Build Lotus and its native runtime, then run a program from the compiler checkout.
+
+## Requirements
+
+| Tool | Requirement |
+| --- | --- |
+| OS | macOS; the current backend uses macOS APIs |
+| C toolchain | C11 compiler, such as Clang |
+| CMake | 4.2+ builds both projects; the compiler alone requires 3.25+ |
+| LLVM | Development installation; CMake currently points to `/opt/homebrew/opt/llvm/lib/cmake/llvm` |
+
+<Steps>
+<Step title="Get the source">
+
+```sh
+git clone --recurse-submodules https://github.com/LINQeee/lotus.git
+cd lotus
+```
+
+</Step>
+<Step title="Build both projects">
+
+Run from the repository root. If LLVM is elsewhere, update `LLVM_DIR` in the root `CMakeLists.txt` first.
+
+```sh
+cmake -S . -B cmake-build-debug
+cmake --build cmake-build-debug --target compiler
+cmake -S lotus-core -B lotus-core/cmake-build-debug
+cmake --build lotus-core/cmake-build-debug --target lotus_core
+```
+
+The runtime library is written to `libs/`. For an existing clone, initialize missing submodules with `git submodule update --init --recursive`.
+
+</Step>
+<Step title="Write test.lt">
+
+Create `test.lt` in the repository root:
+
+```text test.lt
+for i in 1..3 print(i)
+```
+
+```text Output
+1
+2
+3
+```
+
+</Step>
+<Step title="Run from the build directory">
+
+```sh
+cd cmake-build-debug
+./compiler
+```
+
+Look between `RUNNING main()` and `EXECUTED MAIN FUNCTION` for your program's output. The compiler also prints AST and IR diagnostics and writes `output.ll` in the working directory.
+
+</Step>
+</Steps>
+
+<Warning>
+The executable currently reads `../test.lt` and loads `../libs` relative to the **working directory**. There is no source-file command-line argument yet.
+</Warning>
+
+For development checks, see [the contributor workflow](/development/workflow).

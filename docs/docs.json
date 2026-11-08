@@ -1,0 +1,83 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Lotus",
+  "colors": {
+    "primary": "#7C3AED",
+    "light": "#A78BFA",
+    "dark": "#7C3AED"
+  },
+  "favicon": "/assets/favicon.svg",
+  "logo": {
+    "light": "/assets/logo-light.svg",
+    "dark": "/assets/logo-dark.svg"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Language",
+        "groups": [
+          {
+            "group": "Start here",
+            "pages": [
+              "index",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Language guide",
+            "pages": [
+              "language/types",
+              "language/variables",
+              "language/expressions",
+              "language/functions",
+              "language/control-flow",
+              "language/strings"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "runtime",
+              "status"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Contribute",
+        "groups": [
+          {
+            "group": "Development",
+            "pages": [
+              "development/workflow",
+              "development/tests",
+              "development/benchmarks",
+              "development/native",
+              "development/compiler"
+            ]
+          },
+          {
+            "group": "Documentation",
+            "pages": [
+              "development/documentation"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/LINQeee/lotus"
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/LINQeee/lotus"
+    }
+  }
+}

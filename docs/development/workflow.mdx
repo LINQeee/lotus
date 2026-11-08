@@ -1,0 +1,82 @@
+---
+title: "Contributor workflow"
+description: "Build, format and verify a focused change."
+---
+
+Read `AGENTS.md` before editing. Keep changes focused and follow the surrounding C style.
+
+## Repositories
+
+| Checkout | Repository |
+| --- | --- |
+| Compiler and canonical docs | [lotus](https://github.com/LINQeee/lotus) |
+| `lotus-core/` submodule | [lotus-core](https://github.com/LINQeee/lotus-core) |
+| `tools/lotus-test/` submodule | [lotus-test](https://github.com/LINQeee/lotus-test) |
+
+Initialize with `git submodule update --init --recursive`. Commit and push library/runner changes in their own repositories, then commit the updated submodule pointers in the compiler. Each pointer pins a compatible revision; it is not an ignored directory. After pulling a pointer update, run the same submodule command and install changed runner dependencies with `npm ci --prefix tools/lotus-test`.
+
+## Build and check
+
+```sh
+cmake --build cmake-build-debug --target compiler
+cmake --build lotus-core/cmake-build-debug --target lotus_core
+lotus-test
+./scripts/style.sh --check
+```
+
+For initial configuration, follow [Quickstart](/quickstart) and install the [test runner](/development/tests). Run targeted tests while iterating, such as `lotus-test loops/for`.
+
+## Tool configuration
+
+Shell scripts use `lotus-scripts-config.json`; test settings belong only in `lotus-test-config.json`.
+
+```json lotus-scripts-config.json
+{
+  "cmake": "cmake"
+}
+```
+
+For shell scripts, selection order is environment `CMAKE`, config `cmake`, then `cmake` from PATH. A configured path is relative to the project root. Replace machine-specific paths in either config with your installation. Hooks launched by an IDE use that IDE's environment.
+
+## Formatting and includes
+
+The project pins **clang-format 22** and **include-what-you-use 0.26** in `.clang-format-version` and `.iwyu-version`.
+
+```sh
+./scripts/install-iwyu.sh
+./scripts/install-hooks.sh
+./scripts/style.sh --write
+```
+
+| Command | Purpose |
+| --- | --- |
+| `style.sh --write` | Remove unused includes, add direct dependencies, then format |
+| `style.sh --check` | Check both without rewriting files |
+| `format.sh --write` / `--check` | Formatting only |
+| `includes.sh --write` / `--check` | Include analysis only |
+
+Formatting covers non-ignored C headers/sources in `src/` and `lotus-core/`; generated builds and deprecated experiments are excluded. Lotus `.lt` files are not formatted.
+
+IWYU checks CMake-listed sources and their headers for the current platform. Register new C sources in the appropriate CMake target. `.iwyu.imp` maps Apple SDK internals to public headers. Intentional side-effect includes may use `IWYU pragma: keep` with an explanation.
+
+<Accordion title="Tool locations and installation">
+The installer builds IWYU under ignored `.tools/` using LLVM 22, CMake, make and Python 3. Python is required by IWYU's tools, not by the Lotus test runner.
+
+Overrides: `CLANG_FORMAT`, `LLVM_CONFIG`, `CMAKE` and `IWYU_BINARY`. A custom IWYU installation must include matching `iwyu_tool.py` and `fix_includes.py` beside the binary. Cleanup is verified in a temporary tree before being applied.
+</Accordion>
+
+## Git checks
+
+- **Pre-commit:** checks formatting/includes in the staged snapshot, then runs the full test suite from the working tree. It does not rewrite or stage source files.
+- **Pre-push:** checks formatting/includes in outgoing commits, then runs all tests from the current working tree. A later formatting fix does not repair an invalid intermediate commit.
+- Earlier history without the relevant version configuration is skipped; branch/tag tips still need to pass. Ref deletions need no checks.
+
+<Note>
+Any failed check blocks the operation. Hooks use the local runner submodule, not a global installation. Tests do not validate a separate staged/commit snapshot. Hooks are local and can be bypassed; shared enforcement needs required CI checks for style and tests.
+</Note>
+
+## CLion
+
+Select **Settings → Editor → Code Style → C/C++ → General → Clang-Format**. Use the pinned formatter, not another formatting engine. Select the executable from your LLVM installation.
+
+Enable **Tools → Actions on Save → Reformat code** if desired. Review changes before staging.

@@ -1,0 +1,56 @@
+---
+title: "Maintain the docs"
+description: "Preview, check and publish the Markdown sources."
+---
+
+`docs/` in the compiler repository is the single source of documentation for Lotus, lotus-core and lotus-test. Pages are MDX; navigation, theme and colors live in `docs.json`. READMEs contain only purpose and links here.
+
+## Preview locally
+
+Requires Node.js 20.17+ and npm. From the repository root:
+
+```sh
+cd docs
+npm ci
+npm run dev
+```
+
+Open the local URL printed by Mintlify. `mint` is pinned in `package.json` and `package-lock.json`; there is no global installation requirement.
+
+## Check a change
+
+```sh
+npm run check
+```
+
+This validates Mintlify content/configuration and checks links. For a language example, also run it with the compiler or add an appropriate `.lt` test.
+
+## Writing style
+
+- One page, one topic. Start with the action and a short working example.
+- Keep explanations brief; retain constraints that change behavior.
+- Put expected output near the example. Use tables for comparisons.
+- Use cards for navigation, steps for procedures and callouts for real limitations.
+- Link to the source of a rule instead of repeating it across pages.
+- Follow Kotlin, React and Qwik's focused guides; keep tutorials separate from reference and contributor details.
+
+Follow the full rules in the project's `AGENTS.md`. Lotus examples currently use plain code blocks labelled with `.lt` filenames; do not claim another language's highlighting as Lotus syntax support.
+
+## Connect Mintlify
+
+<Steps>
+<Step title="Commit the site sources">
+Run `npm run check` in `docs/`. Commit and push `docs/`, including MDX pages, `docs.json`, assets, `package.json` and `package-lock.json`. The root `.gitignore` excludes `node_modules/`, `.mint/` and `.mintlify/` caches.
+</Step>
+<Step title="Connect the repository">
+Open Mintlify's [Git settings](https://app.mintlify.com/settings/git), authorize its GitHub App for `LINQeee/lotus` and select the production branch. If switching from a Mintlify-hosted repository, download its content before replacing the source.
+</Step>
+<Step title="Set the documentation path">
+In Git settings, enable **docs.json is in a subdirectory** and set the path to `/docs`. Saving starts a deployment from that path.
+</Step>
+<Step title="Verify the published site">
+Wait for the deployment to succeed and open the URL shown by Mintlify. Check navigation, code blocks and light/dark appearance. Future pushes to the connected branch update the site. Add a custom domain later if needed.
+</Step>
+</Steps>
+
+Local preview does not publish a site. See Mintlify's [GitHub connection](https://www.mintlify.com/docs/deploy/github) and [subdirectory setup](https://www.mintlify.com/docs/deploy/monorepo) for current dashboard instructions. Until the site is live, README links point to the canonical MDX pages in GitHub; switch them to the verified site URLs after publishing.

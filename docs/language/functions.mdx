@@ -1,0 +1,59 @@
+---
+title: "Functions and returns"
+description: "Typed parameters, explicit results and checked return paths."
+---
+
+```text functions.lt
+fn sum(a: int, b: int): int {
+    return a + b
+}
+
+print(sum(20, 22))
+```
+
+```text Output
+42
+```
+
+- Functions are declared at top level. Calls can precede their declaration.
+- Parameters and result types are explicit; argument types must match exactly.
+- Recursion and mutual recursion are supported.
+- Arguments are evaluated left to right. Functions can read and update visible top-level variables.
+- Function names must be unique and cannot replace registered native functions.
+- Nested functions and closures are not supported.
+
+## Return without a value
+
+Omit the result type for a void function:
+
+```text early-return.lt
+fn greet(enabled: bool) {
+    if enabled {
+        print("hello")
+        return
+    }
+    print("disabled")
+}
+
+greet(true)
+```
+
+```text Output
+hello
+```
+
+A newline, `}`, `else` or end of file immediately after `return` ends a bare return. Start a multiline result on the same line, for example `return (`.
+
+## Return paths
+
+A value-returning function must not reach its end without a result. Void functions may fall through.
+
+| Path | Behavior |
+| --- | --- |
+| Both `if` branches return | Accepted |
+| Conditional return followed by a fallback return | Accepted |
+| `while true` with no reachable break | May never return; accepted |
+| Return only inside a `for` | Not sufficient; the range is treated as possibly empty |
+| Missing return on a reachable path | Type error before IR generation |
+
+Literal `true`/`false` conditions and leveled loop jumps are analyzed. General constant evaluation and termination proofs are not performed. Unreachable statements still undergo type checking.

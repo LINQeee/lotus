@@ -1,0 +1,42 @@
+---
+title: "Variables and scope"
+description: "Declare mutable values and keep names local to their blocks."
+---
+
+```text variables.lt
+int count = 2
+count += 3
+string label = "Lotus"
+label += "!"
+print(label, count)
+```
+
+```text Output
+Lotus!5
+```
+
+- Declare with `type name = expression`; initialization is required.
+- Assign with `=` or use `+=`, `-=`, `*=`, `/=`, `%=` where the underlying operation supports the type.
+- A variable's type stays fixed. There is no immutable declaration form yet.
+
+## Scope and shadowing
+
+Each `if`/`else` branch and loop body has a scope, including a single-statement body without braces. Functions have their own local scope.
+
+```text shadowing.lt
+int value = 10
+if true {
+    int value = value + 1
+    print(value)
+}
+print(value)
+```
+
+```text Output
+11
+10
+```
+
+The initializer sees the outer name; the new binding starts after initialization. Inner bindings may have different types. Assignment without a new declaration updates the nearest visible binding.
+
+Redeclaring a name in the same scope is an error. Parameters share the function body's scope. Loop counters are local to their loop and can be assigned.

@@ -1,0 +1,91 @@
+---
+title: "Native C functions"
+description: "Register functions and follow the string ownership contract."
+---
+
+Include `lotus-core/lotus.h`, export functions with the names you register, and provide a `lotusRegister` entry point through the macros.
+
+```c example.c
+#include "lotus.h"
+
+int twice(int value) {
+    return value * 2;
+}
+
+LOTUS_NATIVE_LIBRARY {
+    LOTUS_FUNCTION(twice, LOTUS_I32, LOTUS_I32);
+}
+```
+
+Build a dynamic library and place it in `libs/`:
+
+```sh
+clang -dynamiclib -I lotus-core example.c -o libs/libexample.dylib
+```
+
+The compiler loads libraries from `../libs` relative to its working directory. Registered functions can then be called directly from Lotus.
+
+## Develop lotus-core
+
+`lotus-core` is a [separate repository](/development/workflow#repositories) mounted inside the compiler checkout.
+
+| Path in lotus-core | Purpose |
+| --- | --- |
+| `lotus.h` | Native ABI, value types and registration macros |
+| `library.c` | Registration entry point |
+| `src/` | I/O, conversions and random numbers |
+| `internal/` | Compiler runtime functions with `_` names |
+| `utils/` | C helpers used to implement the library |
+
+Add implementation files to the `lotus_core` target in `CMakeLists.txt`. Register language-callable functions in `library.c`; C-only helpers need no registration. Keep registered symbols exported: the current JIT resolves them by name.
+
+From a standalone lotus-core checkout:
+
+```sh
+cmake -S . -B build
+cmake --build build --target lotus_core
+```
+
+This requires CMake 4.2+ and C11 and writes the library to `../libs/`. Test changes with [the language runner](/development/tests) from a compiler checkout.
+
+## Types and registration
+
+| Lotus type | Native tag | Representation |
+| --- | --- | --- |
+| `int` | `LOTUS_I32` | 32-bit integer |
+| `long` | `LOTUS_I64` | 64-bit integer |
+| `float` | `LOTUS_F32` | C `float` |
+| `double` | `LOTUS_F64` | C `double` |
+| `bool` | `LOTUS_BOOL` | C `bool` |
+| `string` | `LOTUS_STRING` | `LotusString *` |
+| No result | `LOTUS_VOID` | C `void` |
+| Native boxed argument | `LOTUS_ANY` | `LotusValue` with a type tag and payload |
+
+`LOTUS_FUNCTION(name, result, args...)` registers a fixed signature. `LOTUS_VARIADIC` registers a variadic function; see `print` in `lotus-core/src/io.c` for the current count/argument ABI. Keep type tags and layouts synchronized with the compiler.
+
+## String ownership
+
+| Operation | Responsibility |
+| --- | --- |
+| Receive a string argument | Borrow it for the duration of the call |
+| Store a borrowed string beyond the call | Retain it, then release when done |
+| Return a new string | Transfer one owned reference |
+| Return a borrowed argument | Retain it before returning |
+| Receive a boxed string in `LotusValue` | Same borrowed-argument rules |
+
+```c
+#include "internal/string_runtime.h"
+
+LotusString *identity(LotusString *value) {
+    _stringRetain(value);
+    return value;
+}
+```
+
+Inside lotus-core, include `utils/string_utils.h` to use `lotusStringCreate(length)`. This helper is not registered with Lotus or exported from the shared library. It allocates an owned string with reference count one and space for a trailing NUL. Fill its bytes before returning it. `_stringRelease` frees dynamic strings after the last reference is dropped.
+
+<Warning>
+Do not mutate shared strings or return a pointer to stack storage. A zero reference count means an immortal static string, not a dynamic string waiting to be retained. Reference counting is single-threaded.
+</Warning>
+
+`LotusString` contains `length`, `data` and `references`. Rebuild the compiler, runtime and extensions together when its ABI changes.

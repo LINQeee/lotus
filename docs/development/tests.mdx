@@ -1,0 +1,146 @@
+---
+title: "Language tests"
+description: "One .lt program, one expected result."
+---
+
+Lotus integration tests compile and run `.lt` programs against expectations in comments. Requires Node.js 20+ and the [macOS toolchain](/quickstart).
+
+## Run the local checkout
+
+From the compiler root:
+
+```sh
+git submodule update --init --recursive
+npm ci --prefix tools/lotus-test
+node tools/lotus-test/bin/lotus-test.mjs
+node tools/lotus-test/bin/lotus-test.mjs loops/for
+```
+
+To use the local checkout as the global `lotus-test` command:
+
+```sh
+cd tools/lotus-test
+npm link
+```
+
+Local edits apply immediately; run `npm ci` after dependency changes. To install or update a separate GitHub copy:
+
+```sh
+npm install -g git+https://github.com/LINQeee/lotus-test.git
+```
+
+For a specific Git tag, append `#TAG`, replacing `TAG` with its name.
+
+## Configuration
+
+`lotus-test-config.json` is found from the working directory upward. Config paths are relative to this file; CLI `--compiler PATH` is relative to the working directory. All keys are required.
+
+| Key | Meaning |
+| --- | --- |
+| `testsDir`, `resultsDir` | Test discovery and output directories |
+| `compiler` | Compiler executable |
+| `cmake` | Command from PATH or executable path; environment `CMAKE` overrides it |
+| `runtimeBuild`, `runtimeLibrary` | Runtime build directory and shared library |
+| `timeout`, `setupTimeout` | Positive deadlines in seconds for a test and each setup command |
+| `build`, `verbose` | Build before testing; print individual results |
+| `runtime` | Default `normal`, `none` or `memory` runtime |
+| `entryAllocas` | Require allocas in function entry blocks |
+
+CLI overrides config; test directives override `runtime` and `entryAllocas`. Defaults: build both projects, normal runtime, entry allocas checked, 10-second test and 120-second setup deadlines.
+
+## Write a test
+
+<Tabs>
+<Tab title="Output">
+
+```text ascending-iterating-for-loop.lt
+// expect: "1\n2\n3\n"
+
+for i in 1..3 print(i)
+```
+
+</Tab>
+<Tab title="Diagnostic">
+
+```text implicit-cast.lt
+// error: "cannot assign float to double"
+
+double value = 2f
+```
+
+</Tab>
+<Tab title="Input">
+
+```text echo.lt
+// input: "hello\n"
+// expect: "hello\n"
+
+print(input())
+```
+
+</Tab>
+</Tabs>
+
+Place cases under `tests/<feature>/`. Each runs in a separate process with a temporary source; your root `test.lt` is unchanged.
+
+## Results
+
+A spinner shows the current test, then a status line per root group. Failures show details; `--verbose` lists every result. Full output goes to logs.
+
+| Option | Effect |
+| --- | --- |
+| `-v`, `--verbose` | Print every test result |
+| `--no-build` | Reuse existing binaries |
+| `--compiler PATH` | Select another compiler build |
+| `--timeout SECONDS` | Override the per-test deadline |
+| `-h`, `--help` | Show usage inside a configured project |
+
+Each run gets a directory under `resultsDir`, normally `tests/.results/`. Colors stay enabled; redirection and `TERM=dumb` disable animation. Exit codes: **0** pass, **1** failed tests, **2** setup/selection error.
+
+## Expectations and checks
+
+All directive values use JSON. Exactly one `expect` or `error` is required.
+
+| Directive | Checks |
+| --- | --- |
+| `expect: "..."` | Exact program stdout, including spaces and final newlines |
+| `error: "..."` | Exit 1 and diagnostic substring before program execution |
+| `input: "..."` | Stdin contents, followed by EOF; `\u0000` represents NUL |
+| `ir: ["..."]` | Required substrings in unoptimized generated IR |
+| `log: ["..."]` / `no-log: ["..."]` | Required / forbidden stdout or stderr text |
+| `entry-allocas: true` | Stack allocations only in function entry blocks; enabled by default, set `false` to disable |
+| `runtime: "normal"` | Use the configured runtime library |
+| `runtime: "none"` | No runtime, for missing-helper diagnostics |
+| `runtime: "memory"` | Instrumented string runtime |
+
+`DIRECTIVE ERROR` reports file, line, comment and reason. Unknown/duplicate keys, invalid JSON/types and missing/conflicting expectations fail that test without executing it; others continue.
+
+`expect` excludes compiler diagnostics. Stderr is checked only by log assertions. Crashes, timeouts and missing execution markers always fail.
+
+## Coverage
+
+| Root group | Focus |
+| --- | --- |
+| `lexer`, `parser` | Tokens, comments, suffixes, escapes and malformed input |
+| `types`, `expressions` | Cast matrix, operators, types and precedence |
+| `variables`, `scopes` | Assignment, shadowing and name resolution |
+| `conditionals`, `loops` | Branches, ranges, mutable counters and leveled jumps |
+| `functions` | Calls, recursion, return types and return paths |
+| `strings`, `native` | String behavior, runtime functions, input and boxing |
+| `memory` | ARC across aliases, calls, returns, scopes and repeated allocation |
+
+<Note>
+Memory mode rebuilds the project's `lotus_core` CMake target with ASan/UBSan and malloc/free counters, even with `--no-build`. New sources and registrations are picked up automatically. `CC` selects Clang. LeakSanitizer is disabled; counters track runtime allocations. JIT code is not sanitizer-instrumented. These tests do not imply complete compiler-memory cleanup or 100% C line coverage.
+</Note>
+
+## Runner development
+
+Add language cases under `tests/`; change `tools/lotus-test/` only when runner behavior needs to change.
+
+| Module | Responsibility |
+| --- | --- |
+| `config.mjs`, `schema.mjs` | CLI options, config lookup and validation |
+| `checks.mjs` | Directives, output, diagnostics and IR assertions |
+| `process.mjs`, `runtime.mjs` | Subprocesses, timeouts, builds and runtime selection |
+| `reporter.mjs`, `run.mjs` | Terminal results and orchestration |
+| `memory/`, `string-memory-runtime.c` | Instrumented runtime build and test-only native functions |

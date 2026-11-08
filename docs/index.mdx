@@ -1,0 +1,37 @@
+---
+title: "Lotus"
+description: "A concise, statically typed language with LLVM execution."
+---
+
+Write explicit types, small functions and range loops. Run them through LLVM and use native C functions when needed.
+
+```text hello.lt
+fn sum(a: int, b: int): int {
+    return a + b
+}
+
+print(sum(20, 22))
+```
+
+```text Output
+42
+```
+
+<CardGroup cols={2}>
+  <Card title="Run your first program" icon="terminal" href="/quickstart">
+    Build the compiler and runtime on macOS.
+  </Card>
+  <Card title="Explore the language" icon="code" href="/language/types">
+    Types, explicit casts, functions and loops.
+  </Card>
+  <Card title="Use range loops" icon="repeat" href="/language/control-flow">
+    Forward and reverse iteration with explicit boundaries.
+  </Card>
+  <Card title="Contribute a test" icon="flask" href="/development/tests">
+    A small `.lt` file and an expected result.
+  </Card>
+</CardGroup>
+
+<Note>
+Lotus is pre-alpha. Syntax and native interfaces can change. See [current support](/status) before relying on a feature.
+</Note>

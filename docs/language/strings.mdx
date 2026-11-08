@@ -1,0 +1,36 @@
+---
+title: "Strings"
+description: "Concatenate, compare and share strings without manual cleanup."
+---
+
+```text strings.lt
+string first = "hello"
+string second = first
+first += "!"
+print(first)
+print(second)
+print(first == second)
+```
+
+```text Output
+hello!
+hello
+false
+```
+
+- Use single or double quotes. Escapes include `\n`, `\t`, `\\` and the matching quote.
+- Other backslash sequences remain literal; `\0` and `\u...` are not string-literal escapes.
+- `+` creates a concatenation. Reassigning a variable does not change its aliases.
+- `==` and `!=` compare length and bytes, including embedded NULs from input.
+- Comparison is case-sensitive and does not normalize Unicode.
+- Ordering comparisons and character indexing are not supported.
+
+## Automatic lifetime
+
+Strings use reference counting. A variable holds its string until reassignment or scope exit. Temporary expressions release references after use; returns and loop jumps also perform cleanup.
+
+<Note>
+Literal strings live for the program's lifetime. This is single-threaded string ownership, not a general garbage collector or exact last-use analysis.
+</Note>
+
+See [runtime I/O](/runtime) for `input` and `print`, or [native ownership](/development/native) when writing C extensions.

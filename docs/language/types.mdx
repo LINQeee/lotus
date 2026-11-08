@@ -1,0 +1,67 @@
+---
+title: "Types and casts"
+description: "Keep types explicit, including numeric conversions."
+---
+
+Lotus has six value types. Write types explicitly and use casts for numeric conversions.
+
+| Type | Meaning | Example |
+| --- | --- | --- |
+| `int` | Signed 32-bit integer | `42` |
+| `long` | Signed 64-bit integer | `42L` |
+| `float` | 32-bit floating-point value | `2.5f` |
+| `double` | 64-bit floating-point value | `2.5` or `2.5d` |
+| `bool` | Boolean | `true`, `false` |
+| `string` | String managed by the runtime | `"hello"` |
+
+Numeric suffixes also accept uppercase/lowercase variants: `L/l`, `F/f`, `D/d`.
+
+## Source syntax
+
+- Identifiers use letters, digits and `_`; the first character cannot be a digit. Names are case-sensitive; keywords cannot be names.
+- Write statements without semicolons. Whitespace separates tokens; a newline also matters for [bare return](/language/functions#return-without-a-value).
+- Comments use `//` to the end of the line or `/* ... */` for a block.
+- Numeric literals use decimal notation. Scientific notation, hexadecimal and digit separators are not supported.
+
+## Explicit conversions
+
+Declarations, assignments, arguments and returns require matching types. Numeric operators also require matching operand types.
+
+```text casts.lt
+double value = (double)2.2f
+long total = (long)(2 + 2)
+print(value)
+print(total)
+```
+
+```text Output
+2.200000
+4
+```
+
+| Source | Allowed targets |
+| --- | --- |
+| `int` | `int`, `long`, `float`, `double` |
+| `long` | `long`, `float`, `double` |
+| `float` | `float`, `double` |
+| `double` | `double` |
+
+Integer-to-floating conversions may round large values. Narrowing, floating-to-integer and casts involving strings or booleans are not supported.
+
+## Cast the operation you intend
+
+```text division.lt
+print((double)(5 / 2))
+print((double)5 / (double)2)
+```
+
+```text Output
+2.000000
+2.500000
+```
+
+Casts bind tighter than binary operators. `(long)2 + 2` is a type error; `(long)(2 + 2)` converts the sum. Chained casts such as `(double)(long)2` are allowed.
+
+<Note>
+A native `any` parameter preserves the argument's type tag. Its internal representation does not enable implicit casts in Lotus.
+</Note>

@@ -1,0 +1,9 @@
+{
+  "name": "lotus-docs",
+  "private": true,
+  "scripts": {
+    "dev": "mint dev --no-open --telemetry false",
+    "check": "mint validate --telemetry false && mint broken-links --telemetry false"
+  },
+  "devDependencies": { "mint": "4.3.6" }
+}
