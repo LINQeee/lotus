@@ -19,4 +19,4 @@ fi
 
 chmod +x scripts/*.sh .githooks/pre-commit .githooks/pre-push
 git config --local core.hooksPath .githooks
-echo "Enabled local pre-commit and pre-push formatting and include checks."
+echo "Enabled local pre-commit and pre-push formatting, include checks and the full Lotus test suite."

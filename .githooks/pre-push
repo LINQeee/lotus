@@ -35,3 +35,8 @@ while IFS= read -r commit; do
         "$root/scripts/includes.sh" --ref "$commit"
     fi
 done < "$tempDir/unique"
+
+if [[ -s "$tempDir/tips" ]]; then
+    echo "Running all Lotus tests before push..."
+    node tools/lotus-test/bin/lotus-test.mjs
+fi
