@@ -3,7 +3,7 @@
 
 #include <llvm-c/Core.h>
 #include <llvm-c/ExecutionEngine.h>
-#include <mach/mach_time.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -77,14 +77,12 @@ int codegenProgram(const ProgramNode *program, bool debug, const char *irPath, c
     int (*mainFunc)() = (int (*)())addr;
     if (!addr) exitWithError("JIT did not produce main");
     if (debug) printf("###### RUNNING main():\n");
-    uint64_t start = mach_absolute_time();
+    struct timespec start, end;
+    timespec_get(&start, TIME_UTC);
     int result = mainFunc();
-    uint64_t end = mach_absolute_time();
-    mach_timebase_info_data_t timebase;
-    mach_timebase_info(&timebase);
-    uint64_t elapsed_ticks = end - start;
-    uint64_t elapsed_ms = (elapsed_ticks * timebase.numer) / (timebase.denom * 1000000);
-    if (debug) printf("\n\n###### EXECUTED MAIN FUNCTION IN %llu ms:\nExit code: %d\n", elapsed_ms, result);
+    timespec_get(&end, TIME_UTC);
+    double elapsed = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_nsec - start.tv_nsec) / 1000000.0;
+    if (debug) printf("\n\n###### EXECUTED MAIN FUNCTION IN %.0f ms:\nExit code: %d\n", elapsed, result);
     LLVMDisposeExecutionEngine(engine);
     return result;
 }

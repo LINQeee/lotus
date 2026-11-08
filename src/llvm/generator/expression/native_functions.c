@@ -14,6 +14,7 @@
 #include "../../../parser/parser.h"
 #include "functions.h"
 #include <llvm-c/Core.h>
+#include <llvm-c/Support.h>
 #include <llvm-c/Types.h>
 
 LLVMNativeFunction *findNative(const char *name) {
@@ -47,7 +48,7 @@ LLVMTypeRef convertType(const LotusType type) {
         case LOTUS_F64: return cg->f64Type;
         case LOTUS_STRING: return LLVMPointerType(cg->i8Type, 0);
         case LOTUS_VOID: return cg->voidType;
-        case LOTUS_ANY: return lotusValueLLVMType();
+        case LOTUS_ANY: return LLVMPointerType(lotusValueLLVMType(), 0);
     }
     return cg->voidType;
 }
@@ -61,6 +62,7 @@ void prepareNativeFunction(const LotusFunctionInfo *info) {
     native->argc = info->argc;
     native->variadic = info->variadic;
     native->fn = info->fn;
+    LLVMAddSymbol(info->name, info->fn);
 
     for (int i = 0; i < info->argc; i++) native->args[i] = info->args[i];
 
@@ -144,7 +146,14 @@ LLVMValueRef buildLotusValue(const Node *node) {
 
     result = LLVMBuildInsertValue(cg->builder, result, payload, 1, "");
 
-    return result;
+    // Pass boxed arguments by pointer to keep the native ABI identical across platforms
+    LLVMBasicBlockRef entry = LLVMGetEntryBasicBlock(cg->currentFn);
+    LLVMValueRef first = LLVMGetFirstInstruction(entry);
+    if (first) LLVMPositionBuilderBefore(cg->allocaBuilder, first);
+    else LLVMPositionBuilderAtEnd(cg->allocaBuilder, entry);
+    LLVMValueRef storage = LLVMBuildAlloca(cg->allocaBuilder, valueType, "boxed.argument");
+    LLVMBuildStore(cg->builder, result, storage);
+    return storage;
 }
 
 LLVMValueRef generateNativeCall(const CallNode *node) {
@@ -163,6 +172,9 @@ LLVMValueRef generateNativeCall(const CallNode *node) {
     for (int i = 0; i < node->argumentCount; i++) {
         if (node->arguments[i]->dataType != LOTUS_STRING) continue;
         LLVMValueRef value = args[native->variadic ? i + 1 : i];
+        int argIndex = i < native->argc ? i : native->argc - 1;
+        if (native->args[argIndex] == LOTUS_ANY)
+            value = LLVMBuildLoad2(cg->builder, lotusValueLLVMType(), value, "boxed.value");
         if (LLVMGetTypeKind(LLVMTypeOf(value)) == LLVMStructTypeKind) {
             LLVMValueRef payload = LLVMBuildExtractValue(cg->builder, value, 1, "str.payload");
             value = LLVMBuildIntToPtr(cg->builder, payload, convertType(LOTUS_STRING), "str.argument");

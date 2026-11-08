@@ -36,38 +36,42 @@ typedef void(LOTUS_CALL *RegisterFunction)(const LotusFunctionInfo *info);
 
 #ifdef _WIN32
 static void loadWindows(const char *path) {
-    char searchPath[512];
-    sprintf(searchPath, "%s\\*%s", path, LIB_EXT);
-
+    char *directory = _fullpath(NULL, path, 0);
+    if (!directory) exitWithError("Cannot resolve library directory '%s'", path);
+    char *search = mallocSafe(strlen(directory) + 7);
+    sprintf(search, "%s\\*.dll", directory);
     WIN32_FIND_DATAA data;
-    HANDLE hFind = FindFirstFileA(searchPath, &data);
-
-    if (hFind == INVALID_HANDLE_VALUE) return;
-
+    HANDLE handle = FindFirstFileA(search, &data);
+    free(search);
+    if (handle == INVALID_HANDLE_VALUE) {
+        DWORD error = GetLastError();
+        if (error != ERROR_FILE_NOT_FOUND)
+            exitWithError("Cannot open library directory '%s': Windows error %lu", path, error);
+        free(directory);
+        return;
+    }
     do {
         if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) continue;
-
-        char full[512];
-        sprintf(full, "%s\\%s", path, data.cFileName);
-
+        char *full = mallocSafe(strlen(directory) + strlen(data.cFileName) + 2);
+        sprintf(full, "%s\\%s", directory, data.cFileName);
         HMODULE lib = LoadLibraryA(full);
-        if (!lib) {
-            DWORD err = GetLastError();
-
-            printf("Cannot load %s error=%lu\n", full, err);
-            continue;
+        if (!lib) exitWithError("Cannot load '%s': Windows error %lu", full, GetLastError());
+        void(LOTUS_CALL * init)(RegisterFunction) =
+            (void(LOTUS_CALL *)(RegisterFunction))GetProcAddress(lib, "lotusRegister");
+        if (init) {
+            init(prepareNativeFunction);
+            nativeLibraryPaths = reallocSafe(nativeLibraryPaths, (nativeLibraryCount + 1) * sizeof(char *));
+            nativeLibraryPaths[nativeLibraryCount++] = full;
+        } else {
+            FreeLibrary(lib);
+            free(full);
         }
-
-        RegisterFunction init = (RegisterFunction)GetProcAddress(lib, "lotusRegister");
-
-        if (!init) {
-            printf("No lotusRegister in %s\n", full);
-            continue;
-        }
-        init(prepareNativeFunction);
-    } while (FindNextFileA(hFind, &data));
-
-    FindClose(hFind);
+    } while (FindNextFileA(handle, &data));
+    DWORD error = GetLastError();
+    FindClose(handle);
+    free(directory);
+    if (error != ERROR_NO_MORE_FILES)
+        exitWithError("Cannot read library directory '%s': Windows error %lu", path, error);
 }
 
 #endif

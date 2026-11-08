@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
-project(compiler C)
+project(compiler C CXX)
+
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(FATAL_ERROR "Lotus currently requires a 64-bit platform")
+endif()
 
 set(CMAKE_C_STANDARD 11)
 
@@ -9,6 +13,9 @@ if(LLVM_CONFIG AND NOT LLVM_DIR)
 endif()
 
 find_package(LLVM REQUIRED CONFIG)
+if(LLVM_PACKAGE_VERSION VERSION_LESS 22)
+    message(FATAL_ERROR "LLVM 22 or newer is required")
+endif()
 
 message(STATUS "LLVM version: ${LLVM_VERSION}")
 
@@ -60,9 +67,24 @@ add_executable(compiler
         src/llvm/llvm.h
 )
 
-target_link_libraries(compiler
-        LLVM
-)
+if(TARGET LLVM)
+    target_link_libraries(compiler PRIVATE LLVM)
+else()
+    llvm_map_components_to_libnames(LLVM_LIBS core executionengine mcjit native passes)
+    target_link_libraries(compiler PRIVATE ${LLVM_LIBS})
+    set_target_properties(compiler PROPERTIES LINKER_LANGUAGE CXX)
+endif()
+target_link_libraries(compiler PRIVATE ${CMAKE_DL_LIBS})
+if(WIN32)
+    enable_language(RC)
+    target_include_directories(compiler PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+    target_sources(compiler PRIVATE src/lotus.rc)
+endif()
+option(LOTUS_BUILD_CORE "Build and install the standard runtime" ON)
+if(LOTUS_BUILD_CORE)
+    add_subdirectory(lotus-core)
+    add_dependencies(compiler lotus_core)
+endif()
 set_target_properties(compiler PROPERTIES OUTPUT_NAME lotus)
 set(LOTUS_RUNTIME_DIR "${CMAKE_SOURCE_DIR}/libs" CACHE PATH "Default native library directory")
 target_compile_definitions(compiler PRIVATE LOTUS_RUNTIME_DIR="${LOTUS_RUNTIME_DIR}")

@@ -13,6 +13,12 @@
 #include "utils/cutils.h"
 #include "llvm/llvm.h"
 
+#ifdef _WIN32
+#define EXECUTABLE_SUFFIX ".exe"
+#else
+#define EXECUTABLE_SUFFIX ".out"
+#endif
+
 typedef struct {
     const char *file, *libs, *irPath;
     bool check, debug, build, help;
@@ -22,7 +28,7 @@ static void printHelp(void) {
     puts("Usage: lotus [run|build|check] [options] FILE\n"
          "\n"
          "  run              Execute through JIT (default)\n"
-         "  build            Build FILE.out without executing\n"
+         "  build            Build FILE" EXECUTABLE_SUFFIX " without executing\n"
          "  check            Parse and type-check without execution\n"
          "  --libs DIR       Native library directory (overrides LOTUS_LIBS)\n"
          "  --debug          Print AST, IR and execution timing\n"
@@ -85,8 +91,8 @@ int main(int argc, char **argv) {
     if (options.debug) printAST(program);
     char *outputBuildPath = NULL;
     if (options.build) {
-        outputBuildPath = mallocSafe(strlen(options.file) + 5);
-        sprintf(outputBuildPath, "%s.out", options.file);
+        outputBuildPath = mallocSafe(strlen(options.file) + sizeof(EXECUTABLE_SUFFIX));
+        sprintf(outputBuildPath, "%s%s", options.file, EXECUTABLE_SUFFIX);
     }
     int result = options.check ? 0 : codegenProgram(program, options.debug, options.irPath, outputBuildPath);
     free(outputBuildPath);
