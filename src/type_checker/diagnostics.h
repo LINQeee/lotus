@@ -8,6 +8,6 @@ typedef struct {
     const char *file;
 } DiagnosticContext;
 
-void diagnosticError(const char *scriptContent, SourceLocation location, const char *format, ...);
+_Noreturn void diagnosticError(const char *scriptContent, SourceLocation location, const char *format, ...);
 
 #endif

@@ -42,7 +42,7 @@ static size_t digits(size_t value) {
     return result;
 }
 
-void diagnosticError(const char *scriptContent, SourceLocation location, const char *format, ...) {
+_Noreturn void diagnosticError(const char *scriptContent, SourceLocation location, const char *format, ...) {
     fprintf(stderr, "error: ");
 
     va_list args;

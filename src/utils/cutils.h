@@ -6,6 +6,6 @@ void *mallocSafe(size_t size);
 
 void *reallocSafe(void *p, size_t size);
 
-void exitWithError(const char *format, ...);
+_Noreturn void exitWithError(const char *format, ...);
 
 #endif

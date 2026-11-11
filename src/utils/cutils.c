@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void exitWithError(const char *format, ...) {
+_Noreturn void exitWithError(const char *format, ...) {
     va_list args;
     va_start(args, format);
 
