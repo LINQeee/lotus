@@ -1,10 +1,9 @@
+#include "native_caller.h"
 #include "functions.h"
 
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "../../../parser/parser.h"
 #include "../../llvm.h"
@@ -74,16 +73,15 @@ void generateFunction(const FunctionNode *node) {
     LLVMBasicBlockRef entry = LLVMAppendBlock("entry");
 
     LLVMMoveBuilderToEnd(entry);
-    LLVMPositionBuilderAtEnd(cg->allocaBuilder, entry);
 
     for (int i = 0; i < fn->argc; i++) {
         LLVMValueRef arg = LLVMGetParam(fn->llvmFunction, i);
-        LLVMVariable *var = createVar(
-            node->params[i]->name,
-            LLVMBuildAlloca(cg->allocaBuilder, convertType(node->params[i]->base.dataType), node->params[i]->name),
-            node->params[i]->base.dataType);
+        LLVMVariable *var =
+            createVar(node->params[i]->name,
+                      createEntryAlloca(convertType(node->params[i]->base.dataType), node->params[i]->name),
+                      node->params[i]->base.dataType);
 
-        if (var->type == LOTUS_STRING) retainString(arg);
+        retainIfNeeded(var->type, arg);
         LLVMBuildStore(cg->builder, arg, var->storage);
     }
 
@@ -121,15 +119,10 @@ LLVMValueRef generateCall(const CallNode *node) {
         LLVMValueRef result = LLVMBuildCall2(cg->builder, fn->fnType, fn->llvmFunction, args, node->argumentCount,
                                              node->base.dataType == LOTUS_VOID ? "" : "calltmp");
         for (int i = 0; i < node->argumentCount; i++) {
-            if (node->arguments[i]->dataType == LOTUS_STRING) releaseString(args[i]);
+            releaseIfNeeded(node->arguments[i]->dataType, args[i]);
         }
         return result;
     }
 
-    LLVMNativeFunction *native = findNative(name);
-
-    if (native) return generateNativeCall(node);
-
-    printf("Unknown function %s\n", name);
-    exit(1);
+    return generateNativeCall(node);
 }

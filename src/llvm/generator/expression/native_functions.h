@@ -1,6 +1,5 @@
 #ifndef NATIVE_FUNCTIONS_H
 #define NATIVE_FUNCTIONS_H
-#include "../../../parser/parser.h"
 #include "../../lotus_types.h"
 #include <llvm-c/Types.h>
 #include <stdbool.h>
@@ -27,11 +26,7 @@ typedef struct {
 
 void prepareNativeFunction(const LotusFunctionInfo *info);
 
-LLVMNativeFunction *findNative(const char *name);
-
+LLVMTypeRef lotusValueLLVMType(void);
 LLVMTypeRef convertType(LotusType type);
 
-LotusType resolveExpressionType(const Node *node);
-
-LLVMValueRef generateNativeCall(const CallNode *node);
 #endif

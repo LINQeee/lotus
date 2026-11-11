@@ -1,3 +1,4 @@
+#include "../expression/native_caller.h"
 #include <llvm-c/Core.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -8,6 +9,7 @@
 #include "../expression/expression_generator.h"
 #include "../generator.h"
 #include "../expression/functions.h"
+#include "../expression/native_functions.h"
 #include "../../lotus_types.h"
 #include "../../var_manager.h"
 #include "../../../parser/parser.h"
@@ -71,11 +73,7 @@ static LLVMRange generateRange(const ForNode *node) {
 }
 
 static LLVMValueRef createRangeVariable(const IdentifierNode *variable, const LLVMRange *range) {
-    LLVMBasicBlockRef entry = LLVMGetEntryBasicBlock(cg->currentFn);
-    LLVMValueRef first = LLVMGetFirstInstruction(entry);
-    if (first) LLVMPositionBuilderBefore(cg->allocaBuilder, first);
-    else LLVMPositionBuilderAtEnd(cg->allocaBuilder, entry);
-    LLVMValueRef storage = LLVMBuildAlloca(cg->allocaBuilder, range->type, variable->name);
+    LLVMValueRef storage = createEntryAlloca(range->type, variable->name);
     createVar(variable->name, storage, variable->base.dataType);
     LLVMValueRef initial = LLVMBuildTrunc(cg->builder, range->start, range->type, "range.initial");
     LLVMBuildStore(cg->builder, initial, storage);
@@ -193,23 +191,9 @@ static void generateReturn(const ReturnNode *node) {
     else LLVMBuildRetVoid(cg->builder);
 }
 
-static LLVMTypeRef lotusTypeToLLVMType(LotusType type) {
-    switch (type) {
-        case LOTUS_I32: return cg->i32Type;
-        case LOTUS_I64: return cg->i64Type;
-        case LOTUS_F32: return cg->f32Type;
-        case LOTUS_F64: return cg->f64Type;
-        case LOTUS_BOOL: return cg->boolType;
-        case LOTUS_VOID: return cg->voidType;
-        case LOTUS_STRING: return LLVMPointerType(cg->stringType, 0);
-
-        default: return NULL;
-    }
-}
-
 static void generateDeclaration(const DeclarationNode *node) {
     LLVMValueRef value = generateExpression(node->value);
-    LLVMTypeRef type = lotusTypeToLLVMType(node->base.dataType);
+    LLVMTypeRef type = convertType(node->base.dataType);
 
     if (cg->currentFn == cg->mainFunction) {
         // TODO: do null pre initialization  only for non-literal types
@@ -220,11 +204,7 @@ static void generateDeclaration(const DeclarationNode *node) {
 
         LLVMBuildStore(cg->builder, value, storage);
     } else {
-        LLVMBasicBlockRef entry = LLVMGetEntryBasicBlock(cg->currentFn);
-        LLVMValueRef first = LLVMGetFirstInstruction(entry);
-        if (first) LLVMPositionBuilderBefore(cg->allocaBuilder, first);
-        else LLVMPositionBuilderAtEnd(cg->allocaBuilder, entry);
-        LLVMValueRef storage = LLVMBuildAlloca(cg->allocaBuilder, type, node->target->name);
+        LLVMValueRef storage = createEntryAlloca(type, node->target->name);
         LLVMBuildStore(cg->builder, value, storage);
 
         createVar(node->target->name, storage, node->base.dataType);
@@ -237,10 +217,9 @@ static void generateAssignment(const AssignmentNode *node) {
     if (var == NULL) exitWithError("Variable '%s' is not declared", node->target->name);
 
     LLVMValueRef value = generateExpression(node->value);
-    if (var->type == LOTUS_STRING) {
-        LLVMValueRef previous =
-            LLVMBuildLoad2(cg->builder, lotusTypeToLLVMType(LOTUS_STRING), var->storage, "str.previous");
-        releaseString(previous);
+    if (isMemoryType(var->type)) {
+        LLVMValueRef previous = LLVMBuildLoad2(cg->builder, convertType(var->type), var->storage, "str.previous");
+        releaseIfNeeded(var->type, previous);
     }
     LLVMBuildStore(cg->builder, value, var->storage);
 }

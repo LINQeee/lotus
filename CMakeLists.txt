@@ -41,6 +41,7 @@ add_executable(compiler
         src/llvm/generator/expression/expression_generator.c
         src/llvm/var_manager.c
         src/llvm/var_manager.h
+        src/llvm/generator/expression/native_caller.c
         src/llvm/generator/expression/native_functions.c
         src/llvm/generator/expression/native_functions.h
         src/llvm/generator/expression/functions.c

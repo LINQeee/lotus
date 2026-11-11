@@ -14,7 +14,14 @@ typedef enum {
     LOTUS_VOID,
     LOTUS_ANY,
     LOTUS_FUNCTION,
-    LOTUS_UNKNOWN
+    LOTUS_UNKNOWN,
+    LOTUS_I32_ARRAY,
+    LOTUS_I64_ARRAY,
+    LOTUS_F32_ARRAY,
+    LOTUS_F64_ARRAY,
+    LOTUS_BOOL_ARRAY,
+    LOTUS_STRING_ARRAY,
+    LOTUS_ARRAY
 } LotusType;
 
 typedef enum {
@@ -36,6 +43,11 @@ NumericKind getNumericKind(LotusType type);
 bool isNumericType(LotusType type);
 
 bool isIntegerType(LotusType type);
+
+bool isArrayType(LotusType type);
+bool isMemoryType(LotusType type);
+LotusType fromArrayType(LotusType type);
+LotusType toArrayType(LotusType type);
 
 bool isBooleanType(LotusType type);
 #endif

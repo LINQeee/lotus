@@ -28,6 +28,14 @@ LLVMBasicBlockRef LLVMAppendBlock(const char *name) {
     return LLVMAppendBasicBlockInContext(cg->context, cg->currentFn, name);
 }
 
+LLVMValueRef createEntryAlloca(LLVMTypeRef type, const char *name) {
+    LLVMBasicBlockRef entry = LLVMGetEntryBasicBlock(cg->currentFn);
+    LLVMValueRef first = LLVMGetFirstInstruction(entry);
+    if (first) LLVMPositionBuilderBefore(cg->allocaBuilder, first);
+    else LLVMPositionBuilderAtEnd(cg->allocaBuilder, entry);
+    return LLVMBuildAlloca(cg->allocaBuilder, type, name);
+}
+
 void createMainFunctionAndGenerateCode(const ProgramNode *program) {
     collectFunctions((const Node *)program);
 

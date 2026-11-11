@@ -2,28 +2,13 @@
 
 #include <stdbool.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "../../llvm.h"
 #include "../../../type_checker/type_checker.h"
-#include "../../../utils/cutils.h"
-#include "expression_generator.h"
 #include "../../lotus_types.h"
-#include "../../var_manager.h"
-#include "../../../parser/parser.h"
-#include "functions.h"
 #include <llvm-c/Core.h>
 #include <llvm-c/Support.h>
 #include <llvm-c/Types.h>
-
-LLVMNativeFunction *findNative(const char *name) {
-    for (int i = 0; i < cg->nativeCount; i++) {
-        if (strcmp(cg->natives[i].name, name) == 0) return &cg->natives[i];
-    }
-
-    return NULL;
-}
 
 LLVMTypeRef lotusValueLLVMType() {
     static LLVMTypeRef type = NULL;
@@ -76,110 +61,4 @@ void prepareNativeFunction(const LotusFunctionInfo *info) {
     native->llvmFunction = LLVMAddFunction(cg->module, native->name, fnType);
 
     typeCheckerAddNativeFunction(info->name, info->returnType, info->args, info->argc, info->variadic);
-}
-
-// deprecated
-LotusType resolveExpressionType(const Node *node) {
-    switch (node->type) {
-        case NODE_NUMBER: return node->dataType;
-
-        case NODE_STRING:
-            return LOTUS_STRING;
-
-            // case NODE_BOOLEAN: TODO
-            //     return LOTUS_BOOL;
-
-        case NODE_CALL: {
-            LLVMNativeFunction *nativeFn = findNative(((CallNode *)node)->callee->name);
-            LLVMUserFunction *userFn = findFunction(((CallNode *)node)->callee->name);
-            if (!nativeFn && !userFn) {
-                printf("Unknown function %s\n", ((CallNode *)node)->callee->name);
-                exit(1);
-            }
-
-            return nativeFn ? nativeFn->returnType : userFn->returnType;
-        }
-
-        case NODE_IDENTIFIER: {
-            LLVMVariable *var = getVar(((IdentifierNode *)node)->name);
-
-            if (!var) exitWithError("Unknown variable %s", ((IdentifierNode *)node)->name);
-            return var->type;
-            // return var->type; TODO
-        }
-
-        default: return LOTUS_I32;
-    }
-}
-//
-LLVMValueRef buildLotusValue(const Node *node) {
-    // LotusType type = resolveExpressionType(node);
-    LotusType type = node->dataType;
-    LLVMValueRef value = generateExpression(node);
-
-    LLVMTypeRef valueType = lotusValueLLVMType();
-    LLVMValueRef result = LLVMGetUndef(valueType);
-
-    result = LLVMBuildInsertValue(cg->builder, result, LLVMConstInt(cg->i32Type, type, 0), 0, "");
-
-    LLVMValueRef payload = NULL;
-
-    switch (type) {
-        case LOTUS_I32: payload = LLVMBuildSExt(cg->builder, value, cg->i64Type, ""); break;
-
-        case LOTUS_I64: payload = value; break;
-
-        case LOTUS_BOOL: payload = LLVMBuildZExt(cg->builder, value, cg->i64Type, ""); break;
-
-        case LOTUS_STRING: payload = LLVMBuildPtrToInt(cg->builder, value, cg->i64Type, ""); break;
-
-        case LOTUS_F32:
-            payload = LLVMBuildFPExt(cg->builder, value, cg->f64Type, "");
-
-            payload = LLVMBuildBitCast(cg->builder, payload, cg->i64Type, "");
-            break;
-
-        case LOTUS_F64: payload = LLVMBuildBitCast(cg->builder, value, cg->i64Type, ""); break;
-
-        default: payload = LLVMConstInt(cg->i64Type, 0, 0);
-    }
-
-    result = LLVMBuildInsertValue(cg->builder, result, payload, 1, "");
-
-    // Pass boxed arguments by pointer to keep the native ABI identical across platforms
-    LLVMBasicBlockRef entry = LLVMGetEntryBasicBlock(cg->currentFn);
-    LLVMValueRef first = LLVMGetFirstInstruction(entry);
-    if (first) LLVMPositionBuilderBefore(cg->allocaBuilder, first);
-    else LLVMPositionBuilderAtEnd(cg->allocaBuilder, entry);
-    LLVMValueRef storage = LLVMBuildAlloca(cg->allocaBuilder, valueType, "boxed.argument");
-    LLVMBuildStore(cg->builder, result, storage);
-    return storage;
-}
-
-LLVMValueRef generateNativeCall(const CallNode *node) {
-    LLVMNativeFunction *native = findNative(node->callee->name);
-    LLVMValueRef args[64];
-    if (native->variadic) args[0] = LLVMConstInt(cg->i32Type, node->argumentCount, 0);
-    for (int i = 0; i < node->argumentCount; i++) {
-        LotusType expected;
-        if (i < native->argc) expected = native->args[i];
-        else expected = native->args[native->argc - 1];
-        if (expected == LOTUS_ANY) args[native->variadic ? i + 1 : i] = buildLotusValue(node->arguments[i]);
-        else args[native->variadic ? i + 1 : i] = generateExpression(node->arguments[i]);
-    }
-    LLVMValueRef result = LLVMBuildCall2(cg->builder, native->fnType, native->llvmFunction, args,
-                                         native->variadic ? node->argumentCount + 1 : node->argumentCount, "");
-    for (int i = 0; i < node->argumentCount; i++) {
-        if (node->arguments[i]->dataType != LOTUS_STRING) continue;
-        LLVMValueRef value = args[native->variadic ? i + 1 : i];
-        int argIndex = i < native->argc ? i : native->argc - 1;
-        if (native->args[argIndex] == LOTUS_ANY)
-            value = LLVMBuildLoad2(cg->builder, lotusValueLLVMType(), value, "boxed.value");
-        if (LLVMGetTypeKind(LLVMTypeOf(value)) == LLVMStructTypeKind) {
-            LLVMValueRef payload = LLVMBuildExtractValue(cg->builder, value, 1, "str.payload");
-            value = LLVMBuildIntToPtr(cg->builder, payload, convertType(LOTUS_STRING), "str.argument");
-        }
-        releaseString(value);
-    }
-    return result;
 }

@@ -14,5 +14,7 @@ void LLVMMoveBuilderToEnd(LLVMBasicBlockRef block);
 
 LLVMBasicBlockRef LLVMAppendBlock(const char *name);
 
+LLVMValueRef createEntryAlloca(LLVMTypeRef type, const char *name);
+
 void verifyCode();
 #endif

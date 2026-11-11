@@ -1,9 +1,9 @@
+#include "expression/native_caller.h"
 #include <stdbool.h>
 
 #include "../../parser/parser.h"
 #include "expression/expression_generator.h"
 #include "statement/statement_generator.h"
-#include "../lotus_types.h"
 #include <llvm-c/Types.h>
 
 static bool isStatement(const Node *node) {
@@ -17,6 +17,6 @@ void generateNode(const Node *node) {
     if (isStatement(node)) generateStatement(node);
     else {
         LLVMValueRef value = generateExpression(node);
-        if (node->dataType == LOTUS_STRING) releaseString(value);
+        releaseIfNeeded(node->dataType, value);
     }
 }
