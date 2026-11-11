@@ -37,6 +37,7 @@ static const Keyword KEYWORDS[] = {
     {"for", TOKEN_FOR},
     {"in", TOKEN_IN},
     {"step", TOKEN_STEP},
+    {"new", TOKEN_NEW},
 };
 
 static char current() {
@@ -199,6 +200,7 @@ static Token readSymbol() {
     if (match("**")) return makeToken(TOKEN_DOUBLE_STAR, 2);
 
     switch (current()) {
+        case '.': return makeToken(TOKEN_DOT, 1);
         case '!': return makeToken(TOKEN_EXCLAMATION, 1);
         case '-': return makeToken(TOKEN_MINUS, 1);
         case '+': return makeToken(TOKEN_PLUS, 1);

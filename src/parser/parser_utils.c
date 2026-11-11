@@ -239,3 +239,30 @@ UnaryNode *newUnaryNode(TokenKind op, Node *operand, SourceLocation location) {
     node->postfix = false;
     return node;
 }
+
+LotusType parseType() {
+    LotusType type = tokenTypeToLotusType(advance().type);
+    if (matchCurrent(TOKEN_LBRACKET)) {
+        expect(TOKEN_RBRACKET);
+        type = toArrayType(type);
+    }
+    return type;
+}
+
+ArrayNode *newArrayNode(SourceLocation location) {
+    ArrayNode *node = mallocSafe(sizeof(ArrayNode));
+    *node = (ArrayNode){.base = {NODE_ARRAY, LOTUS_UNKNOWN, location}};
+    return node;
+}
+
+IndexNode *newIndexNode(Node *array, Node *index, SourceLocation location) {
+    IndexNode *node = mallocSafe(sizeof(IndexNode));
+    *node = (IndexNode){.base = {NODE_INDEX, LOTUS_UNKNOWN, location}, .array = array, .index = index};
+    return node;
+}
+
+LengthNode *newLengthNode(Node *array, SourceLocation location) {
+    LengthNode *node = mallocSafe(sizeof(LengthNode));
+    *node = (LengthNode){.base = {NODE_LENGTH, LOTUS_I32, location}, .array = array};
+    return node;
+}

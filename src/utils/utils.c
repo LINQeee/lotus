@@ -70,6 +70,33 @@ static void printNode(const Node *node, const char *prefix, bool isLast) {
     makeChildPrefix(prefix, isLast, childPrefix, sizeof(childPrefix));
 
     switch (node->type) {
+        case NODE_ARRAY: {
+            const ArrayNode *array = (const ArrayNode *)node;
+            printPrefix(prefix, isLast);
+            printf("Array (%s)\n", lotusTypeName(node->dataType));
+            if (array->size) printNode(array->size, childPrefix, true);
+            for (size_t i = 0; i < array->itemsCount; i++)
+                printNode(array->items[i], childPrefix, i + 1 == array->itemsCount);
+            break;
+        }
+        case NODE_LENGTH: {
+            const LengthNode *length = (const LengthNode *)node;
+            printPrefix(prefix, isLast);
+            printf("Length\n");
+            printNode(length->array, childPrefix, true);
+            break;
+        }
+        case NODE_INDEX:
+        case NODE_INDEX_ASSIGN: {
+            const IndexNode *index = (const IndexNode *)node;
+            printPrefix(prefix, isLast);
+            printf("%s\n", node->type == NODE_INDEX ? "Index" : "Index assignment");
+            printNode(index->array, childPrefix, false);
+            printNode(index->index, childPrefix, !index->value);
+            if (index->value) printNode(index->value, childPrefix, true);
+            break;
+        }
+
         case NODE_PROGRAM: {
             const ProgramNode *program = (const ProgramNode *)node;
 

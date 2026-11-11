@@ -27,7 +27,11 @@ typedef enum {
     NODE_DECLARATION,
     NODE_BOOLEAN,
     NODE_CAST,
-    NODE_UNARY
+    NODE_UNARY,
+    NODE_ARRAY,
+    NODE_INDEX,
+    NODE_LENGTH,
+    NODE_INDEX_ASSIGN
 } NodeType;
 
 typedef struct {
@@ -119,6 +123,25 @@ typedef struct {
     bool excludeEnd;
     Node *body;
 } ForNode;
+
+typedef struct {
+    Node base;
+    Node **items;
+    size_t itemsCount;
+    Node *size;
+} ArrayNode;
+
+typedef struct {
+    Node base; // dataType is the array element type
+    Node *array;
+    Node *index;
+    Node *value;
+} IndexNode;
+
+typedef struct {
+    Node base;
+    Node *array;
+} LengthNode;
 
 typedef struct {
     Node base;

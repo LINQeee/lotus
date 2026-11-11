@@ -24,6 +24,7 @@ add_definitions(${LLVM_DEFINITIONS})
 
 add_executable(compiler
         src/main.c
+        src/llvm/generator/expression/arrays.c
         src/cli/project.c
         src/llvm/executable.c
         src/lexer/lexer.c

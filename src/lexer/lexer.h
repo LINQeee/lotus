@@ -57,7 +57,9 @@ typedef enum {
     TOKEN_EQ_PERCENT,
     TOKEN_LBRACKET,
     TOKEN_RBRACKET,
-    TOKEN_DOUBLE_STAR
+    TOKEN_DOUBLE_STAR,
+    TOKEN_NEW,
+    TOKEN_DOT
 } TokenKind;
 
 typedef struct {
