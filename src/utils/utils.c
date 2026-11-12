@@ -253,7 +253,7 @@ static void printNode(const Node *node, const char *prefix, bool isLast) {
             printf("For %s (%s..%s)\n", cycle->variable->name, cycle->excludeStart ? "!" : "",
                    cycle->excludeEnd ? "!" : "");
             printNode(cycle->start, childPrefix, false);
-            printNode(cycle->end, childPrefix, false);
+            if (cycle->end) printNode(cycle->end, childPrefix, false);
             if (cycle->step) printNode(cycle->step, childPrefix, false);
             printNode(cycle->body, childPrefix, true);
             break;

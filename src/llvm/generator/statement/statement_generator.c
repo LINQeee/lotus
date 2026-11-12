@@ -95,7 +95,59 @@ static void generateRangeStep(const LLVMRange *range, LLVMValueRef storage, LLVM
     LLVMBuildBr(cg->builder, bodyBlock);
 }
 
+static LLVMValueRef createLoopStorage(const char *name, LotusType type, LLVMValueRef value) {
+    LLVMValueRef storage = createEntryAlloca(convertType(type), name);
+    LLVMBuildStore(cg->builder, value, storage);
+    createVar(name, storage, type);
+    return storage;
+}
+
+static void generateArrayFor(const ForNode *node) {
+    int previousVarsCount = cg->varsCount;
+    LLVMValueRef array = generateExpression(node->start);
+    createLoopStorage(".array", node->start->dataType, array);
+    LLVMValueRef length = callArrayLength(array);
+    LLVMValueRef index = createLoopStorage(".index", LOTUS_I32, LLVMConstNull(cg->i32Type));
+    int iterationVarsStart = cg->varsCount;
+    LLVMBasicBlockRef condBlock = LLVMAppendBlock("foreach.cond");
+    LLVMBasicBlockRef bodyBlock = LLVMAppendBlock("foreach.body");
+    LLVMBasicBlockRef stepBlock = LLVMAppendBlock("foreach.step");
+    LLVMBasicBlockRef exitBlock = LLVMAppendBlock("foreach.exit");
+    LLVMBuildBr(cg->builder, condBlock);
+    LLVMMoveBuilderToEnd(condBlock);
+    LLVMValueRef current = LLVMBuildLoad2(cg->builder, cg->i32Type, index, "array.index");
+    LLVMValueRef more = LLVMBuildICmp(cg->builder, LLVMIntSLT, current, length, "array.more");
+    LLVMBuildCondBr(cg->builder, more, bodyBlock, exitBlock);
+    LLVMMoveBuilderToEnd(bodyBlock);
+    LLVMValueRef address = callArrayAt(array, current);
+    LotusType elementType = node->variable->base.dataType;
+    LLVMValueRef value = LLVMBuildLoad2(cg->builder, convertType(elementType), address, "array.element");
+    retainIfNeeded(elementType, value);
+    createLoopStorage(node->variable->name, elementType, value);
+    if (cg->loopCount >= MAX_LOOP_DEPTH) exitWithError("Too many nested loops");
+    cg->loops[cg->loopCount++] =
+        (LoopContext){.breakBlock = exitBlock, .continueBlock = stepBlock, .varsStart = iterationVarsStart};
+    generateNode(node->body);
+    cg->loopCount--;
+    if (!LLVMGetBasicBlockTerminator(cg->currentBlock)) {
+        releaseVariables(iterationVarsStart);
+        LLVMBuildBr(cg->builder, stepBlock);
+    }
+    cg->varsCount = iterationVarsStart;
+    LLVMMoveBuilderToEnd(stepBlock);
+    LLVMBuildStore(cg->builder, LLVMBuildAdd(cg->builder, current, LLVMConstInt(cg->i32Type, 1, 0), "array.next"),
+                   index);
+    LLVMBuildBr(cg->builder, condBlock);
+    LLVMMoveBuilderToEnd(exitBlock);
+    releaseVariables(previousVarsCount);
+    cg->varsCount = previousVarsCount;
+}
+
 static void generateFor(const ForNode *node) {
+    if (!node->end) {
+        generateArrayFor(node);
+        return;
+    }
     int previousVarsCount = cg->varsCount;
     LLVMRange range = generateRange(node);
     LLVMValueRef storage = createRangeVariable(node->variable, &range);

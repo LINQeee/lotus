@@ -178,6 +178,49 @@ static LotusType checkIdentifier(TypeChecker *checker, IdentifierNode *node) {
     return variable->type;
 }
 
+static LotusType checkExpected(TypeChecker *checker, Node *node, LotusType expected) {
+    if (node->type == NODE_ARRAY && !((ArrayNode *)node)->size && isArrayType(expected)) node->dataType = expected;
+    return checkExpression(checker, node);
+}
+
+static LotusType checkArray(TypeChecker *checker, ArrayNode *node) {
+    if (node->size) {
+        if (checkExpression(checker, node->size) != LOTUS_I32)
+            diagnosticError(checker->scriptContent, node->size->location, "array size must be int");
+        return node->base.dataType;
+    }
+    LotusType elementType = isArrayType(node->base.dataType) ? fromArrayType(node->base.dataType) : LOTUS_UNKNOWN;
+    for (size_t i = 0; i < node->itemsCount; i++) {
+        LotusType actual = checkExpression(checker, node->items[i]);
+        if (elementType == LOTUS_UNKNOWN) elementType = actual;
+        bool scalar = isNumericType(actual) || actual == LOTUS_BOOL || actual == LOTUS_STRING;
+        if (!scalar || elementType != actual)
+            diagnosticError(checker->scriptContent, node->items[i]->location,
+                            "array elements must have the same scalar type");
+    }
+    if (elementType == LOTUS_UNKNOWN)
+        diagnosticError(checker->scriptContent, node->base.location, "empty array requires an array type");
+    return node->base.dataType = toArrayType(elementType);
+}
+
+static LotusType checkIndex(TypeChecker *checker, IndexNode *node) {
+    LotusType array = checkExpression(checker, node->array);
+    if (!isArrayType(array)) diagnosticError(checker->scriptContent, node->base.location, "expected an array");
+    if (checkExpression(checker, node->index) != LOTUS_I32)
+        diagnosticError(checker->scriptContent, node->index->location, "array index must be int");
+    LotusType elementType = fromArrayType(array);
+    if (node->value && checkExpression(checker, node->value) != elementType)
+        diagnosticError(checker->scriptContent, node->value->location, "array element requires %s",
+                        lotusTypeName(elementType));
+    return node->base.dataType = elementType;
+}
+
+static LotusType checkLength(TypeChecker *checker, LengthNode *node) {
+    if (!isArrayType(checkExpression(checker, node->array)))
+        diagnosticError(checker->scriptContent, node->base.location, "expected an array");
+    return node->base.dataType;
+}
+
 static LotusType checkBinary(TypeChecker *checker, BinaryNode *node) {
     LotusType left = checkExpression(checker, node->left);
 
@@ -195,6 +238,10 @@ static LotusType checkBinary(TypeChecker *checker, BinaryNode *node) {
 }
 
 static LotusType checkCall(TypeChecker *checker, CallNode *node) {
+    if (!strcmp(node->callee->name, "_arrayCreate") || !strcmp(node->callee->name, "_arrayAt") ||
+        !strcmp(node->callee->name, "_arrayLength") || !strcmp(node->callee->name, "_arrayRetain") ||
+        !strcmp(node->callee->name, "_arrayRelease"))
+        diagnosticError(checker->scriptContent, node->base.location, "array runtime functions are internal");
     if (strcmp(node->callee->name, "_stringRetain") == 0 || strcmp(node->callee->name, "_stringRelease") == 0)
         diagnosticError(checker->scriptContent, node->base.location, "string lifetime is managed automatically");
 
@@ -217,7 +264,10 @@ static LotusType checkCall(TypeChecker *checker, CallNode *node) {
                         fixedCount == 1 ? "" : "s", node->argumentCount);
 
     for (int i = 0; i < node->argumentCount; i++) {
-        LotusType actual = checkExpression(checker, node->arguments[i]);
+        LotusType expectedType = i < (int)function->parameterCount ? function->parameterTypes[i] : LOTUS_ANY;
+        LotusType actual = checkExpected(checker, node->arguments[i], expectedType);
+        if (expectedType == LOTUS_ANY && isArrayType(actual))
+            diagnosticError(checker->scriptContent, node->arguments[i]->location, "arrays cannot be passed as any");
 
         size_t parameterIndex = (size_t)i;
 
@@ -244,6 +294,10 @@ static LotusType checkCall(TypeChecker *checker, CallNode *node) {
 
 static LotusType checkExpression(TypeChecker *checker, Node *node) {
     switch (node->type) {
+        case NODE_ARRAY: return checkArray(checker, (ArrayNode *)node);
+        case NODE_LENGTH: return checkLength(checker, (LengthNode *)node);
+        case NODE_INDEX:
+        case NODE_INDEX_ASSIGN: return checkIndex(checker, (IndexNode *)node);
         case NODE_NUMBER: return node->dataType;
 
         case NODE_BOOLEAN: return LOTUS_BOOL;
@@ -284,14 +338,11 @@ static LotusType checkExpression(TypeChecker *checker, Node *node) {
 
         default: diagnosticError(checker->scriptContent, node->location, "node cannot be used as an expression");
     }
-
-    return LOTUS_ANY;
 }
 
 static void checkDeclaration(TypeChecker *checker, DeclarationNode *node) {
-    LotusType valueType = checkExpression(checker, node->value);
-
     LotusType declaredType = node->target->base.dataType;
+    LotusType valueType = checkExpected(checker, node->value, declaredType);
 
     if (!isAssignable(declaredType, valueType))
         diagnosticError(checker->scriptContent, node->value->location, "cannot assign %s to %s",
@@ -306,7 +357,7 @@ static void checkDeclaration(TypeChecker *checker, DeclarationNode *node) {
 static void checkAssignment(TypeChecker *checker, AssignmentNode *node) {
     Variable *variable = findVariable(checker, node->target->name, node->target->base.location);
 
-    LotusType valueType = checkExpression(checker, node->value);
+    LotusType valueType = checkExpected(checker, node->value, variable->type);
 
     if (!isAssignable(variable->type, valueType))
         diagnosticError(checker->scriptContent, node->value->location, "cannot assign %s to %s",
@@ -327,7 +378,7 @@ static void checkReturn(TypeChecker *checker, const ReturnNode *node) {
         return;
     }
 
-    LotusType actual = checkExpression(checker, node->value);
+    LotusType actual = checkExpected(checker, node->value, checker->currentReturnType);
 
     if (checker->currentReturnType == LOTUS_VOID)
         diagnosticError(checker->scriptContent, node->value->location, "void function cannot return a value");
@@ -361,6 +412,18 @@ static void checkIf(TypeChecker *checker, const IfNode *node) {
 
 static void checkFor(TypeChecker *checker, ForNode *node) {
     LotusType type = checkExpression(checker, node->start);
+    if (!node->end) {
+        if (!isArrayType(type))
+            diagnosticError(checker->scriptContent, node->start->location, "for requires an array or range");
+        enterScope(checker);
+        node->variable->base.dataType = fromArrayType(type);
+        declareVariable(checker, node->variable->name, node->variable->base.dataType, node->variable->base.location);
+        checker->loopDepth++;
+        checkStatement(checker, node->body);
+        checker->loopDepth--;
+        leaveScope(checker);
+        return;
+    }
     LotusType endType = checkExpression(checker, node->end);
     if (!isIntegerType(type) || type != endType)
         diagnosticError(checker->scriptContent, node->base.location,
@@ -533,6 +596,10 @@ static void checkStatement(TypeChecker *checker, Node *node) {
 
         case NODE_FUNCTION: checkFunction(checker, (FunctionNode *)node); break;
 
+        case NODE_ARRAY:
+        case NODE_INDEX:
+        case NODE_LENGTH:
+        case NODE_INDEX_ASSIGN:
         case NODE_CALL:
         case NODE_UNARY:
         case NODE_BINARY:

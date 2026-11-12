@@ -53,6 +53,11 @@ static Node *parseFor() {
     node->variable = newIdentifierNode(name.value, LOTUS_UNKNOWN, name.location);
     expect(TOKEN_IN);
     node->start = parseExpression();
+    if (!isCurrent(TOKEN_RANGE) && !isCurrent(TOKEN_EXCLAMATION)) {
+        if (parenthesized) expect(TOKEN_RPAREN);
+        node->body = parseBlock();
+        return (Node *)node;
+    }
     node->excludeStart = matchCurrent(TOKEN_EXCLAMATION);
     expect(TOKEN_RANGE);
     node->excludeEnd = matchCurrent(TOKEN_EXCLAMATION);
@@ -75,8 +80,7 @@ static Node *parseIf() {
     return (Node *)node;
 }
 static Node *parseDeclaration() {
-    Token typeToken = advance();
-    LotusType type = tokenTypeToLotusType(typeToken.type);
+    LotusType type = parseType();
 
     Token varName = expect(TOKEN_IDENTIFIER);
     expect(TOKEN_EQUAL);
@@ -115,7 +119,7 @@ static IdentifierNode *parseParameter() {
     Token varName = expect(TOKEN_IDENTIFIER);
     expect(TOKEN_COLON);
 
-    LotusType type = tokenTypeToLotusType(advance().type);
+    LotusType type = parseType();
 
     return newIdentifierNode(varName.value, type, varName.location);
 }
@@ -139,7 +143,7 @@ static Node *parseFunction() {
 
     LotusType returnType = LOTUS_VOID;
 
-    if (matchCurrent(TOKEN_COLON)) returnType = tokenTypeToLotusType(advance().type);
+    if (matchCurrent(TOKEN_COLON)) returnType = parseType();
 
     FunctionNode *func = newFunctionNode(funcName.value, returnType, funcName.location);
 
@@ -171,10 +175,16 @@ Node *parseStatement() {
         case TOKEN_TYPE_BOOL:
         case TOKEN_TYPE_STRING: return parseDeclaration();
 
-        case TOKEN_IDENTIFIER: {
-            if (isAssignmentOp(peekNext().type)) return parseAssignment();
-            return parseExpression();
+        default: {
+            if (isCurrent(TOKEN_IDENTIFIER) && isAssignmentOp(peekNext().type)) return parseAssignment();
+            Node *target = parseExpression();
+            if (matchCurrent(TOKEN_EQUAL)) {
+                if (target->type != NODE_INDEX) exitWithError("Expected an assignable array element");
+                IndexNode *index = (IndexNode *)target;
+                index->base.type = NODE_INDEX_ASSIGN;
+                index->value = parseExpression();
+            }
+            return target;
         }
-        default: return parseExpression();
     }
 }
