@@ -1,0 +1,4 @@
+// error: "variable 'x' is not declared"
+
+for x in [1] print(x)
+print(x)

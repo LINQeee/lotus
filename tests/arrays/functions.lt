@@ -1,0 +1,14 @@
+// expect: "42\n0\n0\n"
+
+fn make(): int[] { return [1, 2] }
+fn empty(): int[] { return [] }
+fn change(values: int[]): int[] {
+    values[0] = 42
+    return values
+}
+fn length(values: int[]): int { return values.length }
+int[] values = make()
+change(values)
+print(values[0])
+print(length([]))
+print(empty().length)

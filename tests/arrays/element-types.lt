@@ -1,0 +1,16 @@
+// expect: "2\n3.500000\n4.500000\ntrue\nab\n"
+
+long[] longs = [(long)1, 2l]
+float[] floats = [1f, 2f]
+double[] doubles = [1.0, 2.0]
+bool[] flags = [false]
+string[] words = ["a"]
+floats[0] = 3.5f
+doubles[0] = 4.5
+flags[0] = true
+words[0] = words[0] + "b"
+print(longs[1])
+print(floats[0])
+print(doubles[0])
+print(flags[0])
+print(words[0])

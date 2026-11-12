@@ -1,0 +1,7 @@
+// expect: "1\n2\n7\n"
+
+int[] values = [0]
+fn index(): int { print(1) return 0 }
+fn value(): int { print(2) return 7 }
+values[index()] = value()
+print(values[0])

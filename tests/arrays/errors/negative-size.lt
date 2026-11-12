@@ -1,0 +1,3 @@
+// runtime-error: "Array size must be nonnegative"
+
+int[] x = new int[-1]

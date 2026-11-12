@@ -1,0 +1,10 @@
+// expect: "3\n9\n0\n2\n"
+
+int[] values = [1, 2, 3]
+int[] alias = values
+alias[0] = 9
+print(values.length)
+print(values[0])
+values = []
+print(values.length)
+print(alias[1])

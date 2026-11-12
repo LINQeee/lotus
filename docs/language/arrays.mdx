@@ -1,0 +1,69 @@
+---
+title: "Arrays"
+description: "Store and iterate over a fixed number of typed values."
+keywords: ["Lotus", "arrays", "collections"]
+---
+
+```rust
+int[] numbers = [10, 20, 30]
+numbers[1] = 42
+print(numbers[1])
+print(numbers.length)
+```
+
+```text Output
+42
+3
+```
+
+Arrays contain one scalar type: `int`, `long`, `float`, `double`, `bool` or `string`. Their length is fixed at creation; elements are mutable. Nested arrays are not supported yet.
+
+## Create an array
+
+```rust
+int[] values = [1, 2, 3]
+int[] empty = []
+int size = 10
+int[] buffer = new int[size]
+long[] longs = [(long)1, 2l]
+```
+
+`new T[size]` accepts a nonnegative `int`, including a runtime value. Numbers start at zero, booleans at `false`, strings at `""`. Size is not part of the type.
+
+Elements must match the declared type; there are no implicit conversions. An empty literal needs its type from a declaration, assignment, parameter or return type.
+
+## Read and write
+
+Indices are `int`, from `0` through `length - 1`. Invalid indices and negative sizes stop execution with a diagnostic. `.length` is read-only.
+
+Use `values[index] = expression` to update an element. Compound assignments and `++`/`--` on indexed elements are not supported yet. Arrays cannot be compared or passed directly to `print`; print their elements instead.
+
+## References and functions
+
+Assignment shares the array; it does not copy elements. References are released automatically, including string elements.
+
+```rust
+fn change(values: int[]): int[] {
+    values[0] = 9
+    return values
+}
+
+int[] original = [1, 2]
+int[] alias = change(original)
+print(original[0]) // 9
+```
+
+Reassigning `alias` to another array leaves `original` unchanged.
+
+## Iterate
+
+```rust
+for value in [10, 20, 30] {
+    if value == 20 continue
+    print(value)
+}
+```
+
+Iteration visits elements in index order. The array expression is evaluated once and kept alive for the loop. An empty array runs zero iterations. Each iteration reads the current element; assigning to the loop variable does not replace that element.
+
+`break`, `continue` and their `@level` forms work as in [range loops](/language/control-flow).

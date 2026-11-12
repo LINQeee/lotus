@@ -1,0 +1,4 @@
+// error: "array index must be int"
+
+int[] x = [1]
+print(x[true])

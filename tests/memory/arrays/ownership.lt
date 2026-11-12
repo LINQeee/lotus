@@ -1,0 +1,36 @@
+// expect: "ab\nnew\nreturned\ndone\n"
+// runtime: "memory"
+// log: ["String memory: live=0 "]
+
+fn create(): string[] { return ["a" + "b", "old" + "!"] }
+fn first(items: string[]): string {
+    for value in items { return value }
+    return "empty"
+}
+fn replace(items: string[]): string[] {
+    items[1] = "n" + "ew"
+    return items
+}
+string[] values = create()
+string[] alias = replace(values)
+print(first(values))
+values = []
+print(alias[1])
+alias[1] = alias[1]
+print(first(["ret" + "urned"]))
+for i in 1..50 {
+    string[] items = create()
+    for value in items {
+        items = new string[1]
+        continue
+    }
+    for value in create() {
+        for other in create() { break @2 }
+    }
+    for value in create() {
+        for other in create() { continue @2 }
+    }
+    create()
+    new string[0]
+}
+print("done")

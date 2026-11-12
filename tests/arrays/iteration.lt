@@ -1,0 +1,21 @@
+// expect: "1\n3\n10\n2\n"
+
+int[] values = [1, 2, 3]
+for value in values {
+    if value == 2 continue
+    print(value)
+    value = 10
+}
+for (value in [10, 20]) {
+    print(value)
+    break
+}
+int count = 0
+for outer in [1, 2] {
+    for inner in [3, 4] {
+        count++
+        continue @2
+    }
+}
+print(count)
+for value in new int[0] print(value)

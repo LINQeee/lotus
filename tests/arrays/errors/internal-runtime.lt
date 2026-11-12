@@ -1,0 +1,3 @@
+// error: "array runtime functions are internal"
+
+_arrayCreate(1, 0)

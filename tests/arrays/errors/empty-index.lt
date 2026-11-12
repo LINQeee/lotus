@@ -1,0 +1,4 @@
+// runtime-error: "Array index 0 out of bounds"
+
+int[] x = []
+print(x[0])

@@ -205,3 +205,41 @@ test('UTF-8 paths and runtime strings work with redirected input', () => {
     assert.equal(executable.status, 0, executable.stderr)
     assert.equal(executable.stdout.replaceAll('\r\n', '\n'), 'привет世界\n')
 })
+
+test('arrays work in JIT and executable builds', () => {
+    const file = path.join(temp, 'arrays.lt')
+    fs.writeFileSync(file, `
+fn words(): string[] { return ["hel" + "lo", "world"] }
+string[] items = words()
+string[] alias = items
+items = []
+alias[1] = "Lotus"
+for word in alias print(word)
+int[] values = new int[2]
+values[1] = 42
+print(values[1])
+print(items.length)
+`)
+    const expected = 'hello\nLotus\n42\n0\n'
+    const jit = run(['run', file])
+    assert.equal(jit.status, 0, jit.stderr)
+    assert.equal(jit.stdout.replaceAll('\r\n', '\n'), expected)
+    const build = run(['build', file])
+    assert.equal(build.status, 0, build.stderr)
+    const executable = spawnSync(`${file}${suffix}`, {cwd: temp, encoding: 'utf8'})
+    assert.equal(executable.status, 0, executable.stderr)
+    assert.equal(executable.stdout.replaceAll('\r\n', '\n'), expected)
+})
+
+test('array bounds fail at runtime in both execution modes', () => {
+    const file = path.join(temp, 'bounds.lt')
+    fs.writeFileSync(file, 'int[] values = [1]\nprint(values[values.length])\n')
+    assert.equal(run(['check', file]).status, 0)
+    const jit = run(['run', file])
+    assert.equal(jit.status, 1)
+    assert.match(jit.stderr, /Array index 1 out of bounds for length 1/)
+    assert.equal(run(['build', file]).status, 0)
+    const executable = spawnSync(`${file}${suffix}`, {cwd: temp, encoding: 'utf8'})
+    assert.equal(executable.status, 1)
+    assert.match(executable.stderr, /Array index 1 out of bounds for length 1/)
+})

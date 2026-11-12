@@ -1,0 +1,3 @@
+// error: "can reach its end without returning"
+
+fn value(): int { for x in [1] return x }

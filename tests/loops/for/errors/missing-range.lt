@@ -1,3 +1,3 @@
-// error: "Expected"
+// error: "for requires an array or range"
 
 for i in 0 {}

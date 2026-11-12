@@ -1,0 +1,16 @@
+// expect: "0\n0\n0.000000\n0.000000\nfalse\n\n0\n"
+
+int size = 2
+int[] ints = new int[size]
+long[] longs = new long[size]
+float[] floats = new float[size]
+double[] doubles = new double[size]
+bool[] flags = new bool[size]
+string[] words = new string[size]
+print(ints[1])
+print(longs[1])
+print(floats[1])
+print(doubles[1])
+print(flags[1])
+print(words[1])
+print(new int[0].length)

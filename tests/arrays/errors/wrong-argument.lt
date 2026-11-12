@@ -1,0 +1,4 @@
+// error: "array elements must have the same scalar type"
+
+fn use(x: int[]): int { return x.length }
+use([true])

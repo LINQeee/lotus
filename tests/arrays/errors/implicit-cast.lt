@@ -1,0 +1,3 @@
+// error: "array elements must have the same scalar type"
+
+long[] x = [1]

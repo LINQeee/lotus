@@ -1,0 +1,4 @@
+// error: "array element requires int"
+
+int[] x = [1]
+x[0] = true

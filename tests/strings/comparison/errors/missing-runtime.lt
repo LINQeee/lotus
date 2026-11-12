@@ -1,4 +1,4 @@
-// error: "String comparison requires _stringEquals"
+// error: "Native function _stringEquals is unavailable"
 // runtime: "none"
 
 bool equal = "a" == "a"

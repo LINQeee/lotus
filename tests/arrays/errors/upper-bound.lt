@@ -1,0 +1,4 @@
+// runtime-error: "Array index 1 out of bounds"
+
+int[] x = [1]
+x[1] = 2
