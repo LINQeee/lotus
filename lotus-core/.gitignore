@@ -1,9 +1,0 @@
-/cmake-build-*/
-/build/
-/.idea/
-.DS_Store
-*.dylib
-*.so
-*.dll
-*.a
-*.lib
