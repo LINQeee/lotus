@@ -48,6 +48,11 @@ WhileNode *newWhileNode(Node *condition, Node *body, SourceLocation location);
 
 BooleanNode *newBooleanNode(bool value, SourceLocation location);
 
+LotusType parseType();
+ArrayNode *newArrayNode(SourceLocation location);
+IndexNode *newIndexNode(Node *array, Node *index, SourceLocation location);
+LengthNode *newLengthNode(Node *array, SourceLocation location);
+
 CastNode *newCastNode(LotusType type, Node *operand, SourceLocation location);
 
 UnaryNode *newUnaryNode(TokenKind op, Node *operand, SourceLocation location);

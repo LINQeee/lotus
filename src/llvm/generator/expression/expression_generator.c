@@ -14,6 +14,7 @@
 #include "../../var_manager.h"
 #include "../../../parser/parser.h"
 #include "functions.h"
+#include "arrays.h"
 
 static LLVMValueRef generateNumber(const NumberNode *node) {
     switch (node->base.dataType) {
@@ -218,6 +219,10 @@ static LLVMValueRef generateUpdate(const UnaryNode *node) {
 
 LLVMValueRef generateExpression(const Node *node) {
     switch (node->type) {
+        case NODE_ARRAY: return generateArray((const ArrayNode *)node);
+        case NODE_LENGTH: return generateLength((const LengthNode *)node);
+        case NODE_INDEX:
+        case NODE_INDEX_ASSIGN: return generateIndex((const IndexNode *)node);
         case NODE_UNARY: {
             const UnaryNode *unary = (const UnaryNode *)node;
             if (unary->op == TOKEN_INCREMENT || unary->op == TOKEN_DECREMENT) return generateUpdate(unary);

@@ -25,6 +25,7 @@ LLVMTypeRef lotusValueLLVMType() {
 }
 
 LLVMTypeRef convertType(const LotusType type) {
+    if (isMemoryType(type) || type == LOTUS_ARRAY) return LLVMPointerType(cg->i8Type, 0);
     switch (type) {
         case LOTUS_I32: return cg->i32Type;
         case LOTUS_I64: return cg->i64Type;

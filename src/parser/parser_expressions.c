@@ -55,6 +55,17 @@ static Node *parseExpressionPrec(const int minPrecedence) {
 }
 
 static Node *parsePostfix(Node *operand) {
+    while (current().location.line == previous().location.line) {
+        if (matchCurrent(TOKEN_LBRACKET)) {
+            Node *index = parseExpressionPrec(0);
+            expect(TOKEN_RBRACKET);
+            operand = (Node *)newIndexNode(operand, index, operand->location);
+        } else if (matchCurrent(TOKEN_DOT)) {
+            Token member = expect(TOKEN_IDENTIFIER);
+            if (strcmp(member.value, "length")) exitWithError("Unknown array property '%s'", member.value);
+            operand = (Node *)newLengthNode(operand, operand->location);
+        } else break;
+    }
     while ((isCurrent(TOKEN_INCREMENT) || isCurrent(TOKEN_DECREMENT)) &&
            current().location.line == previous().location.line) {
         Token op = advance();
@@ -93,6 +104,24 @@ static Node *parseUnary() {
 static Node *parsePrimary() {
     const Token primaryT = current();
 
+    if (matchCurrent(TOKEN_NEW)) {
+        ArrayNode *node = newArrayNode(primaryT.location);
+        LotusType elementType = tokenTypeToLotusType(advance().type);
+        node->base.dataType = toArrayType(elementType);
+        expect(TOKEN_LBRACKET);
+        node->size = parseExpressionPrec(0);
+        expect(TOKEN_RBRACKET);
+        return (Node *)node;
+    }
+    if (matchCurrent(TOKEN_LBRACKET)) {
+        ArrayNode *node = newArrayNode(primaryT.location);
+        if (!isCurrent(TOKEN_RBRACKET)) do {
+                node->items = reallocSafe(node->items, (node->itemsCount + 1) * sizeof(Node *));
+                node->items[node->itemsCount++] = parseExpressionPrec(0);
+            } while (matchCurrent(TOKEN_COMMA));
+        expect(TOKEN_RBRACKET);
+        return (Node *)node;
+    }
     if (isCurrent(TOKEN_IDENTIFIER) && peekNext().type == TOKEN_LPAREN) {
         Token id = advance();
         IdentifierNode *idN = newIdentifierNode(id.value, LOTUS_FUNCTION, id.location);
