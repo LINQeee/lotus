@@ -32,19 +32,20 @@ For rejected programs, use a diagnostic substring:
 double value = 2f
 ```
 
-All directive values use JSON. Exactly one `expect` or `error` is required.
+All directive values use JSON. Exactly one `expect`, `error` or `runtime-error` is required.
 
 | Directive | Meaning |
 | --- | --- |
 | `expect: "..."` | Exact program stdout, including final newlines |
 | `error: "..."` | Exit 1 with this diagnostic before execution |
+| `runtime-error: "..."` | Exit 1 with this stderr diagnostic after execution starts |
 | `input: "..."` | Stdin text, followed by EOF |
 | `ir: ["..."]` | Required text in IR before optimization |
 | `log: ["..."]` / `no-log: ["..."]` | Required / forbidden stdout or stderr text |
 | `entry-allocas: false` | Disable entry-block allocation checking for this case |
 | `runtime: "normal"` | Use the configured runtime library |
 | `runtime: "none"` | Load no runtime libraries |
-| `runtime: "memory"` | Use the instrumented string runtime |
+| `runtime: "memory"` | Use the instrumented runtime |
 
 `runtime` and entry-allocation checks inherit config values when omitted. `expect` excludes debug output; use log assertions for stderr. Invalid directives report `DIRECTIVE ERROR` with the source location and skip execution of that case. Crashes, timeouts and missing execution markers fail the test.
 
@@ -92,7 +93,7 @@ Local edits then apply immediately. To install or update an independent copy, us
 
 ## Coverage
 
-Feature folders cover syntax, types, expressions, scope, control flow, functions, strings and native calls. Add cases there; edit `tools/lotus-test/src/` only when changing the runner itself.
+Feature folders cover syntax, types, expressions, scope, control flow, functions, strings, arrays and native calls. Add cases there; edit `tools/lotus-test/src/` only when changing the runner itself.
 
 Memory tests build lotus-core with ASan/UBSan and allocation counters. `CC` selects Clang. LeakSanitizer is disabled and JIT code is not instrumented; these checks do not prove complete compiler-memory cleanup.
 

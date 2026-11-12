@@ -8,13 +8,13 @@ Lotus is pre-alpha. User installation targets 64-bit macOS, Linux and Windows (M
 
 | Available | Not implemented |
 | --- | --- |
-| Explicit types and numeric casts | Implicit conversions, arrays, structs, generics |
+| Explicit types and numeric casts | Implicit conversions, structs, generics |
 | Top-level functions and recursion | Nested functions and closures |
-| Conditions, while and integer-range loops | Iterable collections and range values |
-| Strings with automatic reference counting | String indexing and Unicode normalization |
+| Conditions, while, range and array loops | Range values and dynamic lists |
+| Strings and fixed-length arrays with automatic reference counting | Nested arrays, string indexing and Unicode normalization |
 | JIT execution and executable builds | REPL, cross-compilation and bundled distributions |
 | Native C extensions | `.lt` module imports and package management |
 
-Executable builds depend on native libraries; see [CLI requirements](/cli). String reference counting covers runtime strings, not all compiler allocations.
+Executable builds depend on native libraries; see [CLI requirements](/cli). Reference counting covers runtime strings and arrays, not all compiler allocations.
 
 For supported syntax, start with [types](/language/types). To work on the implementation, follow [the contributor workflow](/development/workflow).

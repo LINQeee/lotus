@@ -39,7 +39,8 @@
               "language/expressions",
               "language/control-flow",
               "language/functions",
-              "language/strings"
+              "language/strings",
+              "language/arrays"
             ]
           },
           {
