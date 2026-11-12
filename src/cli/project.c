@@ -26,7 +26,7 @@ void createProject(const char *name, const char *parent) {
     if (result) exitWithError("Cannot create project '%s': %s", directory, strerror(errno));
     char *file = mallocSafe(strlen(directory) + sizeof("/main.lt"));
     sprintf(file, "%s/main.lt", directory);
-    FILE *output = fopen(file, "wx");
+    FILE *output = fopen(file, "wbx");
     if (!output) exitWithError("Cannot create '%s': %s", file, strerror(errno));
     size_t written = fwrite(PROJECT_TEMPLATE, 1, sizeof(PROJECT_TEMPLATE), output);
     int closed = fclose(output);
