@@ -4,6 +4,7 @@
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "../../../parser/parser.h"
 #include "../../llvm.h"
@@ -37,7 +38,10 @@ void collectFunctions(const Node *node) {
 
         f->fnType = type;
 
-        f->llvmFunction = LLVMAddFunction(cg->module, f->name, type);
+        char symbol[80];
+        snprintf(symbol, sizeof(symbol), "$lotus.%s", f->name);
+        f->llvmFunction = LLVMAddFunction(cg->module, symbol, type);
+        LLVMSetLinkage(f->llvmFunction, LLVMInternalLinkage);
     } else {
         switch (node->type) {
             case NODE_PROGRAM: {
