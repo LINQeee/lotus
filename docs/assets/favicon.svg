@@ -1,4 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
-  <rect x="1" y="1" width="38" height="38" fill="#121116" stroke="#A78BFA" stroke-width="2"/>
-  <path d="M7 10H4v20h3m26-20h3v20h-3M14 11v18h12" fill="none" stroke="#C4B5FD" stroke-width="3"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="#7654D6">
+    <style>@media (prefers-color-scheme: dark) { svg { fill: #C4AFF2; } }</style>
+    <title>Lotus</title>
+    <path d="M64 9C44 23 35 43 42 63C51 69 59 78 64 88C69 78 77 69 86 63C93 43 84 23 64 9Z"/>
+    <path d="M14 32C23 30 31 32 37 36C33 44 33 52 35 59C28 56 21 55 14 56C12 48 12 40 14 32Z"/>
+    <path d="M114 32C105 30 97 32 91 36C95 44 95 52 93 59C100 56 107 55 114 56C116 48 116 40 114 32Z"/>
+    <path d="M6 68C28 59 51 74 61 108C36 112 13 96 6 68Z"/>
+    <path d="M122 68C100 59 77 74 67 108C92 112 115 96 122 68Z"/>
 </svg>

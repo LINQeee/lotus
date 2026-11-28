@@ -4,3 +4,6 @@
 [submodule "lotus-core"]
 	path = lotus-core
 	url = https://github.com/LINQeee/lotus-core.git
+[submodule "tools/lotus-extension"]
+	path = tools/lotus-extension
+	url = https://github.com/LINQeee/lotus-extension.git

@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Lotus",
   "colors": {
-    "primary": "#7C3AED",
-    "light": "#A78BFA",
-    "dark": "#7C3AED"
+    "primary": "#7654D6",
+    "light": "#C4AFF2",
+    "dark": "#7654D6"
   },
   "favicon": "/assets/favicon.svg",
   "logo": {
@@ -60,6 +60,7 @@
             "pages": [
               "development/workflow",
               "development/tests",
+              "development/vscode",
               "development/compiler"
             ]
           },

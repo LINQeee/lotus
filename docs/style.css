@@ -1,12 +1,12 @@
 :root {
-    --lotus-accent: #6d28d9;
+    --lotus-accent: #7654d6;
     --lotus-line: #d6d0df;
     --lotus-panel: #f2eff6;
     --lotus-muted: #696273;
 }
 
 html.dark {
-    --lotus-accent: #c4b5fd;
+    --lotus-accent: #c4aff2;
     --lotus-line: #3c3549;
     --lotus-panel: #1b1822;
     --lotus-muted: #b3aabd;
@@ -99,26 +99,37 @@ html.dark {
     border-radius: 0;
 }
 
-#content .ascii-banner {
+#content .brand-banner {
     margin: 1.5rem 0 2rem;
     padding: 1.5rem;
-    border: 1px dashed var(--lotus-line);
+    border: 1px solid var(--lotus-line);
     background: var(--lotus-panel);
 }
 
-#content .ascii-art {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--lotus-accent);
-    font: 600 clamp(10px, 2.5vw, 16px)/1.3 ui-monospace, monospace;
-    white-space: pre;
-    overflow-x: auto;
+#content .brand-heading {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 2.5rem;
+    font-weight: 600;
+    letter-spacing: -0.04em;
 }
 
-#content .ascii-caption {
-    margin-top: 1.25rem;
+#content .brand-heading img {
+    margin: 0;
+}
+
+#content .brand-mark-dark,
+html.dark #content .brand-mark-light {
+    display: none;
+}
+
+html.dark #content .brand-mark-dark {
+    display: block;
+}
+
+#content .brand-caption {
+    margin-top: 1rem;
     color: var(--lotus-muted);
     font-size: 0.75rem;
     letter-spacing: 0.04em;
