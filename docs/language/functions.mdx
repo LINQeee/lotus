@@ -55,6 +55,6 @@ A value-returning function must not reach its end without a result. Void functio
 | Conditional return followed by a fallback return | Accepted |
 | `while true` with no reachable break | May never return; accepted |
 | Return only inside a `for` | Not sufficient; the range is treated as possibly empty |
-| Missing return on a reachable path | Type error before IR generation |
+| Missing return on a reachable path | Type error |
 
 The analysis recognizes literal boolean conditions, not arbitrary constant expressions. Unreachable statements are still type-checked.

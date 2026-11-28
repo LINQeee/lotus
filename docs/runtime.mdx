@@ -4,15 +4,17 @@ description: "Functions provided by lotus-core."
 keywords: ["Lotus", "runtime"]
 ---
 
-These functions are available when `lotus-core` is [loaded](/cli#native-libraries); no import statement is needed.
+No import is needed. These functions require [lotus-core](/cli#native-libraries).
 
 | Function | Result | Behavior |
 | --- | --- | --- |
 | `print(values...)` | No value | Print one or more values without separators, then a newline |
 | `input()` | `string` | Read through newline or EOF; omit the newline |
-| `toInt(text: string)` | `int` | Parse using C `atoi`; no reliable validation or overflow reporting |
+| `toInt(text: string)` | `int` | Parse an integer; no reliable validation or overflow reporting |
 | `toBool(value: any)` | `bool` | Apply the rules below |
 | `randomNum(min: int, max: int)` | `int` | Inclusive range; bounds must be valid and non-overflowing |
+
+## I/O behavior
 
 ```rust runtime.lt
 print("sum=", 1 + 2 + 3)
@@ -26,8 +28,6 @@ sum=6
 42
 ```
 
-## I/O behavior
-
 Floats print six decimal places. `input()` returns an empty string for an empty line or EOF. Printed strings stop at an embedded NUL; [string equality](/language/strings) compares all bytes.
 
 ## Boolean conversion
@@ -39,6 +39,6 @@ Floats print six decimal places. `input()` returns an empty string for an empty 
 | String `"true"` or `"false"` | Corresponding boolean |
 | Another string | Diagnostic on stderr and `false` |
 
-<Warning>
-`randomNum` reseeds on every call and is not suitable for secure or reproducible randomness. Use `toInt` only when its unchecked conversion is acceptable.
-</Warning>
+## Random numbers
+
+`randomNum` reseeds on every call and is not suitable for secure or reproducible randomness.

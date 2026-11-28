@@ -77,7 +77,7 @@ for i in 5!..0 step -2 print(i)
 - Default: `+1` if the original start is below the end, otherwise `-1`.
 - Explicit step: a nonzero integer literal of the range type, such as `2` or `-2L`.
 - A step pointing away from the end produces an empty loop.
-- Generated advancement handles integer limits without wrapping the counter.
+- Advancing the counter does not wrap at integer limits.
 
 ### Change the counter
 

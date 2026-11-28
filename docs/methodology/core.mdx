@@ -1,0 +1,52 @@
+---
+title: "CORE"
+description: "Four principles for organizing code: effects, operations, state and contracts."
+keywords: ["Lotus", "CORE", "methodology", "cheatsheet"]
+---
+
+CORE was developed for Lotus and applies to other languages.
+
+## Cheatsheet
+
+<div className="core-cheatsheet">
+
+| Principle | Rule |
+| --- | --- |
+| **C — Controlled Effects** | Make side effects predictable |
+| **O — Operation Ownership** | Assign an owner to the steps and outcome |
+| **R — Responsibility for State** | Change state through its owner |
+| **E — Explicit Contracts** | Define inputs, results and errors |
+
+</div>
+
+## C Controlled Effects
+
+A function's side effects should match its name and contract.
+
+**Example**
+
+`getLength(values)` returns the number of elements. Calling it should not change the array or write to a file.
+
+## O Operation Ownership
+
+One operation should own the steps, completion and failure handling of a multi-step process.
+
+**Example**
+
+`processFile(path)` opens a file, reads its contents and processes them. The same operation closes the file, including when reading or processing fails.
+
+## R Responsibility for State
+
+Change state through an owner that enforces its rules.
+
+**Example**
+
+A counter must stay nonnegative. `counter.decrement()` checks its value before decreasing it. Other code uses this method instead of changing the value directly.
+
+## E Explicit Contracts
+
+Define valid inputs, results and errors explicitly.
+
+**Example**
+
+`findIndex(values, value)` returns the first matching index, starting at zero, or `-1` if no element matches. It leaves the array unchanged.

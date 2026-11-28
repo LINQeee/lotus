@@ -1,0 +1,54 @@
+---
+title: "Build from source"
+description: "Build a checkout or customize the installation."
+keywords: ["Lotus", "build", "installation"]
+---
+
+## Dependencies
+
+Requires LLVM 22+, CMake 3.25+, Ninja, Git and Clang. Keep LLVM and the toolchain installed after setup.
+
+The installer uses Homebrew on macOS, apt and the [LLVM repository](https://apt.llvm.org) on Debian/Ubuntu, and MSYS2 Clang64 on Windows. On other Linux distributions, install the dependencies yourself and pass `--no-deps`.
+
+## Install from a checkout
+
+From the repository root:
+
+```sh
+git submodule update --init --recursive
+bash scripts/install.sh --source .
+```
+
+On Windows, initialize the submodules and use PowerShell:
+
+```powershell
+git submodule update --init --recursive
+& ./scripts/install.ps1 -Source .
+```
+
+| Option | Bash | PowerShell |
+| --- | --- | --- |
+| Installation directory | `--prefix DIR` | `-Prefix DIR` |
+| Existing dependencies | `--no-deps` | `-NoDeps` |
+| Leave shell/PATH settings alone | `--no-path` | `-NoPath` |
+
+For a custom toolchain, set `LLVM_DIR`, `CC`, `CXX` and `CMAKE` before running the Bash installer. On Windows, `-MsysRoot DIR` selects an existing MSYS2 installation.
+
+The installer builds the compiler and runtime and adds `lotus` to `PATH`. Open a new terminal to use it. On Windows, the launcher works in PowerShell and cmd.
+
+## Build without installing
+
+With dependencies installed and submodules initialized, run the following commands. On Windows, use an MSYS2 Clang64 shell.
+
+```sh
+cmake -S . -B cmake-build-debug -G Ninja
+cmake --build cmake-build-debug --target compiler
+```
+
+The executable is `cmake-build-debug/lotus` (`lotus.exe` on Windows). Runtime libraries are written to `libs/`. Set `LLVM_DIR` if CMake cannot find your LLVM installation.
+
+To change the default runtime directory, configure with `-DLOTUS_RUNTIME_DIR=/path/to/libs`. The installer sets it to `lib/lotus` inside the installation directory.
+
+## Update an installation
+
+Rerun the installer. Without `--source` or `-Source`, it downloads the current `main` branch; `LOTUS_REF` selects another branch or tag.

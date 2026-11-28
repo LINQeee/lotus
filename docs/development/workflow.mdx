@@ -4,18 +4,19 @@ description: "Set up a checkout and verify a change."
 keywords: ["Lotus", "workflow"]
 ---
 
-Start with [Quickstart](/quickstart), then read `AGENTS.md` for the project's C, JavaScript and documentation style.
+Set up a [source build](/development/build), then read `AGENTS.md` for the project's coding and documentation style.
 
 ## Prepare the checkout
 
 ```sh
-git submodule update --init --recursive
 npm ci --prefix tools/lotus-test
 ./scripts/install-iwyu.sh
 ./scripts/install-hooks.sh
 ```
 
-Contributor tools: Node.js 20+, Python 3, clang-format 22 and IWYU 0.26, in addition to the build toolchain. The IWYU installer builds into `.tools/`; Python is used by include analysis, not the test runner.
+Contributor tools: Node.js 20+, Python 3, clang-format 22 and IWYU 0.26. The IWYU installer writes to `.tools/`.
+
+Hooks and memory-instrumented tests depend on your contributor environment; installer support alone does not verify these tools on every platform.
 
 Shell scripts read `lotus-scripts-config.json`; the runner reads `lotus-test-config.json`. Set each `cmake` field to your CMake command or path. `CMAKE` in the environment overrides both. IDE hooks inherit the IDE's environment.
 
@@ -44,9 +45,9 @@ Register new C files in the relevant CMake target. Formatting does not cover `.l
 
 ## Commit and push
 
-Hooks check formatting/includes in the staged snapshot before commit and outgoing commits before push. Both then run language and CLI tests from the **working tree**. Any failure blocks the operation; hooks do not rewrite or stage files.
+Hooks check formatting and includes in the staged snapshot before commit and outgoing commits before push. Both then run language and CLI tests from the **working tree**, which may differ from those snapshots. Any failure blocks the operation; hooks do not rewrite or stage files.
 
-Local hooks can be bypassed. Shared enforcement requires CI; the local test run is not a test of an isolated staged snapshot.
+Local hooks can be bypassed; use CI to enforce checks for all contributors.
 
 ## Repositories
 
@@ -57,5 +58,3 @@ Local hooks can be bypassed. Shared enforcement requires CI; the local test run 
 | `tools/lotus-test/` | [lotus-test](https://github.com/LINQeee/lotus-test) |
 
 Commit and push submodule changes in their repositories first, then commit updated pointers in Lotus. After pulling, run `git submodule update --init --recursive`; reinstall runner dependencies when its lockfile changes.
-
-Next: [add a test](/development/tests#write-a-test), [change the compiler](/development/compiler), or [write a C extension](/development/native).

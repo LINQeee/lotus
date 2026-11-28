@@ -25,6 +25,10 @@
               "cli",
               "status"
             ]
+          },
+          {
+            "group": "Editor",
+            "pages": ["development/vscode"]
           }
         ]
       },
@@ -45,6 +49,12 @@
             ]
           },
           {
+            "group": "Methodology",
+            "pages": [
+              "methodology/core"
+            ]
+          },
+          {
             "group": "Standard library",
             "pages": [
               "runtime"
@@ -59,8 +69,8 @@
             "group": "Development",
             "pages": [
               "development/workflow",
+              "development/build",
               "development/tests",
-              "development/vscode",
               "development/compiler"
             ]
           },
@@ -68,6 +78,7 @@
             "group": "Extend and maintain",
             "pages": [
               "development/native",
+              "development/extension",
               "development/documentation"
             ]
           }

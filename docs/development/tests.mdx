@@ -4,7 +4,7 @@ description: "Run feature tests and describe expected behavior."
 keywords: ["Lotus", "tests"]
 ---
 
-Requires Node.js 20+ and the [build toolchain](/quickstart). From the compiler root:
+Requires Node.js 20+ and the [build toolchain](/development/build#dependencies). From the compiler root:
 
 ```sh
 npm ci --prefix tools/lotus-test
@@ -12,7 +12,7 @@ node tools/lotus-test/bin/lotus-test.mjs
 node tools/lotus-test/bin/lotus-test.mjs loops/for
 ```
 
-The runner builds the compiler/runtime, then runs `.lt` files through `lotus run`. Each test uses its original source, a separate process and a temporary working directory. Runtime modes are prepared once per run in separate directories.
+The runner builds the compiler and runtime before testing. Each `.lt` file runs in a separate process with a temporary working directory.
 
 ## Write a test
 
@@ -59,7 +59,7 @@ All directive values use JSON. Exactly one `expect`, `error` or `runtime-error` 
 | `-v`, `--verbose` | List individual results |
 | `-h`, `--help` | Show usage in a configured project |
 
-Output uses colors and one summary per root group. A terminal spinner shows the current test; verbose mode and redirected output omit animation. Failures show details and log paths under `resultsDir`.
+Failures include diagnostics and log paths under `resultsDir`.
 
 Exit codes: **0** pass, **1** failed cases, **2** setup or selection error.
 
@@ -92,8 +92,6 @@ Local edits then apply immediately. To install or update an independent copy, us
 </Accordion>
 
 ## Coverage
-
-Feature folders cover syntax, types, expressions, scope, control flow, functions, strings, arrays and native calls. Add cases there; edit `tools/lotus-test/src/` only when changing the runner itself.
 
 Memory tests build lotus-core with ASan/UBSan and allocation counters. `CC` selects Clang. LeakSanitizer is disabled and JIT code is not instrumented; these checks do not prove complete compiler-memory cleanup.
 

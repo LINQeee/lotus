@@ -95,6 +95,10 @@ html.dark {
     border-bottom: 1px solid var(--lotus-line);
 }
 
+#content .core-cheatsheet :is(th, td):first-child {
+    white-space: nowrap;
+}
+
 #content :not(pre) > code {
     border-radius: 0;
 }

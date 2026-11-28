@@ -13,11 +13,11 @@ keywords: ["Lotus", "index"]
   <div className="brand-caption">Pre-alpha / static types / native runtime</div>
 </div>
 
-Lotus is an experimental, statically typed language implemented with LLVM and a native C runtime.
+Lotus is an experimental, statically typed programming language.
 
 <Columns cols={1}>
-  <Card title="01 / Install Lotus" href="/quickstart#install">
-    Install with one command on macOS, Linux or Windows, then create your first project.
+  <Card title="01 / Install Lotus" href="/quickstart">
+    Install on macOS, Linux or Windows and run your first program.
   </Card>
   <Card title="02 / Learn the language" href="/language/types">
     Types, variables, functions, loops and strings.
@@ -27,18 +27,4 @@ Lotus is an experimental, statically typed language implemented with LLVM and a 
   </Card>
 </Columns>
 
-```rust hello.lt
-fn sum(a: int, b: int): int {
-    return a + b
-}
-
-print(sum(20, 22))
-```
-
-```text Output
-42
-```
-
-<Note>
-Lotus is pre-alpha. Syntax and the native ABI may change. Check [current support](/status) before choosing it for a project.
-</Note>
+[Current support and limits](/status)

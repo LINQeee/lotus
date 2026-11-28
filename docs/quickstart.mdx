@@ -4,37 +4,29 @@ description: "Install Lotus and run your first program."
 keywords: ["Lotus", "quickstart", "installation"]
 ---
 
-## Install
-
-Run one command below — no repository clone or manual download is needed. The installer downloads the sources into a temporary folder, installs dependencies, builds Lotus and lotus-core, then adds `lotus` to your terminal's `PATH`.
-
-System permissions may still require a password or Windows elevation. Keep LLVM and the installed toolchain available after setup.
+## Choose your OS
 
 <Tabs>
 <Tab title="macOS">
 
-Requires [Homebrew](https://brew.sh) and its Command Line Tools prerequisite. Apple Silicon and Intel builds use the same command:
+Requires [Homebrew](https://brew.sh) and Command Line Tools.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/LINQeee/lotus/main/scripts/install.sh | bash
 ```
 
-Installs dependencies with Homebrew and Lotus into `~/.local/share/lotus`. Open a new terminal afterward.
-
-[View the Bash installer](https://raw.githubusercontent.com/LINQeee/lotus/main/scripts/install.sh)
+Installs Lotus into `~/.local/share/lotus`.
 
 </Tab>
 <Tab title="Linux">
 
-On Debian/Ubuntu, the installer uses `sudo`, apt and the [LLVM package repository](https://apt.llvm.org):
+For Debian and Ubuntu:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/LINQeee/lotus/main/scripts/install.sh | bash
 ```
 
-Installs Lotus into `~/.local/share/lotus`. Open a new terminal afterward. On other distributions, install LLVM 22+, CMake 3.25+, Ninja, Git and Clang first, then append `-s -- --no-deps` to `bash`.
-
-[View the Bash installer](https://raw.githubusercontent.com/LINQeee/lotus/main/scripts/install.sh)
+Installs Lotus into `~/.local/share/lotus`. For other distributions, see [build from source](/development/build#dependencies).
 
 </Tab>
 <Tab title="Windows">
@@ -45,14 +37,14 @@ Requires Windows 10 1903+ or Windows 11, x64, PowerShell and `winget`:
 irm https://raw.githubusercontent.com/LINQeee/lotus/main/scripts/install.ps1 | iex
 ```
 
-Installs MSYS2/Clang64 dependencies and Lotus into `%LOCALAPPDATA%\Lotus`. The `lotus` launcher works in PowerShell and cmd without opening an MSYS2 shell. New terminals inherit the command from your user `PATH`.
-
-[View the PowerShell installer](https://raw.githubusercontent.com/LINQeee/lotus/main/scripts/install.ps1)
+Installs Lotus into `%LOCALAPPDATA%\Lotus`.
 
 </Tab>
 </Tabs>
 
 ## Run a program
+
+In a new terminal:
 
 ```sh
 lotus new hello-world .
@@ -63,28 +55,4 @@ lotus run hello-world/main.lt
 Hello, World!
 ```
 
-Edit `hello-world/main.lt` to write your program. `run` executes immediately through JIT. `lotus build hello-world/main.lt` creates `main.lt.out` on macOS/Linux or `main.lt.exe` on Windows beside the source, without executing it. See [native library requirements](/cli#executable-builds) before sharing the binary.
-
-## Install from a checkout
-
-Initialize the submodules first. From the repository root:
-
-```sh
-bash scripts/install.sh --source .
-```
-
-On Windows:
-
-```powershell
-& ./scripts/install.ps1 -Source .
-```
-
-| Option | Bash | PowerShell |
-| --- | --- | --- |
-| Installation directory | `--prefix DIR` | `-Prefix DIR` |
-| Existing dependencies | `--no-deps` | `-NoDeps` |
-| Leave shell/PATH settings alone | `--no-path` | `-NoPath` |
-
-For a custom toolchain, set `LLVM_DIR`, `CC`, `CXX` and `CMAKE` before running the Bash installer. On Windows, `-MsysRoot DIR` selects an existing MSYS2 installation. Rerun the installer to update Lotus; it builds the current `main` branch unless `LOTUS_REF` selects another branch or tag.
-
-Next: [language basics](/language/types) or [CLI reference](/cli).
+[Language basics](/language/types) · [CLI reference](/cli)

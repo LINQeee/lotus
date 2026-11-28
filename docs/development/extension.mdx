@@ -1,0 +1,66 @@
+---
+title: "Develop the extension"
+description: "Build, test and release the Lotus VS Code extension."
+keywords: ["Lotus", "VS Code", "development", "release"]
+---
+
+Requires Node.js 22+ and a checkout of [lotus-extension](https://github.com/LINQeee/lotus-extension).
+
+## Build a package
+
+From the compiler repository:
+
+```sh
+git submodule update --init --recursive
+cd tools/lotus-extension
+npm ci
+npm test
+npm run package
+code --install-extension dist/lotus-extension-0.1.4.vsix
+```
+
+## Run locally
+
+From `tools/lotus-extension`, run `npm run dev` and open a Lotus project in the Extension Development Host. Use **Developer: Reload Window** after changing code or configuration. Your regular VS Code installation is unchanged.
+
+Alternatively, open `tools/lotus-extension` in VS Code and press F5 with **Run Lotus Extension** selected. Configure the [compiler path](/development/vscode#configure-the-compiler) in the development window.
+
+## Test
+
+`npm test` checks declaration analysis, semantic tokens, diagnostic positions and the TextMate grammar. `test/host.js` checks these features in an Extension Host, including unsaved-file diagnostics; use a disposable workspace and test profile.
+
+Keep language examples and user documentation in the compiler repository.
+
+## Builds and releases
+
+| Directory | Purpose | Stored in Git |
+| --- | --- | --- |
+| `dist/` | Local packages and CI build output | No |
+| `releases/` | Versioned VSIX packages approved for publication | Yes |
+
+`npm run package` builds into `dist/`. CI checks every push and pull request and attaches the package as a workflow artifact.
+
+To release a new version from the extension repository:
+
+```sh
+npm version patch --no-git-tag-version
+npm run release:prepare
+git add package.json package-lock.json releases/
+git commit
+git push origin main
+```
+
+Commit implementation changes with the package. `release:prepare` runs tests, builds a VSIX and copies it to `releases/` without overwriting existing files. Keep earlier release packages; published versions are immutable.
+
+A push changing `releases/*.vsix` on `main` runs `.github/workflows/release.yml`. It verifies that the package identity, version and implementation match the checked-out source, creates a `vX.Y.Z` GitHub Release and attaches the committed VSIX. The Marketplace job publishes the same file. A manual workflow run can retry publication; an existing GitHub asset must match byte-for-byte, and an already published Marketplace version is skipped.
+
+### One-time Marketplace setup
+
+GitHub Releases work immediately with the workflow's built-in GitHub token. Marketplace publication remains disabled until the publisher is configured:
+
+1. Sign in to [Marketplace publisher management](https://marketplace.visualstudio.com/manage) and create publisher ID `LINQe`. If that ID is unavailable, update `publisher` in `package.json` and rebuild before publishing.
+2. In the publisher's **Trusted Publishing** settings, create a policy for owner `LINQeee`, repository `lotus-extension`, workflow `release.yml`. Leave Environment empty.
+3. In the GitHub repository's **Settings → Secrets and variables → Actions → Variables**, add `MARKETPLACE_ENABLED` with value `true`.
+4. Run **Release VSIX** from the Actions tab to publish the current release.
+
+The workflow uses `vsce --oidc` and `id-token: write`; no PAT secret is required. See [VS Code's Trusted Publishing instructions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#publish-with-github-actions-and-trusted-publishing).

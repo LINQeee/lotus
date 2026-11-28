@@ -20,7 +20,7 @@ LOTUS_NATIVE_LIBRARY {
 }
 ```
 
-Build into the directory containing your runtime:
+On macOS, build into the directory containing your runtime:
 
 ```sh
 clang -dynamiclib -I lotus-core example.c -o libs/libexample.dylib
@@ -36,7 +36,7 @@ print(twice(21))
 42
 ```
 
-The loader calls each library's `lotusRegister` entry point. Registered functions must be exported under their registered names. `--libs` replaces the library directory; retain lotus-core there for standard functions.
+The loader calls each library's `lotusRegister` entry point. Export functions under their registered names. Keep lotus-core in the [selected library directory](/cli#native-libraries) for standard functions.
 
 ## Native types
 
@@ -64,7 +64,18 @@ The loader calls each library's `lotusRegister` entry point. Registered function
 
 `LotusString` stores `length`, `data` and `references`. `_stringRetain` and `_stringRelease` manage references. Zero references mark an immortal literal, not an unowned allocation. Do not mutate shared strings or return stack storage; reference counting is single-threaded.
 
-`_concat` and `_stringEquals` support language operators. Lifetime helpers cannot be called from Lotus source.
+`_concat` borrows its operands and returns a new owned string. The compiler also uses
+`_concatOwned`, which consumes one owned reference to each operand and may reuse a
+uniquely owned left buffer. This internal helper cannot be called from Lotus source.
+`LotusString` layout and the public borrowed-argument ABI are unchanged.
+
+## Array storage
+
+Array storage uses the element's actual size: 4 bytes for `int`/`float`, 8 for
+`long`/`double` and string pointers, and 1 for `bool` on supported platforms.
+The compiler generates checked access using the internal runtime layout; rebuild
+compiler and lotus-core together. Native code must use the array runtime helpers
+rather than assume 8-byte slots or modify an array's length.
 
 ## Work on lotus-core
 
@@ -76,6 +87,6 @@ The loader calls each library's `lotusRegister` entry point. Registered function
 | `internal/` | Compiler helpers named with `_` |
 | `utils/` | C-only implementation helpers |
 
-`utils/string_utils.h` provides `lotusStringCreate(length)`: one owned reference, storage for the bytes and trailing NUL. Fill the bytes before returning the string. This helper is neither registered nor exported.
+`lotusStringCreate(length)` in `utils/string_utils.h` returns one owned reference with storage for the bytes and trailing NUL. Fill the bytes before returning the string. This helper is neither registered nor exported.
 
-Add new C sources to the runtime's CMake target. [Build instructions](/quickstart) and [tests](/development/tests) use the compiler checkout; standalone runtime builds also write to `../libs/`. Rebuild compiler, runtime and extensions together after ABI changes.
+Add new C sources to the runtime's CMake target. [Build instructions](/development/build) and [tests](/development/tests) use the compiler checkout; standalone runtime builds also write to `../libs/`. After ABI changes, rebuild compiler, runtime and extensions together.

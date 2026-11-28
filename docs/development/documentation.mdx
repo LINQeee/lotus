@@ -4,7 +4,7 @@ description: "Edit, preview and publish the documentation."
 keywords: ["Lotus", "documentation"]
 ---
 
-`docs/` is the shared documentation source for Lotus, lotus-core and lotus-test. READMEs only introduce each repository and link here. Pages use MDX; `docs.json` defines navigation and appearance.
+Keep documentation for Lotus, lotus-core and lotus-test in `docs/`; READMEs introduce each repository and link here. Pages use MDX; `docs.json` defines navigation and appearance.
 
 ## Preview and validate
 
@@ -24,15 +24,11 @@ npm run check
 
 This checks Mintlify content, config and links. Execute changed language examples separately. Commit pages, assets and package files; keep generated caches and dependencies ignored.
 
-Use `rust` for approximate highlighting of Lotus examples and `text` for output. The examples remain Lotus code; custom grammars currently render as plain text on the hosted site.
+Use `rust` for approximate highlighting of Lotus examples and `text` for output. Custom grammars currently render as plain text on the hosted site.
 
-## Put information in one place
+## Edit a page
 
-- **Get started:** installation, first run, CLI and current limits
-- **Language:** syntax, behavior and runtime functions
-- **Contribute:** workflow, tests, compiler internals and native extensions
-
-Follow `AGENTS.md`: short examples with output, concise rules, links instead of repetition. Use Kotlin, React and Qwik as presentation references. Keep implementation details out of beginner instructions unless they affect use.
+Write in English and follow the documentation rules in `AGENTS.md`. Keep each page focused on its reader's task. Link to detailed references instead of repeating them in getting-started instructions.
 
 ## Publish
 

@@ -4,22 +4,9 @@ description: "Edit Lotus files with highlighting, completion, navigation and com
 keywords: ["Lotus", "VS Code", "extension", "editor"]
 ---
 
-The Lotus extension recognizes `.lt` files. It provides syntax and semantic highlighting, snippets, field and method completion, hover information, go to definition and an outline for the current document.
+## Install
 
-## Install from source
-
-The extension lives in the `tools/lotus-extension` submodule, maintained in [lotus-extension](https://github.com/LINQeee/lotus-extension).
-
-```sh
-git submodule update --init --recursive
-cd tools/lotus-extension
-npm ci
-npm test
-npm run package
-code --install-extension dist/lotus-extension-0.1.4.vsix
-```
-
-Alternatively, use **Extensions: Install from VSIX** in VS Code. The extension requires VS Code 1.85 or newer. Packaging uses a current Node.js release compatible with the dependencies.
+Requires VS Code 1.85+. [Build a VSIX package](/development/extension#build-a-package), then use **Extensions: Install from VSIX** in VS Code.
 
 ## Configure the compiler
 
@@ -42,7 +29,7 @@ For a compiler checkout, workspace settings can contain:
 }
 ```
 
-On Windows, include `.exe` in the compiler filename. Paths are passed as process arguments, so paths with spaces do not require extra shell quotes. In a multi-root workspace, relative paths resolve against the folder containing the document.
+On Windows, include `.exe` in the compiler filename. Do not add shell quotes to paths with spaces. In a multi-root workspace, relative paths resolve against the folder containing the document.
 
 ## Commands and errors
 
@@ -53,71 +40,22 @@ Use the command palette:
 - **Lotus: Build Current File** saves and builds an executable in a VS Code task.
 - **Lotus: Show Compiler Output** opens the check log with the compiler command and working directory.
 
-Compiler execution requires a trusted workspace. Syntax and navigation remain available without trust. The extension does not download or install a compiler.
+Compiler execution requires a trusted workspace. Syntax and navigation remain available without trust.
 
-Automatic checks run on open, save and after a short pause while typing. They use temporary snapshots of the editor text, including unsaved changes; the original file is not overwritten. New unsaved editors work when their language mode is Lotus. Each edit cancels the previous check and clears outdated diagnostics. Temporary snapshots are removed after checking.
+Checks include unsaved changes. For a new unsaved file, select Lotus as its language mode.
 
-Compiler errors with source positions appear in Problems and as underlines. Errors without coordinates, missing executables and timeouts appear in the Lotus language status and **Lotus** output channel. They do not underline the first line of the file.
+Errors with source positions appear in Problems and as underlines. Other errors appear in the Lotus language status and **Lotus** output channel. Each check reports the first compiler error.
 
-If `lotus` reports `Unknown symbol: .`, check whether `lotus.compilerPath` points to an older installation in PATH. Build the current compiler and set the path explicitly, for example `./cmake-build-debug/lotus` in a compiler checkout. The current class declaration keyword is `class`, not `type`.
-
-The compiler currently stops at its first error. The extension therefore reports one compiler error per check, not a full list of independent errors.
+If valid code reports `Unknown symbol: .`, check for an older compiler in `lotus.compilerPath`. Update it or point the setting to your current build.
 
 ## Highlighting
 
-Class names are highlighted in declarations, variable types, parameter and return annotations, and object constructors. Fields, parameters, variables and function calls have separate token categories. Semantic highlighting also distinguishes references to declared classes and parameters in the current document. Colors come from the active VS Code theme.
+Classes, fields, parameters, variables and calls use distinct highlighting. Colors follow your VS Code theme.
 
 ## Completion and navigation
 
-Completion uses declarations in the current document. It supports typed variables, parameters, class fields and methods, `this`, nested named receivers and array `.length`. Built-in functions and language keywords are also suggested. Snippets provide templates for classes, functions, conditions and loops.
+Completion, hover, go to definition and the outline use the current document. Completion supports typed variables, parameters, fields, methods, `this`, nested named receivers and array `.length`. Built-ins, keywords and snippets for classes, functions, conditions and loops are also available.
 
-This is a lightweight declaration analyzer, not a full language server. It does not infer receivers from arbitrary expressions or method return chains, provide cross-file symbols, rename symbols or format programs. Incomplete code may yield incomplete suggestions.
+The declaration analyzer cannot infer receivers from arbitrary expressions or method return chains. Cross-file symbols, rename and formatting are unsupported. Incomplete code may yield incomplete suggestions.
 
-The extension supplies a default `.lt` file icon. Its visibility depends on the active file icon theme; themes with their own Lotus association can override it.
-
-## Develop the extension
-
-Open `tools/lotus-extension` itself in VS Code and run **Run Lotus Extension** with F5. A separate Extension Development Host opens with the extension loaded. Open a Lotus project there and configure the compiler path.
-
-Run `npm test` for declaration analysis, semantic tokens, diagnostic positions and TextMate grammar checks. `test/host.js` also exercises these features in an Extension Host, including diagnostics without saving; run it only with a disposable workspace and test profile. Keep language examples and user documentation in this compiler repository.
-
-
-## Local development without VSIX installation
-
-From `tools/lotus-extension`, run `npm run dev`, then open your Lotus project in the new Extension Development Host window. It loads the local source directly. Use **Developer: Reload Window** after changing extension code or configuration. This does not update the extension installed in your regular VS Code windows.
-
-## Builds and releases
-
-Node.js 22 or newer is required for packaging and publishing.
-
-| Directory | Purpose | Stored in Git |
-| --- | --- | --- |
-| `dist/` | Local packages and CI build output | No |
-| `releases/` | Versioned VSIX packages approved for publication | Yes |
-
-`npm run package` builds into `dist/`. CI checks every push and pull request and attaches the package as a workflow artifact.
-
-To release a new version from the extension repository:
-
-```sh
-npm version patch --no-git-tag-version
-npm run release:prepare
-git add package.json package-lock.json releases/
-git commit
-git push origin main
-```
-
-Commit the implementation changes with the package too. `release:prepare` runs tests, builds a VSIX and copies it to `releases/`. It refuses to overwrite an existing release file: published versions are immutable. Keep earlier release packages in that directory.
-
-A push changing `releases/*.vsix` on `main` runs `.github/workflows/release.yml`. It verifies that the package identity, version and implementation match the checked-out source, creates a `vX.Y.Z` GitHub Release and attaches the committed VSIX. The Marketplace job publishes the same file. A manual workflow run can retry publication; an existing GitHub asset must match byte-for-byte, and an already published Marketplace version is skipped.
-
-### One-time Marketplace setup
-
-GitHub Releases work immediately with the workflow's built-in GitHub token. Marketplace publication remains disabled until the publisher is configured:
-
-1. Sign in to [Marketplace publisher management](https://marketplace.visualstudio.com/manage) and create publisher ID `LINQe`. If that ID is unavailable, update `publisher` in `package.json` and rebuild before publishing.
-2. In the publisher's **Trusted Publishing** settings, create a policy for owner `LINQeee`, repository `lotus-extension`, workflow `release.yml`. Leave Environment empty.
-3. In the GitHub repository's **Settings → Secrets and variables → Actions → Variables**, add `MARKETPLACE_ENABLED` with value `true`.
-4. Run **Release VSIX** from the Actions tab to publish the current release.
-
-The workflow uses `vsce --oidc` and `id-token: write`; no PAT secret is required. See [VS Code's Trusted Publishing instructions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#publish-with-github-actions-and-trusted-publishing).
+The `.lt` file icon depends on your file icon theme.

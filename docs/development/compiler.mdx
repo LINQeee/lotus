@@ -36,3 +36,32 @@ Source → Lexer → AST → Type checker → LLVM IR → Verify → Optimize
 Verify execution and diagnostics, not just C compilation. For ABI changes, rebuild the compiler, runtime and native extensions together.
 
 `src/deprecated_or_experiment_files/` is excluded from the active build and is not a specification.
+
+## Managed values
+
+Runtime strings, arrays and objects use single-threaded reference counting. This does not cover all compiler allocations.
+
+Variables release their references on reassignment or scope exit, not at last use. Temporaries release references after use; returns and loop jumps also perform cleanup. String literals live for the program's lifetime.
+
+Releasing the last owning reference frees the object and releases its managed fields, including string array elements. Nested fields follow the same rules.
+
+## Performance and ownership
+
+The LLVM pipeline uses `O3`, with aggressive machine-code optimization for JIT and
+AOT. Floating-point operations retain their existing rounding behavior; no
+fast-math flags are enabled.
+
+Array access uses typed, packed storage and an inline bounds check. Simple accesses
+borrow a variable only when the index and assigned value cannot reassign it; other
+expressions keep an owned reference through evaluation. Bounds errors retain the
+runtime diagnostic. Length facts from successful allocation are passed to LLVM.
+
+Reference-count updates are visible to LLVM. String concatenation consumes temporary
+references and can reuse a uniquely owned buffer. Assignment evaluates both operands
+before releasing the previous destination, including when a function reassigns it.
+
+Local class instances with numeric/boolean fields can use stack storage when all uses
+are field accesses or methods proven not to retain `this`. Returning, aliasing,
+reassigning or passing the instance to an unproven function keeps heap allocation.
+Default unit-step ranges use native-width stepping after checking that the next
+value remains within the range; other ranges retain extended-width arithmetic.

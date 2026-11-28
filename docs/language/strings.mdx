@@ -28,10 +28,6 @@ false
 
 ## Automatic lifetime
 
-Strings use reference counting. A variable holds its string until reassignment or scope exit. Temporary expressions release references after use; returns and loop jumps also perform cleanup.
+Strings are managed automatically. A variable keeps its string until reassignment or scope exit.
 
-<Note>
-Literals live for the program's lifetime. Reference counting is single-threaded and does not free variables at their last use.
-</Note>
-
-See [runtime I/O](/runtime) for `input` and `print`, or [native ownership](/development/native) when writing C extensions.
+See [runtime I/O](/runtime) for `input` and `print`.

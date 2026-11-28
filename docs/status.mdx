@@ -4,7 +4,9 @@ description: "Implemented features and current limits."
 keywords: ["Lotus", "status"]
 ---
 
-Lotus is pre-alpha. User installation targets 64-bit macOS, Linux and Windows (MSYS2 Clang64). macOS Apple Silicon has been tested locally; Windows, Linux and Intel macOS require successful platform CI runs before release. Developer hooks and memory-instrumented tests still depend on the contributor environment.
+Lotus is pre-alpha; syntax and the native ABI may change. Installers target 64-bit macOS, Linux and Windows (MSYS2 Clang64).
+
+macOS Apple Silicon has been tested locally. Windows, Linux and Intel macOS require successful platform CI runs before release.
 
 | Available | Not implemented |
 | --- | --- |
@@ -16,6 +18,4 @@ Lotus is pre-alpha. User installation targets 64-bit macOS, Linux and Windows (M
 | JIT execution and executable builds | REPL, cross-compilation and bundled distributions |
 | Native C extensions | `.lt` module imports and package management |
 
-Executable builds depend on native libraries; see [CLI requirements](/cli). Reference counting covers runtime strings, arrays and objects, not all compiler allocations.
-
-For supported syntax, start with [types](/language/types). To work on the implementation, follow [the contributor workflow](/development/workflow).
+Executable builds require [native libraries](/cli#executable-builds).

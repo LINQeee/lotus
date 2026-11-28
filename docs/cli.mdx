@@ -4,13 +4,6 @@ description: "Create a project, run, build and check Lotus code."
 keywords: ["Lotus", "cli"]
 ---
 
-```sh
-lotus run hello.lt
-lotus build hello.lt
-./hello.lt.out
-lotus check hello.lt
-```
-
 | Command | Result |
 | --- | --- |
 | `new NAME PATH` | Create `PATH/NAME/main.lt` from the starter template |
@@ -20,7 +13,7 @@ lotus check hello.lt
 
 For `run`, `build` and `check`, pass one source file. Relative paths use the working directory; quote paths containing spaces. Use `./-example.lt` for a name starting with a dash. Program arguments and stdin source input are not supported.
 
-Successful `build` and `check` are silent. Normal `run` prints program output. Failures return a nonzero exit code and diagnostics on stderr.
+Successful `build` and `check` are silent; `run` prints program output. Failures return a nonzero exit code and diagnostics on stderr.
 
 ## Create a project
 
@@ -29,7 +22,7 @@ lotus new hello .
 lotus run hello/main.lt
 ```
 
-Creates `hello/main.lt` with a welcome comment and `print("Hello, World!")`. `PATH` must be an existing directory; `NAME` is a folder name, not a path. Existing files or folders with that name are never overwritten.
+`PATH` must be an existing directory; `NAME` is a folder name, not a path. Existing files or folders with that name are never overwritten.
 
 ## Options
 
@@ -56,12 +49,12 @@ Selection order:
 2. Environment variable `LOTUS_LIBS`
 3. `LOTUS_RUNTIME_DIR`, recorded at compiler build time
 
-The installer sets this to its `lib/lotus` directory. A manual CMake build defaults to the checkout's `libs/`; override it with `-DLOTUS_RUNTIME_DIR=/path/to/libs`. Reinstall if you move the installation directory.
+Installed Lotus uses `lib/lotus` inside its installation directory; a source build uses the checkout's `libs/`. Reinstall if you move the installation directory.
 
 ## Executable builds
 
-`build` uses LLVM to emit an object and `cc` on macOS/Linux or MSYS2 `clang` on Windows to link it. Set `CC` to another compiler executable if needed; supply a command or path without extra flags. `run` does not require the linker.
+`build` requires `cc` on macOS/Linux or MSYS2 `clang` on Windows. Set `CC` to choose another linker driver; supply a command or path without extra flags. `run` does not require it.
 
 A subsequent build replaces the output. On macOS/Linux, native library directories are recorded in the binary; keep those libraries at their installed paths. On Windows, `build` copies registered runtime DLLs beside the executable; keep them together. Dependencies of custom DLLs must also remain available.
 
-Build on the target OS and architecture. This is not cross-compilation, and LLVM/toolchain installation is not bundled into generated executables.
+Build on the target OS and architecture; cross-compilation is unsupported. Generated executables do not bundle LLVM or the toolchain.

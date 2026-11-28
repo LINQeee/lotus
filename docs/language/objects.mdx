@@ -1,6 +1,6 @@
 ---
 title: "Classes and objects"
-description: "Declare named object types with fields, per-instance defaults and methods. Create typed literals and share objects through references."
+description: "Named object types, field defaults, methods and shared references."
 keywords: ["Lotus", "objects", "class", "this"]
 ---
 
@@ -48,7 +48,7 @@ other.age = 21
 other.name += "!"
 ```
 
-Empty classes and empty initializers are allowed. An empty initializer requires all fields to have defaults, or a type with no fields.
+Empty classes are allowed. An initializer can be empty if the class has no fields or every field has a default.
 
 ## References and lifetime
 
@@ -63,7 +63,7 @@ alias = User { name: "Kate" }
 print(user.name) // Sam
 ```
 
-Reference counting releases objects and their managed fields after their last owning reference is released. Nested fields, temporary results, returns and loop jumps follow the same ownership rules as [strings](/language/strings) and [arrays](/language/arrays).
+Objects and their fields are managed automatically.
 
 ## Methods
 
