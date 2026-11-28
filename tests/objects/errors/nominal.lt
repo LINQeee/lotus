@@ -1,0 +1,11 @@
+// error: "cannot assign"
+
+class A {
+}
+
+class B {
+}
+
+A a = {}
+
+B b = a

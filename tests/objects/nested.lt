@@ -1,0 +1,47 @@
+// expect: "Sam!\nSam!\n4\n"
+
+class Group {
+    user: User = {
+        name: "Alex"
+    }
+
+    fn rename(name: string) {
+        this.user.name = name
+    }
+}
+
+class User {
+    name: string
+
+    fn suffix() {
+        this.name += "!"
+    }
+}
+
+fn make(): Group {
+    return {}
+}
+
+fn rename(group: Group) {
+    group.rename("Sam")
+}
+
+Group group = make()
+
+rename(group)
+
+User user = group.user
+user.suffix()
+
+print(group.user.name)
+print(user.name)
+
+class Sized {
+    length: int
+}
+
+Sized sized = {
+    length: 4
+}
+
+print(sized.length)

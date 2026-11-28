@@ -2,7 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+
 #include "../utils/cutils.h"
+#include "lotus.h"
 
 #ifdef _WIN32
 #include <fileapi.h>

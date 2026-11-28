@@ -1,0 +1,9 @@
+// error: "field and method share"
+
+class A {
+    name: int
+
+    fn name(): int {
+        return 1
+    }
+}

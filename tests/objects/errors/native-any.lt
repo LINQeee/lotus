@@ -1,0 +1,8 @@
+// error: "objects cannot be passed as any"
+
+class A {
+}
+
+A a = {}
+
+print(a)

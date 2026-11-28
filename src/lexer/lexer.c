@@ -18,6 +18,8 @@ typedef struct {
 } Keyword;
 
 static const Keyword KEYWORDS[] = {
+    {"class", TOKEN_OBJECT_TYPE},
+    {"this", TOKEN_THIS},
     {"if", TOKEN_IF},
     {"else", TOKEN_ELSE},
     {"while", TOKEN_WHILE},

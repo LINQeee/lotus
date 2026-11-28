@@ -1,0 +1,7 @@
+// error: "already declared"
+
+class A {
+}
+
+class A {
+}

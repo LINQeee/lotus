@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "../utils/cutils.h"
-#include "../llvm/lotus_types.h"
+#include "../llvm/types.h"
 
 TypeScope *typeScopeCreate(TypeScope *parent) {
     TypeScope *scope = mallocSafe(sizeof(TypeScope));
@@ -26,7 +26,7 @@ void typeScopeDestroy(TypeScope *scope) {
     free(scope);
 }
 
-void typeScopeDeclare(TypeScope *scope, const char *name, LotusType type) {
+void typeScopeDeclare(TypeScope *scope, const char *name, Type *type) {
     for (size_t i = 0; i < scope->count; i++) {
         if (strcmp(scope->variables[i].name, name) == 0) {
             exitWithError("Internal type scope error: variable '%s' already exists", name);

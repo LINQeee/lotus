@@ -1,0 +1,8 @@
+// error: "unknown method"
+
+class A {
+}
+
+A a = {}
+
+a.missing()

@@ -1,0 +1,5 @@
+// error: "variable 'this' is not declared"
+
+class A {
+    n: int = this.n
+}

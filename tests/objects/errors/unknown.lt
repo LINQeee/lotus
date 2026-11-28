@@ -1,0 +1,10 @@
+// error: "unknown field"
+
+class User {
+    name: string
+}
+
+User user = {
+    name: "A",
+    age: 1
+}

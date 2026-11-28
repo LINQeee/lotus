@@ -1,0 +1,39 @@
+// expect: "done\n"
+// runtime: "memory"
+
+class Value {
+    text: string = "a" + "b"
+    values: string[] = ["c" + "d"]
+
+    fn self(): Value {
+        return this
+    }
+}
+
+class Box {
+    value: Value = {}
+}
+
+fn make(): Box {
+    return {}
+}
+
+for i in 1..100 {
+    Box box = make()
+
+    box.value = box.value
+    box.value.text = box.value.text
+    box.value = box.value.self()
+
+    string text = make().value.text
+    string[] values = make().value.values
+
+    if i % 2 == 0 {
+        continue
+    }
+    if i == 99 {
+        break
+    }
+}
+
+print("done")

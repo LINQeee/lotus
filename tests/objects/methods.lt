@@ -1,0 +1,32 @@
+// expect: "Hello, Alex\n26\n27\n"
+
+class User {
+    name: string
+    age: int = 0
+
+    fn greet(): string {
+        return "Hello, " + this.name
+    }
+
+    fn grow() {
+        this.age += 1
+    }
+
+    fn birthday(): int {
+        this.grow()
+        return this.age
+    }
+}
+
+User user = User {
+    name: "Alex",
+    age: 25
+}
+
+User alias = user
+
+alias.grow()
+
+print(user.greet())
+print(user.age)
+print(user.birthday())

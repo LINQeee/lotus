@@ -1,3 +1,4 @@
+#include "../generator/expression/objects.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <llvm-c/Analysis.h>
@@ -37,6 +38,7 @@ LLVMValueRef createEntryAlloca(LLVMTypeRef type, const char *name) {
 }
 
 void createMainFunctionAndGenerateCode(const ProgramNode *program) {
+    prepareObjectCodegen();
     collectFunctions((const Node *)program);
 
     LLVMTypeRef returnType = LLVMInt32TypeInContext(cg->context);

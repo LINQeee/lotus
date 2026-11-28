@@ -10,7 +10,7 @@
 #include "../generator.h"
 #include "../expression/functions.h"
 #include "../expression/native_functions.h"
-#include "../../lotus_types.h"
+#include "../../types.h"
 #include "../../var_manager.h"
 #include "../../../parser/parser.h"
 #include <llvm-c/Types.h>
@@ -95,7 +95,7 @@ static void generateRangeStep(const LLVMRange *range, LLVMValueRef storage, LLVM
     LLVMBuildBr(cg->builder, bodyBlock);
 }
 
-static LLVMValueRef createLoopStorage(const char *name, LotusType type, LLVMValueRef value) {
+static LLVMValueRef createLoopStorage(const char *name, Type *type, LLVMValueRef value) {
     LLVMValueRef storage = createEntryAlloca(convertType(type), name);
     LLVMBuildStore(cg->builder, value, storage);
     createVar(name, storage, type);
@@ -107,7 +107,7 @@ static void generateArrayFor(const ForNode *node) {
     LLVMValueRef array = generateExpression(node->start);
     createLoopStorage(".array", node->start->dataType, array);
     LLVMValueRef length = callArrayLength(array);
-    LLVMValueRef index = createLoopStorage(".index", LOTUS_I32, LLVMConstNull(cg->i32Type));
+    LLVMValueRef index = createLoopStorage(".index", intType, LLVMConstNull(cg->i32Type));
     int iterationVarsStart = cg->varsCount;
     LLVMBasicBlockRef condBlock = LLVMAppendBlock("foreach.cond");
     LLVMBasicBlockRef bodyBlock = LLVMAppendBlock("foreach.body");
@@ -120,7 +120,7 @@ static void generateArrayFor(const ForNode *node) {
     LLVMBuildCondBr(cg->builder, more, bodyBlock, exitBlock);
     LLVMMoveBuilderToEnd(bodyBlock);
     LLVMValueRef address = callArrayAt(array, current);
-    LotusType elementType = node->variable->base.dataType;
+    Type *elementType = node->variable->base.dataType;
     LLVMValueRef value = LLVMBuildLoad2(cg->builder, convertType(elementType), address, "array.element");
     retainIfNeeded(elementType, value);
     createLoopStorage(node->variable->name, elementType, value);
@@ -285,6 +285,7 @@ static void generateProgram(ProgramNode *node) {
 
 void generateStatement(const Node *node) {
     switch (node->type) {
+        case NODE_TYPE: break; // Class declarations have no runtime action
         case NODE_DECLARATION: generateDeclaration((DeclarationNode *)node); break;
         case NODE_ASSIGN: generateAssignment((AssignmentNode *)node); break;
         case NODE_PROGRAM: generateProgram((ProgramNode *)node); break;

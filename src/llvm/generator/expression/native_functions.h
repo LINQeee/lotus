@@ -1,13 +1,14 @@
 #ifndef NATIVE_FUNCTIONS_H
 #define NATIVE_FUNCTIONS_H
-#include "../../lotus_types.h"
+#include "../../types.h"
+#include "lotus.h"
 #include <llvm-c/Types.h>
 #include <stdbool.h>
 
 typedef struct {
     char name[64];
-    LotusType returnType;
-    LotusType args[32];
+    Type *returnType;
+    Type *args[32];
     int argc;
     void *fn;
     bool variadic;
@@ -15,18 +16,12 @@ typedef struct {
     LLVMValueRef llvmFunction;
 } LLVMNativeFunction;
 
-typedef struct {
-    const char *name;
-    bool variadic;
-    LotusType returnType;
-    int argc;
-    const LotusType args[32];
-    void *fn;
-} LotusFunctionInfo;
+Type *fromNativeType(NativeType type);
+NativeType toNativeType(Type *type);
 
 void prepareNativeFunction(const LotusFunctionInfo *info);
 
 LLVMTypeRef lotusValueLLVMType(void);
-LLVMTypeRef convertType(LotusType type);
+LLVMTypeRef convertType(Type *type);
 
 #endif

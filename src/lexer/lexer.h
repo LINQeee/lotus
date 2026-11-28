@@ -3,6 +3,8 @@
 #include <stddef.h>
 
 typedef enum {
+    TOKEN_OBJECT_TYPE,
+    TOKEN_THIS,
     TOKEN_IDENTIFIER,
     TOKEN_NUMBER,
     TOKEN_PLUS,

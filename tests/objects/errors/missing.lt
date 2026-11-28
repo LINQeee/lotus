@@ -1,0 +1,7 @@
+// error: "missing field"
+
+class User {
+    name: string
+}
+
+User user = {}

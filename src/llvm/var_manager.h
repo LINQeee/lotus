@@ -2,16 +2,16 @@
 #define VAR_MANAGER_H
 #include <llvm-c/Types.h>
 
-#include "./lotus_types.h"
+#include "./types.h"
 
 typedef struct {
     char name[64];
     LLVMValueRef storage;
-    LotusType type;
+    Type *type;
     LLVMValueRef relatedFn;
 } LLVMVariable;
 
-LLVMVariable *createVar(const char *name, LLVMValueRef storage, LotusType type);
+LLVMVariable *createVar(const char *name, LLVMValueRef storage, Type *type);
 
 LLVMVariable *getVar(const char *name);
 void releaseVariables(int start);

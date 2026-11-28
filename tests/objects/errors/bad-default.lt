@@ -1,0 +1,5 @@
+// error: "cannot return"
+
+class A {
+    n: int = "bad"
+}

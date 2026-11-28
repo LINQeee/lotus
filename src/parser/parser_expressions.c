@@ -1,3 +1,4 @@
+#include "objects.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -6,7 +7,7 @@
 #include "parser.h"
 #include "parser_utils.h"
 #include "../lexer/lexer.h"
-#include "../llvm/lotus_types.h"
+#include "../llvm/types.h"
 
 static Node *parsePrimary();
 static Node *parseUnary();
@@ -62,8 +63,20 @@ static Node *parsePostfix(Node *operand) {
             operand = (Node *)newIndexNode(operand, index, operand->location);
         } else if (matchCurrent(TOKEN_DOT)) {
             Token member = expect(TOKEN_IDENTIFIER);
-            if (strcmp(member.value, "length")) exitWithError("Unknown array property '%s'", member.value);
-            operand = (Node *)newLengthNode(operand, operand->location);
+            MemberNode *field = newMemberNode(operand, member.value, member.location);
+            operand = (Node *)field;
+            if (matchCurrent(TOKEN_LPAREN)) {
+                Node **args = mallocSafe(MAX_ARGS * sizeof(Node *));
+                int count = 1;
+                args[0] = field->object;
+                if (!isCurrent(TOKEN_RPAREN)) do {
+                        if (count >= MAX_ARGS) exitWithError("Too many method arguments");
+                        args[count++] = parseExpressionPrec(0);
+                    } while (matchCurrent(TOKEN_COMMA));
+                expect(TOKEN_RPAREN);
+                MethodCallNode *call = newMethodCallNode(field, count, args, member.location);
+                operand = (Node *)call;
+            }
         } else break;
     }
     while ((isCurrent(TOKEN_INCREMENT) || isCurrent(TOKEN_DECREMENT)) &&
@@ -104,9 +117,16 @@ static Node *parseUnary() {
 static Node *parsePrimary() {
     const Token primaryT = current();
 
+    if (isCurrent(TOKEN_LBRACE)) return parseObject(unknownType, primaryT.location);
+    if (isCurrent(TOKEN_IDENTIFIER) && peekNext().type == TOKEN_LBRACE &&
+        findObjectType(primaryT.value) != unknownType) {
+        advance();
+        return parseObject(findObjectType(primaryT.value), primaryT.location);
+    }
+    if (matchCurrent(TOKEN_THIS)) return (Node *)newIdentifierNode("this", unknownType, primaryT.location);
     if (matchCurrent(TOKEN_NEW)) {
         ArrayNode *node = newArrayNode(primaryT.location);
-        LotusType elementType = tokenTypeToLotusType(advance().type);
+        Type *elementType = tokenTypeToType(advance().type);
         node->base.dataType = toArrayType(elementType);
         expect(TOKEN_LBRACKET);
         node->size = parseExpressionPrec(0);
@@ -124,7 +144,7 @@ static Node *parsePrimary() {
     }
     if (isCurrent(TOKEN_IDENTIFIER) && peekNext().type == TOKEN_LPAREN) {
         Token id = advance();
-        IdentifierNode *idN = newIdentifierNode(id.value, LOTUS_FUNCTION, id.location);
+        IdentifierNode *idN = newIdentifierNode(id.value, functionType, id.location);
         advance(); // skip (
 
         Node **args = mallocSafe(sizeof(Node *) * MAX_ARGS);
@@ -147,7 +167,7 @@ static Node *parsePrimary() {
     if (isCurrent(TOKEN_LPAREN)) {
         advance(); // skip (
         if (isDataType(current().type)) {
-            LotusType type = tokenTypeToLotusType(advance().type);
+            Type *type = tokenTypeToType(advance().type);
             expect(TOKEN_RPAREN);
             return (Node *)newCastNode(type, parseUnary(), primaryT.location);
         }
@@ -159,7 +179,7 @@ static Node *parsePrimary() {
     if (isCurrent(TOKEN_IDENTIFIER)) {
         advance();
 
-        return (Node *)newIdentifierNode(primaryT.value, LOTUS_UNKNOWN, primaryT.location);
+        return (Node *)newIdentifierNode(primaryT.value, unknownType, primaryT.location);
     }
 
     exitWithError("Unexpected token in primary: %d", primaryT.type);

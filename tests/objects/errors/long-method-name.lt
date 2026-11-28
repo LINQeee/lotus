@@ -1,0 +1,6 @@
+// error: "Function name is too long"
+
+class A {
+    fn xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx() {
+    }
+}

@@ -1,0 +1,4 @@
+// error: "read-only"
+
+int[] a = [1]
+a.length = 2

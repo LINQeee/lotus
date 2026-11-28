@@ -13,7 +13,7 @@
 #include "../generator.h"
 #include "expression_generator.h"
 #include "../../var_manager.h"
-#include "../../lotus_types.h"
+#include "../../types.h"
 
 void collectFunctions(const Node *node) {
     if (node->type == NODE_FUNCTION) {
@@ -92,7 +92,7 @@ void generateFunction(const FunctionNode *node) {
     generateNode(node->body);
 
     if (!LLVMGetBasicBlockTerminator(cg->currentBlock)) {
-        if (fn->returnType == LOTUS_VOID) {
+        if (fn->returnType == voidType) {
             releaseVariables(previousVarsCount);
             LLVMBuildRetVoid(cg->builder);
         } else {
@@ -121,7 +121,7 @@ LLVMValueRef generateCall(const CallNode *node) {
             args[i] = generateExpression(node->arguments[i]);
         }
         LLVMValueRef result = LLVMBuildCall2(cg->builder, fn->fnType, fn->llvmFunction, args, node->argumentCount,
-                                             node->base.dataType == LOTUS_VOID ? "" : "calltmp");
+                                             node->base.dataType == voidType ? "" : "calltmp");
         for (int i = 0; i < node->argumentCount; i++) {
             releaseIfNeeded(node->arguments[i]->dataType, args[i]);
         }

@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
     LLVMMemoryBufferRef buffer = readScript(options.file);
     const char *source = LLVMGetBufferStart(buffer);
     Token *tokens = tokenize(source, options.file);
-    ProgramNode *program = buildAST(tokens);
+    ProgramNode *program = buildAST(tokens, source);
     initCodegen();
     loadNativeLibraries(options.libs ? options.libs : LOTUS_RUNTIME_DIR);
     TypeChecker *checker = typeCheckerCreate(source);

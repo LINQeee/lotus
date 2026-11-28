@@ -1,0 +1,7 @@
+// error: "variable 'n' is not declared"
+
+int n = 1
+
+class A {
+    n: int = n
+}

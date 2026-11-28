@@ -1,0 +1,31 @@
+// expect: "3\n4\n5\n6\n"
+
+class Value {
+    number: int
+}
+
+fn read(value: Value): int {
+    return value.number
+}
+
+fn make(): Value {
+    return {
+        number: 4
+    }
+}
+
+Value value = {
+    number: 3
+}
+
+print(read(value))
+print(make().number)
+
+value = {
+    number: 5
+}
+
+print(value.number)
+print(read({
+    number: 6
+}))

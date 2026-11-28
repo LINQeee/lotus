@@ -1,0 +1,35 @@
+// expect: "1\n2\n3\n8\n"
+
+class Counter {
+    value: int = 0
+
+    fn add(n: int) {
+        this.value += n
+    }
+
+    fn sum(n: int): int {
+        if n == 0 {
+            return this.value
+        }
+
+        return this.sum(n - 1) + 1
+    }
+}
+
+Counter shared = {}
+int calls = 0
+
+fn get(): Counter {
+    calls += 1
+    return shared
+}
+
+get().value += 2
+print(calls)
+
+get().add(3)
+print(calls)
+
+get().value = 7
+print(calls)
+print(shared.sum(1))

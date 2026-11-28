@@ -1,7 +1,7 @@
 #include "native_caller.h"
 #include <stddef.h>
 #include <llvm-c/Types.h>
-#include "../../lotus_types.h"
+#include "../../types.h"
 #include "../../../parser/parser.h"
 #include "arrays.h"
 #include "expression_generator.h"
@@ -10,7 +10,7 @@
 #include <llvm-c/Core.h>
 
 LLVMValueRef generateArray(const ArrayNode *node) {
-    LotusType elementType = fromArrayType(node->base.dataType);
+    Type *elementType = fromArrayType(node->base.dataType);
     LLVMValueRef size = node->size ? generateExpression(node->size) : LLVMConstInt(cg->i32Type, node->itemsCount, 0);
     LLVMValueRef array = callArrayCreate(size, elementType);
     for (size_t i = 0; i < node->itemsCount; i++) {
@@ -25,7 +25,7 @@ LLVMValueRef generateIndex(const IndexNode *node) {
     LLVMValueRef array = generateExpression(node->array);
     LLVMValueRef index = generateExpression(node->index);
     LLVMValueRef address = callArrayAt(array, index);
-    LotusType elementType = node->base.dataType;
+    Type *elementType = node->base.dataType;
     LLVMTypeRef llvmElementType = convertType(elementType);
     LLVMValueRef value;
     if (node->value) {

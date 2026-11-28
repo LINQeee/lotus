@@ -1,28 +1,28 @@
-#include "native_caller.h"
-#include "../expression/expression_generator.h"
-
 #include <llvm-c/Core.h>
 #include <string.h>
 #include <stdbool.h>
 #include <llvm-c/Types.h>
 
+#include "native_caller.h"
+#include "../expression/expression_generator.h"
 #include "../../../utils/cutils.h"
 #include "../../llvm.h"
 #include "native_functions.h"
 #include "../../../lexer/lexer.h"
-#include "../../lotus_types.h"
+#include "../../types.h"
 #include "../../var_manager.h"
 #include "../../../parser/parser.h"
 #include "functions.h"
 #include "arrays.h"
+#include "objects.h"
 
 static LLVMValueRef generateNumber(const NumberNode *node) {
-    switch (node->base.dataType) {
-        case LOTUS_I32: return LLVMConstInt(cg->i32Type, node->i32, 0);
-        case LOTUS_I64: return LLVMConstInt(cg->i64Type, node->i64, 0);
-        case LOTUS_F32: return LLVMConstReal(cg->f32Type, node->f32);
-        case LOTUS_F64: return LLVMConstReal(cg->f64Type, node->f64);
-        default: exitWithError("Unknown number datatype %d", node->base.dataType);
+    switch (node->base.dataType->kind) {
+        case TYPE_I32: return LLVMConstInt(cg->i32Type, node->i32, 0);
+        case TYPE_I64: return LLVMConstInt(cg->i64Type, node->i64, 0);
+        case TYPE_F32: return LLVMConstReal(cg->f32Type, node->f32);
+        case TYPE_F64: return LLVMConstReal(cg->f64Type, node->f64);
+        default: exitWithError("Unknown number datatype %s", typeName(node->base.dataType));
     }
 }
 
@@ -45,29 +45,29 @@ static LLVMValueRef generateBool(const BooleanNode *node) {
     return LLVMConstInt(cg->boolType, node->value, 0);
 }
 
-static LLVMValueRef castNumeric(LLVMValueRef value, LotusType from, LotusType to) {
+static LLVMValueRef castNumeric(LLVMValueRef value, Type *from, Type *to) {
     if (from == to) return value;
 
-    switch (from) {
-        case LOTUS_I32:
-            if (to == LOTUS_I64) return LLVMBuildSExt(cg->builder, value, cg->i64Type, "int_to_long");
-            if (to == LOTUS_F32) return LLVMBuildSIToFP(cg->builder, value, cg->f32Type, "int_to_float");
-            if (to == LOTUS_F64) return LLVMBuildSIToFP(cg->builder, value, cg->f64Type, "int_to_double");
+    switch (from->kind) {
+        case TYPE_I32:
+            if (to == longType) return LLVMBuildSExt(cg->builder, value, cg->i64Type, "int_to_long");
+            if (to == floatType) return LLVMBuildSIToFP(cg->builder, value, cg->f32Type, "int_to_float");
+            if (to == doubleType) return LLVMBuildSIToFP(cg->builder, value, cg->f64Type, "int_to_double");
             break;
 
-        case LOTUS_I64:
-            if (to == LOTUS_F32) return LLVMBuildSIToFP(cg->builder, value, cg->f32Type, "long_to_float");
-            if (to == LOTUS_F64) return LLVMBuildSIToFP(cg->builder, value, cg->f64Type, "long_to_double");
+        case TYPE_I64:
+            if (to == floatType) return LLVMBuildSIToFP(cg->builder, value, cg->f32Type, "long_to_float");
+            if (to == doubleType) return LLVMBuildSIToFP(cg->builder, value, cg->f64Type, "long_to_double");
             break;
 
-        case LOTUS_F32:
-            if (to == LOTUS_F64) return LLVMBuildFPExt(cg->builder, value, cg->f64Type, "float_to_double");
+        case TYPE_F32:
+            if (to == doubleType) return LLVMBuildFPExt(cg->builder, value, cg->f64Type, "float_to_double");
             break;
 
         default: break;
     }
 
-    exitWithError("Invalid numeric cast %d -> %d", from, to);
+    exitWithError("Invalid numeric cast %s -> %s", typeName(from), typeName(to));
 }
 
 static LLVMValueRef buildArithmetic(const BinaryNode *bNode, LLVMValueRef left, LLVMValueRef right) {
@@ -81,9 +81,9 @@ static LLVMValueRef buildArithmetic(const BinaryNode *bNode, LLVMValueRef left, 
         return LLVMBuildCall2(cg->builder, LLVMGlobalGetValueType(func), func, args, 2, "pow_call");
     }
 
-    switch (bNode->base.dataType) {
-        case LOTUS_I32:
-        case LOTUS_I64:
+    switch (bNode->base.dataType->kind) {
+        case TYPE_I32:
+        case TYPE_I64:
             switch (bNode->op) {
                 case TOKEN_PLUS: return LLVMBuildAdd(cg->builder, left, right, "add_tmp");
                 case TOKEN_MINUS: return LLVMBuildSub(cg->builder, left, right, "sub_tmp");
@@ -94,8 +94,8 @@ static LLVMValueRef buildArithmetic(const BinaryNode *bNode, LLVMValueRef left, 
             }
             break;
 
-        case LOTUS_F32:
-        case LOTUS_F64:
+        case TYPE_F32:
+        case TYPE_F64:
             switch (bNode->op) {
                 case TOKEN_PLUS: return LLVMBuildFAdd(cg->builder, left, right, "add_tmp");
                 case TOKEN_MINUS: return LLVMBuildFSub(cg->builder, left, right, "sub_tmp");
@@ -112,15 +112,15 @@ static LLVMValueRef buildArithmetic(const BinaryNode *bNode, LLVMValueRef left, 
 }
 
 static LLVMValueRef buildComparison(const BinaryNode *bNode, LLVMValueRef left, LLVMValueRef right) {
-    LotusType commonType = bNode->left->dataType;
-    if (commonType == LOTUS_STRING) {
+    Type *commonType = bNode->left->dataType;
+    if (commonType == stringType) {
         LLVMValueRef equal = callStringEquals(left, right);
-        releaseIfNeeded(LOTUS_STRING, left);
-        releaseIfNeeded(LOTUS_STRING, right);
+        releaseIfNeeded(stringType, left);
+        releaseIfNeeded(stringType, right);
         return bNode->op == TOKEN_EQ ? equal : LLVMBuildNot(cg->builder, equal, "str.not_equal");
     }
 
-    bool isFloat = commonType == LOTUS_F32 || commonType == LOTUS_F64;
+    bool isFloat = commonType == floatType || commonType == doubleType;
 
     if (isFloat) {
         LLVMRealPredicate predicate;
@@ -155,16 +155,13 @@ static LLVMValueRef buildComparison(const BinaryNode *bNode, LLVMValueRef left, 
     return LLVMBuildICmp(cg->builder, predicate, left, right, "cmp_tmp");
 }
 
-static LLVMValueRef generateBinary(const BinaryNode *node) {
-    LLVMValueRef left = generateExpression(node->left);
-    LLVMValueRef right = generateExpression(node->right);
-
+LLVMValueRef generateBinaryValues(const BinaryNode *node, LLVMValueRef left, LLVMValueRef right) {
     switch (node->op) {
         case TOKEN_PLUS:
-            if (node->base.dataType == LOTUS_STRING) {
+            if (node->base.dataType == stringType) {
                 LLVMValueRef result = callStringConcat(left, right);
-                releaseIfNeeded(LOTUS_STRING, left);
-                releaseIfNeeded(LOTUS_STRING, right);
+                releaseIfNeeded(stringType, left);
+                releaseIfNeeded(stringType, right);
                 return result;
             }
 
@@ -191,6 +188,12 @@ static LLVMValueRef generateBinary(const BinaryNode *node) {
     return NULL;
 }
 
+static LLVMValueRef generateBinary(const BinaryNode *node) {
+    LLVMValueRef left = generateExpression(node->left);
+    LLVMValueRef right = generateExpression(node->right);
+    return generateBinaryValues(node, left, right);
+}
+
 static LLVMValueRef generateIdentifier(const char *name) {
     LLVMVariable *var = getVar(name);
     LLVMValueRef value = LLVMBuildLoad2(cg->builder, convertType(var->type), var->storage, name);
@@ -204,7 +207,7 @@ static LLVMValueRef generateUpdate(const UnaryNode *node) {
     LLVMValueRef value = LLVMBuildLoad2(cg->builder, type, var->storage, "update_old");
     bool increment = node->op == TOKEN_INCREMENT;
     LLVMValueRef updated;
-    if (var->type == LOTUS_F32 || var->type == LOTUS_F64) {
+    if (var->type == floatType || var->type == doubleType) {
         LLVMValueRef one = LLVMConstReal(type, 1);
         updated =
             increment ? LLVMBuildFAdd(cg->builder, value, one, "inc") : LLVMBuildFSub(cg->builder, value, one, "dec");
@@ -219,6 +222,9 @@ static LLVMValueRef generateUpdate(const UnaryNode *node) {
 
 LLVMValueRef generateExpression(const Node *node) {
     switch (node->type) {
+        case NODE_OBJECT: return generateObject((const ObjectNode *)node);
+        case NODE_MEMBER: return generateMember((const MemberNode *)node);
+        case NODE_METHOD_CALL: return generateCall(((const MethodCallNode *)node)->call);
         case NODE_ARRAY: return generateArray((const ArrayNode *)node);
         case NODE_LENGTH: return generateLength((const LengthNode *)node);
         case NODE_INDEX:
@@ -228,7 +234,7 @@ LLVMValueRef generateExpression(const Node *node) {
             if (unary->op == TOKEN_INCREMENT || unary->op == TOKEN_DECREMENT) return generateUpdate(unary);
             LLVMValueRef value = generateExpression(unary->operand);
             if (unary->op == TOKEN_EXCLAMATION) return LLVMBuildNot(cg->builder, value, "not_tmp");
-            if (node->dataType == LOTUS_F32 || node->dataType == LOTUS_F64)
+            if (node->dataType == floatType || node->dataType == doubleType)
                 return LLVMBuildFNeg(cg->builder, value, "neg_tmp");
             return LLVMBuildNeg(cg->builder, value, "neg_tmp");
         }

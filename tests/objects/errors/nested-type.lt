@@ -1,0 +1,6 @@
+// error: "classes can only be declared"
+
+fn f() {
+    class A {
+    }
+}

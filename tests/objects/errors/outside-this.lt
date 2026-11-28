@@ -1,0 +1,3 @@
+// error: "variable 'this' is not declared"
+
+print(this)

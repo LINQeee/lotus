@@ -1,0 +1,11 @@
+// expect: ""
+// runtime: "none"
+
+class Empty {
+}
+
+Empty first = {}
+
+Empty second = Empty {}
+
+first = second

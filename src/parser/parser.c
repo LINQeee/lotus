@@ -1,10 +1,12 @@
 #include "parser.h"
+#include "objects.h"
 #include "../lexer/lexer.h"
 #include "parser_utils.h"
 
 #include "../utils/cutils.h"
 #include "./parser_statements.h"
 
+const char *parserSource;
 static const Token *tokens;
 static size_t pos = 0;
 
@@ -40,9 +42,12 @@ static ProgramNode *parseProgram() {
     return program;
 }
 
-ProgramNode *buildAST(const Token *tokensToParse) {
+ProgramNode *buildAST(const Token *tokensToParse, const char *source) {
+    parserSource = source;
     pos = 0;
     tokens = tokensToParse;
+    collectObjectTypes(tokens);
     ProgramNode *program = parseProgram();
+    appendObjectFunctions(program);
     return program;
 }

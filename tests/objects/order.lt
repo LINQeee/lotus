@@ -1,0 +1,32 @@
+// expect: "2\n1\n3\n12\n"
+
+fn mark(value: int): int {
+    print(value)
+    return value
+}
+
+class Order {
+    first: int
+    second: int
+    third: int = mark(3)
+}
+
+Order order = {
+    second: mark(2),
+    first: mark(1)
+}
+
+class Counter {
+    value: int = 0
+
+    fn bump(): int {
+        this.value += 10
+        return 2
+    }
+}
+
+Counter counter = {}
+
+counter.value = 10
+counter.value += counter.bump()
+print(counter.value)

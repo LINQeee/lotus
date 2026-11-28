@@ -1,0 +1,8 @@
+// error: "unknown field"
+
+class A {
+}
+
+A a = {}
+
+a.x = 1

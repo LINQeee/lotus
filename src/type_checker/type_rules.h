@@ -4,23 +4,23 @@
 #include <stdbool.h>
 
 #include "../lexer/lexer.h"
-#include "../llvm/lotus_types.h"
+#include "../llvm/types.h"
 
-bool isNumericType(LotusType type);
+bool isNumericType(Type *type);
 
-bool isIntegerType(LotusType type);
+bool isIntegerType(Type *type);
 
-bool isBooleanType(LotusType type);
+bool isBooleanType(Type *type);
 
-bool isAssignable(LotusType target, LotusType source);
+bool isAssignable(Type *target, Type *source);
 
-LotusType commonNumericType(LotusType left, LotusType right);
+Type *commonNumericType(Type *left, Type *right);
 
-bool areComparable(LotusType left, LotusType right);
+bool areComparable(Type *left, Type *right);
 
-bool isValidBinaryOperation(TokenKind operator, LotusType left, LotusType right);
+bool isValidBinaryOperation(TokenKind operator, Type * left, Type *right);
 
-LotusType binaryResultType(TokenKind operator, LotusType left, LotusType right);
+Type *binaryResultType(TokenKind operator, Type * left, Type *right);
 
-bool isValidCast(LotusType target, LotusType source);
+bool isValidCast(Type *target, Type *source);
 #endif

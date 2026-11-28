@@ -1,0 +1,10 @@
+// error: "expected int"
+
+class A {
+    fn f(n: int) {
+    }
+}
+
+A a = {}
+
+a.f("bad")

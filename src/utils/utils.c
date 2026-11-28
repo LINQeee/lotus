@@ -5,24 +5,9 @@
 #include "../parser/parser.h"
 #include "utils.h"
 #include "../lexer/lexer.h"
-#include "../llvm/lotus_types.h"
+#include "../llvm/types.h"
 
 static void printNode(const Node *node, const char *prefix, bool isLast);
-
-static const char *typeName(const LotusType type) {
-    switch (type) {
-        case LOTUS_I32: return "int";
-        case LOTUS_I64: return "long";
-        case LOTUS_F32: return "float";
-        case LOTUS_F64: return "double";
-        case LOTUS_BOOL: return "bool";
-        case LOTUS_STRING: return "string";
-        case LOTUS_VOID: return "void";
-        case LOTUS_ANY: return "any";
-        case LOTUS_FUNCTION: return "function";
-        default: return "unknown";
-    }
-}
 
 static const char *operatorName(const TokenKind op) {
     switch (op) {
@@ -70,10 +55,39 @@ static void printNode(const Node *node, const char *prefix, bool isLast) {
     makeChildPrefix(prefix, isLast, childPrefix, sizeof(childPrefix));
 
     switch (node->type) {
+        case NODE_TYPE: {
+            const ObjectType *type = (const ObjectType *)node;
+            printf("Class %s\n", type->name);
+            for (size_t i = 0; i < type->fieldCount; i++) {
+                printf("%s  %s: %s\n", childPrefix, type->fields[i].name, typeName(type->fields[i].type));
+                if (type->fields[i].defaultValue) printNode(type->fields[i].defaultValue, childPrefix, true);
+            }
+            break;
+        }
+        case NODE_OBJECT: {
+            const ObjectNode *object = (const ObjectNode *)node;
+            printf("Object %s\n", typeName(node->dataType));
+            for (size_t i = 0; i < object->count; i++) {
+                printf("%s  %s\n", childPrefix, object->names[i]);
+                printNode(object->values[i], childPrefix, i + 1 == object->count);
+            }
+            break;
+        }
+        case NODE_MEMBER: {
+            const MemberNode *member = (const MemberNode *)node;
+            printf("Member %s\n", member->name);
+            printNode(member->object, childPrefix, !member->value);
+            if (member->value) printNode(member->value, childPrefix, true);
+            break;
+        }
+        case NODE_METHOD_CALL:
+            printf("Method call\n");
+            printNode((Node *)((const MethodCallNode *)node)->call, childPrefix, true);
+            break;
         case NODE_ARRAY: {
             const ArrayNode *array = (const ArrayNode *)node;
             printPrefix(prefix, isLast);
-            printf("Array (%s)\n", lotusTypeName(node->dataType));
+            printf("Array (%s)\n", typeName(node->dataType));
             if (array->size) printNode(array->size, childPrefix, true);
             for (size_t i = 0; i < array->itemsCount; i++)
                 printNode(array->items[i], childPrefix, i + 1 == array->itemsCount);
@@ -162,14 +176,14 @@ static void printNode(const Node *node, const char *prefix, bool isLast) {
 
             printPrefix(prefix, isLast);
 
-            switch (node->dataType) {
-                case LOTUS_I32: printf("Number %d : int\n", number->i32); break;
+            switch (node->dataType->kind) {
+                case TYPE_I32: printf("Number %d : int\n", number->i32); break;
 
-                case LOTUS_I64: printf("Number %lld : long\n", (long long)number->i64); break;
+                case TYPE_I64: printf("Number %lld : long\n", (long long)number->i64); break;
 
-                case LOTUS_F32: printf("Number %g : float\n", number->f32); break;
+                case TYPE_F32: printf("Number %g : float\n", number->f32); break;
 
-                case LOTUS_F64: printf("Number %g : double\n", number->f64); break;
+                case TYPE_F64: printf("Number %g : double\n", number->f64); break;
 
                 default: printf("Number : %s\n", typeName(node->dataType)); break;
             }

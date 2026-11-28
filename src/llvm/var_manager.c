@@ -7,9 +7,9 @@
 #include "generator/expression/native_functions.h"
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
-#include "lotus_types.h"
+#include "types.h"
 
-LLVMVariable *createVar(const char *name, const LLVMValueRef storage, const LotusType type) {
+LLVMVariable *createVar(const char *name, const LLVMValueRef storage, Type *type) {
     LLVMVariable *var = &cg->vars[cg->varsCount++];
     strcpy(var->name, name);
     var->storage = storage;

@@ -1,3 +1,5 @@
+#include "../type_checker/diagnostics.h"
+#include "objects.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +8,7 @@
 #include "../lexer/lexer.h"
 #include "../utils/cutils.h"
 #include "parser.h"
-#include "../llvm/lotus_types.h"
+#include "../llvm/types.h"
 
 bool isComparison(TokenKind type) {
     return type == TOKEN_GT || type == TOKEN_LT || type == TOKEN_GE || type == TOKEN_LE || type == TOKEN_EQ ||
@@ -18,14 +20,14 @@ bool isAssignmentOp(TokenKind type) {
            type == TOKEN_EQ_STAR || type == TOKEN_EQ_SLASH;
 }
 
-LotusType tokenTypeToLotusType(TokenKind type) {
+Type *tokenTypeToType(TokenKind type) {
     switch (type) {
-        case TOKEN_TYPE_INT: return LOTUS_I32;
-        case TOKEN_TYPE_FLOAT: return LOTUS_F32;
-        case TOKEN_TYPE_BOOL: return LOTUS_BOOL;
-        case TOKEN_TYPE_LONG: return LOTUS_I64;
-        case TOKEN_TYPE_DOUBLE: return LOTUS_F64;
-        case TOKEN_TYPE_STRING: return LOTUS_STRING;
+        case TOKEN_TYPE_INT: return intType;
+        case TOKEN_TYPE_FLOAT: return floatType;
+        case TOKEN_TYPE_BOOL: return boolType;
+        case TOKEN_TYPE_LONG: return longType;
+        case TOKEN_TYPE_DOUBLE: return doubleType;
+        case TOKEN_TYPE_STRING: return stringType;
         default: printf("Unknown LOTUS DATATYPE %d\n", type); exit(EXIT_FAILURE);
     }
 }
@@ -41,11 +43,12 @@ bool isOperator(const TokenKind type) {
            type == TOKEN_OR;
 }
 
-FunctionNode *newFunctionNode(const char *name, LotusType returnType, SourceLocation location) {
+FunctionNode *newFunctionNode(const char *name, Type *returnType, SourceLocation location) {
     FunctionNode *func = malloc(sizeof(FunctionNode));
     func->base.type = NODE_FUNCTION;
     func->base.location = location;
     func->base.dataType = returnType;
+    if (strlen(name) >= sizeof(func->name)) diagnosticError(parserSource, location, "Function name is too long");
     strcpy(func->name, name);
     return func;
 }
@@ -74,11 +77,12 @@ ContinueNode *newContinueNode(SourceLocation location) {
     return node;
 }
 
-IdentifierNode *newIdentifierNode(const char *name, LotusType type, SourceLocation location) {
+IdentifierNode *newIdentifierNode(const char *name, Type *type, SourceLocation location) {
     IdentifierNode *node = malloc(sizeof(IdentifierNode));
     node->base.type = NODE_IDENTIFIER;
     node->base.location = location;
     node->base.dataType = type;
+    if (strlen(name) >= sizeof(node->name)) diagnosticError(parserSource, location, "Identifier is too long");
     strcpy(node->name, name);
     return node;
 }
@@ -144,7 +148,7 @@ BooleanNode *newBooleanNode(bool value, SourceLocation location) {
     BooleanNode *node = malloc(sizeof(BooleanNode));
     node->base.type = NODE_BOOLEAN;
     node->base.location = location;
-    node->base.dataType = LOTUS_BOOL;
+    node->base.dataType = boolType;
     node->value = value;
     return node;
 }
@@ -153,7 +157,7 @@ StringNode *newStringNode(const char *value, SourceLocation location) {
     StringNode *node = malloc(sizeof(StringNode));
     node->base.type = NODE_STRING;
     node->base.location = location;
-    node->base.dataType = LOTUS_STRING;
+    node->base.dataType = stringType;
     node->value = strdup(value);
     return node;
 }
@@ -169,28 +173,28 @@ NumberNode *newNumberNode(const char *value, SourceLocation location) {
     switch (suffix) {
         case 'L':
         case 'l':
-            node->base.dataType = LOTUS_I64;
+            node->base.dataType = longType;
             node->i64 = strtoll(value, NULL, 10);
             break;
 
         case 'F':
         case 'f':
-            node->base.dataType = LOTUS_F32;
+            node->base.dataType = floatType;
             node->f32 = strtof(value, NULL);
             break;
 
         case 'D':
         case 'd':
-            node->base.dataType = LOTUS_F64;
+            node->base.dataType = doubleType;
             node->f64 = strtod(value, NULL);
             break;
 
         default:
             if (strchr(value, '.') != NULL) {
-                node->base.dataType = LOTUS_F64;
+                node->base.dataType = doubleType;
                 node->f64 = strtod(value, NULL);
             } else {
-                node->base.dataType = LOTUS_I32;
+                node->base.dataType = intType;
                 node->i32 = strtol(value, NULL, 10);
             }
             break;
@@ -211,7 +215,7 @@ BinaryNode *newBinaryNode(const TokenKind operator, Node *left, Node *right, Sou
 
 ForNode *newForNode(SourceLocation location) {
     ForNode *node = mallocSafe(sizeof(ForNode));
-    *node = (ForNode){.base = {NODE_FOR, LOTUS_VOID, location}};
+    *node = (ForNode){.base = {NODE_FOR, voidType, location}};
     return node;
 }
 
@@ -224,7 +228,7 @@ WhileNode *newWhileNode(Node *condition, Node *body, SourceLocation location) {
     return node;
 }
 
-CastNode *newCastNode(LotusType type, Node *operand, SourceLocation location) {
+CastNode *newCastNode(Type *type, Node *operand, SourceLocation location) {
     CastNode *node = mallocSafe(sizeof(CastNode));
     node->base = (Node){NODE_CAST, type, location};
     node->operand = operand;
@@ -233,15 +237,17 @@ CastNode *newCastNode(LotusType type, Node *operand, SourceLocation location) {
 
 UnaryNode *newUnaryNode(TokenKind op, Node *operand, SourceLocation location) {
     UnaryNode *node = mallocSafe(sizeof(UnaryNode));
-    node->base = (Node){NODE_UNARY, LOTUS_UNKNOWN, location};
+    node->base = (Node){NODE_UNARY, unknownType, location};
     node->op = op;
     node->operand = operand;
     node->postfix = false;
     return node;
 }
 
-LotusType parseType() {
-    LotusType type = tokenTypeToLotusType(advance().type);
+Type *parseType() {
+    Token token = advance();
+    Type *type = token.type == TOKEN_IDENTIFIER ? findObjectType(token.value) : tokenTypeToType(token.type);
+    if (type == unknownType) diagnosticError(parserSource, token.location, "Unknown type '%s'", token.value);
     if (matchCurrent(TOKEN_LBRACKET)) {
         expect(TOKEN_RBRACKET);
         type = toArrayType(type);
@@ -251,18 +257,46 @@ LotusType parseType() {
 
 ArrayNode *newArrayNode(SourceLocation location) {
     ArrayNode *node = mallocSafe(sizeof(ArrayNode));
-    *node = (ArrayNode){.base = {NODE_ARRAY, LOTUS_UNKNOWN, location}};
+    *node = (ArrayNode){.base = {NODE_ARRAY, unknownType, location}};
     return node;
 }
 
 IndexNode *newIndexNode(Node *array, Node *index, SourceLocation location) {
     IndexNode *node = mallocSafe(sizeof(IndexNode));
-    *node = (IndexNode){.base = {NODE_INDEX, LOTUS_UNKNOWN, location}, .array = array, .index = index};
+    *node = (IndexNode){.base = {NODE_INDEX, unknownType, location}, .array = array, .index = index};
     return node;
 }
 
 LengthNode *newLengthNode(Node *array, SourceLocation location) {
     LengthNode *node = mallocSafe(sizeof(LengthNode));
-    *node = (LengthNode){.base = {NODE_LENGTH, LOTUS_I32, location}, .array = array};
+    *node = (LengthNode){.base = {NODE_LENGTH, intType, location}, .array = array};
+    return node;
+}
+
+ObjectType *newTypeNode(char *name, SourceLocation location) {
+    ObjectType *node = mallocSafe(sizeof(ObjectType));
+    *node = (ObjectType){.base = {NODE_TYPE, &node->type, location}, .name = name};
+    node->type = (Type){.kind = TYPE_OBJECT, .object = node};
+    return node;
+}
+
+ObjectNode *newObjectNode(Type *type, SourceLocation location) {
+    ObjectNode *node = mallocSafe(sizeof(ObjectNode));
+    *node = (ObjectNode){.base = {NODE_OBJECT, type, location}};
+    return node;
+}
+
+MemberNode *newMemberNode(Node *object, char *name, SourceLocation location) {
+    MemberNode *node = mallocSafe(sizeof(MemberNode));
+    *node = (MemberNode){.base = {NODE_MEMBER, unknownType, location}, .object = object, .name = name};
+    return node;
+}
+
+MethodCallNode *newMethodCallNode(MemberNode *member, int argumentCount, Node **arguments, SourceLocation location) {
+    MethodCallNode *node = mallocSafe(sizeof(MethodCallNode));
+    *node = (MethodCallNode){.base = {NODE_METHOD_CALL, unknownType, location},
+                             .member = member,
+                             .call = newCallNode(newIdentifierNode(member->name, functionType, location), argumentCount,
+                                                 arguments, location)};
     return node;
 }

@@ -1,0 +1,19 @@
+// expect: "1\n2\n3\n"
+
+class A {
+    n: int = 1
+}
+
+fn malloc(): int {
+    return 2
+}
+
+fn free(): int {
+    return 3
+}
+
+A a = {}
+
+print(a.n)
+print(malloc())
+print(free())

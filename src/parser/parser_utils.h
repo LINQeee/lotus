@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #include "../lexer/lexer.h"
-#include "../llvm/lotus_types.h"
+#include "../llvm/types.h"
 #include "parser.h"
 
 bool isComparison(TokenKind type);
@@ -14,9 +14,9 @@ bool isOperator(TokenKind type);
 
 bool isDataType(TokenKind type);
 
-LotusType tokenTypeToLotusType(TokenKind type);
+Type *tokenTypeToType(TokenKind type);
 
-FunctionNode *newFunctionNode(const char *name, LotusType returnType, SourceLocation location);
+FunctionNode *newFunctionNode(const char *name, Type *returnType, SourceLocation location);
 
 ReturnNode *newReturnNode(Node *value, SourceLocation location);
 
@@ -24,7 +24,7 @@ BreakNode *newBreakNode(SourceLocation location);
 
 ContinueNode *newContinueNode(SourceLocation location);
 
-IdentifierNode *newIdentifierNode(const char *name, LotusType type, SourceLocation location);
+IdentifierNode *newIdentifierNode(const char *name, Type *type, SourceLocation location);
 
 AssignmentNode *newAssignmentNode(IdentifierNode *target, Node *value, SourceLocation location);
 
@@ -48,14 +48,19 @@ WhileNode *newWhileNode(Node *condition, Node *body, SourceLocation location);
 
 BooleanNode *newBooleanNode(bool value, SourceLocation location);
 
-LotusType parseType();
+Type *parseType();
 ArrayNode *newArrayNode(SourceLocation location);
 IndexNode *newIndexNode(Node *array, Node *index, SourceLocation location);
 LengthNode *newLengthNode(Node *array, SourceLocation location);
 
-CastNode *newCastNode(LotusType type, Node *operand, SourceLocation location);
+CastNode *newCastNode(Type *type, Node *operand, SourceLocation location);
 
 UnaryNode *newUnaryNode(TokenKind op, Node *operand, SourceLocation location);
+
+ObjectType *newTypeNode(char *name, SourceLocation location);
+ObjectNode *newObjectNode(Type *type, SourceLocation location);
+MemberNode *newMemberNode(Node *object, char *name, SourceLocation location);
+MethodCallNode *newMethodCallNode(MemberNode *member, int argumentCount, Node **arguments, SourceLocation location);
 
 void programAddStatement(ProgramNode *program, Node *statement);
 #endif

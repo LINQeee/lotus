@@ -23,6 +23,8 @@ include_directories(${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
 add_executable(compiler
+        src/parser/objects.c
+        src/llvm/generator/expression/objects.c
         src/main.c
         src/llvm/generator/expression/arrays.c
         src/cli/project.c
@@ -57,7 +59,7 @@ add_executable(compiler
         src/parser/parser_statements.h
         src/parser/parser_statements.c
         src/parser/parser_expressions.c
-        src/llvm/lotus_types.h
+        src/llvm/types.h
         src/type_checker/diagnostics.c
         src/type_checker/diagnostics.h
         src/type_checker/type_checker.c
@@ -74,7 +76,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS templates/main.lt
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/templates/main.lt" PROJECT_TEMPLATE_BYTES HEX)
 string(REGEX REPLACE "(..)" "0x\\1," PROJECT_TEMPLATE_BYTES "${PROJECT_TEMPLATE_BYTES}")
 configure_file(src/cli/project_template.h.in generated/project_template.h @ONLY)
-target_include_directories(compiler PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
+target_include_directories(compiler PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated" "${CMAKE_CURRENT_SOURCE_DIR}/lotus-core")
 
 if(TARGET LLVM)
     target_link_libraries(compiler PRIVATE LLVM)

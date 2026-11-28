@@ -1,0 +1,9 @@
+// error: "already declared"
+
+class A {
+    fn f() {
+    }
+
+    fn f() {
+    }
+}

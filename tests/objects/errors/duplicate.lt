@@ -1,0 +1,10 @@
+// error: "duplicate field"
+
+class User {
+    name: string
+}
+
+User user = {
+    name: "A",
+    name: "B"
+}

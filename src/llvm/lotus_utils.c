@@ -1,39 +1,73 @@
-#include "../lexer/lexer.h"
-#include "./lotus_types.h"
-#include "../utils/cutils.h"
-
 #include <stdbool.h>
 
-const char *lotusTypeName(LotusType type) {
-    switch (type) {
-        case LOTUS_I32: return "int";
+#include "types.h"
+#include "../utils/cutils.h"
+#include "../lexer/lexer.h"
+#include "../parser/parser.h"
 
-        case LOTUS_I64: return "long";
+static Type intTypeValue = {.kind = TYPE_I32};
+Type *intType = &intTypeValue;
+static Type longTypeValue = {.kind = TYPE_I64};
+Type *longType = &longTypeValue;
+static Type floatTypeValue = {.kind = TYPE_F32};
+Type *floatType = &floatTypeValue;
+static Type doubleTypeValue = {.kind = TYPE_F64};
+Type *doubleType = &doubleTypeValue;
+static Type boolTypeValue = {.kind = TYPE_BOOL};
+Type *boolType = &boolTypeValue;
+static Type stringTypeValue = {.kind = TYPE_STRING};
+Type *stringType = &stringTypeValue;
+static Type voidTypeValue = {.kind = TYPE_VOID};
+Type *voidType = &voidTypeValue;
+static Type anyTypeValue = {.kind = TYPE_ANY};
+Type *anyType = &anyTypeValue;
+static Type functionTypeValue = {.kind = TYPE_FUNCTION};
+Type *functionType = &functionTypeValue;
+static Type unknownTypeValue = {.kind = TYPE_UNKNOWN};
+Type *unknownType = &unknownTypeValue;
+static Type anyArrayTypeValue = {.kind = TYPE_ANY_ARRAY};
+Type *anyArrayType = &anyArrayTypeValue;
 
-        case LOTUS_F32: return "float";
+static Type arrays[] = {
+    {.kind = TYPE_ARRAY, .elementType = &intTypeValue},   {.kind = TYPE_ARRAY, .elementType = &longTypeValue},
+    {.kind = TYPE_ARRAY, .elementType = &floatTypeValue}, {.kind = TYPE_ARRAY, .elementType = &doubleTypeValue},
+    {.kind = TYPE_ARRAY, .elementType = &boolTypeValue},  {.kind = TYPE_ARRAY, .elementType = &stringTypeValue},
+};
 
-        case LOTUS_F64: return "double";
-
-        case LOTUS_BOOL: return "bool";
-
-        case LOTUS_STRING: return "string";
-
-        case LOTUS_VOID: return "void";
-
-        case LOTUS_ANY: return "any";
-
-        case LOTUS_FUNCTION: return "function";
-        case LOTUS_I32_ARRAY: return "int[]";
-        case LOTUS_I64_ARRAY: return "long[]";
-        case LOTUS_F32_ARRAY: return "float[]";
-        case LOTUS_F64_ARRAY: return "double[]";
-        case LOTUS_BOOL_ARRAY: return "bool[]";
-        case LOTUS_STRING_ARRAY: return "string[]";
-    }
-
-    return "<unknown>";
+bool typesEqual(Type *left, Type *right) {
+    if (left == right) return true;
+    if (left->kind != right->kind) return false;
+    if (left->kind == TYPE_ARRAY) return typesEqual(left->elementType, right->elementType);
+    if (left->kind == TYPE_OBJECT) return left->object == right->object;
+    return true;
 }
-
+const char *typeName(Type *type) {
+    if (type->kind == TYPE_OBJECT) return type->object->name;
+    if (type->kind == TYPE_ARRAY) {
+        switch (type->elementType->kind) {
+            case TYPE_I32: return "int[]";
+            case TYPE_I64: return "long[]";
+            case TYPE_F32: return "float[]";
+            case TYPE_F64: return "double[]";
+            case TYPE_BOOL: return "bool[]";
+            case TYPE_STRING: return "string[]";
+            default: return "array";
+        }
+    }
+    switch (type->kind) {
+        case TYPE_I32: return "int";
+        case TYPE_I64: return "long";
+        case TYPE_F32: return "float";
+        case TYPE_F64: return "double";
+        case TYPE_BOOL: return "bool";
+        case TYPE_STRING: return "string";
+        case TYPE_VOID: return "void";
+        case TYPE_ANY: return "any";
+        case TYPE_FUNCTION: return "function";
+        case TYPE_UNKNOWN: return "unknown";
+        default: return "array";
+    }
+}
 const char *tokenTypeName(TokenKind type) {
     switch (type) {
         case TOKEN_PLUS: return "+";
@@ -67,60 +101,32 @@ const char *tokenTypeName(TokenKind type) {
     }
 }
 
-NumericKind getNumericKind(LotusType type) {
-    if (type == LOTUS_I32 || type == LOTUS_I64) return NUMERIC_INTEGER;
-    if (type == LOTUS_F32 || type == LOTUS_F64) return NUMERIC_FLOAT;
-    exitWithError("Unknown numeric kind of type: %d", type);
+bool isNumericType(Type *type) {
+    return type->kind == TYPE_I32 || type->kind == TYPE_I64 || type->kind == TYPE_F32 || type->kind == TYPE_F64;
 }
-
-bool isNumericType(LotusType type) {
-    return type == LOTUS_I32 || type == LOTUS_I64 || type == LOTUS_F32 || type == LOTUS_F64;
+bool isIntegerType(Type *type) {
+    return type->kind == TYPE_I32 || type->kind == TYPE_I64;
 }
-
-bool isIntegerType(LotusType type) {
-    return type == LOTUS_I32 || type == LOTUS_I64;
+bool isBooleanType(Type *type) {
+    return type->kind == TYPE_BOOL;
 }
-
-bool isBooleanType(LotusType type) {
-    return type == LOTUS_BOOL;
+bool isArrayType(Type *type) {
+    return type->kind == TYPE_ARRAY;
 }
-
-bool isArrayType(LotusType type) {
-    switch (type) {
-        case LOTUS_I32_ARRAY:
-        case LOTUS_I64_ARRAY:
-        case LOTUS_F32_ARRAY:
-        case LOTUS_F64_ARRAY:
-        case LOTUS_BOOL_ARRAY:
-        case LOTUS_STRING_ARRAY: return true;
-        default: return false;
-    }
+bool isMemoryType(Type *type) {
+    return type->kind == TYPE_STRING || type->kind == TYPE_ARRAY || type->kind == TYPE_ANY_ARRAY ||
+           type->kind == TYPE_OBJECT;
 }
-
-bool isMemoryType(LotusType type) {
-    return type == LOTUS_STRING || isArrayType(type);
+NumericKind getNumericKind(Type *type) {
+    if (isIntegerType(type)) return NUMERIC_INTEGER;
+    if (type->kind == TYPE_F32 || type->kind == TYPE_F64) return NUMERIC_FLOAT;
+    exitWithError("Expected numeric type, got %s", typeName(type));
 }
-
-LotusType fromArrayType(LotusType type) {
-    switch (type) {
-        case LOTUS_I32_ARRAY: return LOTUS_I32;
-        case LOTUS_I64_ARRAY: return LOTUS_I64;
-        case LOTUS_F32_ARRAY: return LOTUS_F32;
-        case LOTUS_F64_ARRAY: return LOTUS_F64;
-        case LOTUS_BOOL_ARRAY: return LOTUS_BOOL;
-        case LOTUS_STRING_ARRAY: return LOTUS_STRING;
-        default: exitWithError("Expected array type, got %s", lotusTypeName(type));
-    }
+Type *fromArrayType(Type *type) {
+    return type->elementType;
 }
-
-LotusType toArrayType(LotusType type) {
-    switch (type) {
-        case LOTUS_I32: return LOTUS_I32_ARRAY;
-        case LOTUS_I64: return LOTUS_I64_ARRAY;
-        case LOTUS_F32: return LOTUS_F32_ARRAY;
-        case LOTUS_F64: return LOTUS_F64_ARRAY;
-        case LOTUS_BOOL: return LOTUS_BOOL_ARRAY;
-        case LOTUS_STRING: return LOTUS_STRING_ARRAY;
-        default: exitWithError("Expected array element type, got %s", lotusTypeName(type));
-    }
+Type *toArrayType(Type *type) {
+    for (unsigned i = 0; i < sizeof(arrays) / sizeof(arrays[0]); i++)
+        if (typesEqual(arrays[i].elementType, type)) return &arrays[i];
+    exitWithError("Expected array element type, got %s", typeName(type));
 }

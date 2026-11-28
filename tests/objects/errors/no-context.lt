@@ -1,0 +1,4 @@
+// error: "object literal requires"
+
+print({
+})

@@ -2,14 +2,14 @@
 #define FUNCTIONS_H
 #include <llvm-c/Types.h>
 
-#include "../../lotus_types.h"
+#include "../../types.h"
 #include "../../../parser/parser.h"
 
 typedef struct {
     char name[64];
     int argc;
-    LotusType args[32];
-    LotusType returnType;
+    Type *args[32];
+    Type *returnType;
     LLVMTypeRef fnType;
     LLVMValueRef llvmFunction;
 } LLVMUserFunction;

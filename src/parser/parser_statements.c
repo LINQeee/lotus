@@ -1,3 +1,4 @@
+#include "objects.h"
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -6,7 +7,7 @@
 #include "./parser_utils.h"
 #include "parser_expressions.h"
 #include "../lexer/lexer.h"
-#include "../llvm/lotus_types.h"
+#include "../llvm/types.h"
 
 Node *parseStatement();
 
@@ -50,7 +51,7 @@ static Node *parseFor() {
     ForNode *node = newForNode(expect(TOKEN_FOR).location);
     bool parenthesized = matchCurrent(TOKEN_LPAREN);
     Token name = expect(TOKEN_IDENTIFIER);
-    node->variable = newIdentifierNode(name.value, LOTUS_UNKNOWN, name.location);
+    node->variable = newIdentifierNode(name.value, unknownType, name.location);
     expect(TOKEN_IN);
     node->start = parseExpression();
     if (!isCurrent(TOKEN_RANGE) && !isCurrent(TOKEN_EXCLAMATION)) {
@@ -80,7 +81,7 @@ static Node *parseIf() {
     return (Node *)node;
 }
 static Node *parseDeclaration() {
-    LotusType type = parseType();
+    Type *type = parseType();
 
     Token varName = expect(TOKEN_IDENTIFIER);
     expect(TOKEN_EQUAL);
@@ -94,7 +95,7 @@ static Node *parseDeclaration() {
 static Node *parseAssignment() {
     Token varName = advance();
 
-    IdentifierNode *identifier = newIdentifierNode(varName.value, LOTUS_UNKNOWN, varName.location);
+    IdentifierNode *identifier = newIdentifierNode(varName.value, unknownType, varName.location);
 
     Node *value;
 
@@ -119,7 +120,7 @@ static IdentifierNode *parseParameter() {
     Token varName = expect(TOKEN_IDENTIFIER);
     expect(TOKEN_COLON);
 
-    LotusType type = parseType();
+    Type *type = parseType();
 
     return newIdentifierNode(varName.value, type, varName.location);
 }
@@ -141,7 +142,7 @@ static Node *parseFunction() {
     }
     expect(TOKEN_RPAREN);
 
-    LotusType returnType = LOTUS_VOID;
+    Type *returnType = voidType;
 
     if (matchCurrent(TOKEN_COLON)) returnType = parseType();
 
@@ -155,6 +156,7 @@ static Node *parseFunction() {
 
 Node *parseStatement() {
     switch (current().type) {
+        case TOKEN_OBJECT_TYPE: return parseObjectDeclaration();
         case TOKEN_FUNCTION: return parseFunction();
 
         case TOKEN_RETURN: return parseReturn();
@@ -176,8 +178,15 @@ Node *parseStatement() {
         case TOKEN_TYPE_STRING: return parseDeclaration();
 
         default: {
+            if (isCurrent(TOKEN_IDENTIFIER) && peekNext().type == TOKEN_IDENTIFIER) return parseDeclaration();
             if (isCurrent(TOKEN_IDENTIFIER) && isAssignmentOp(peekNext().type)) return parseAssignment();
             Node *target = parseExpression();
+            if (target->type == NODE_MEMBER && isAssignmentOp(current().type)) {
+                MemberNode *member = (MemberNode *)target;
+                member->op = advance().type;
+                member->value = parseExpression();
+                return target;
+            }
             if (matchCurrent(TOKEN_EQUAL)) {
                 if (target->type != NODE_INDEX) exitWithError("Expected an assignable array element");
                 IndexNode *index = (IndexNode *)target;

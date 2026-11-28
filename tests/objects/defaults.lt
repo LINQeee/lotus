@@ -1,0 +1,17 @@
+// expect: "9\n0\nexplicit\nAB\n"
+
+class Box {
+    values: int[] = new int[1]
+    text: string = "A" + "B"
+}
+
+Box first = {}
+Box second = {}
+
+first.values[0] = 9
+first.text = "explicit"
+
+print(first.values[0])
+print(second.values[0])
+print(first.text)
+print(second.text)

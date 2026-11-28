@@ -1,43 +1,43 @@
 #include "type_rules.h"
 
 #include "../lexer/lexer.h"
-#include "../llvm/lotus_types.h"
+#include "../llvm/types.h"
 
-bool isAssignable(LotusType target, LotusType source) {
-    return target == source || target == LOTUS_ANY;
+bool isAssignable(Type *target, Type *source) {
+    return typesEqual(target, source) || target == anyType;
 }
 
-bool isValidCast(LotusType target, LotusType source) {
+bool isValidCast(Type *target, Type *source) {
     if (!isNumericType(target) || !isNumericType(source)) return false;
-    if (target == source) return true;
-    switch (source) {
-        case LOTUS_I32: return target == LOTUS_I64 || target == LOTUS_F32 || target == LOTUS_F64;
-        case LOTUS_I64: return target == LOTUS_F32 || target == LOTUS_F64;
-        case LOTUS_F32: return target == LOTUS_F64;
+    if (typesEqual(target, source)) return true;
+    switch (source->kind) {
+        case TYPE_I32: return target == longType || target == floatType || target == doubleType;
+        case TYPE_I64: return target == floatType || target == doubleType;
+        case TYPE_F32: return target == doubleType;
         default: return false;
     }
 }
 
-LotusType commonNumericType(LotusType left, LotusType right) {
-    return left == right && isNumericType(left) ? left : LOTUS_ANY;
+Type *commonNumericType(Type *left, Type *right) {
+    return typesEqual(left, right) && isNumericType(left) ? left : anyType;
 }
 
-bool areComparable(LotusType left, LotusType right) {
-    if (left == right && isNumericType(left)) return true;
+bool areComparable(Type *left, Type *right) {
+    if (typesEqual(left, right) && isNumericType(left)) return true;
 
-    if (left == LOTUS_BOOL && right == LOTUS_BOOL) return true;
+    if (left == boolType && right == boolType) return true;
 
-    if (left == LOTUS_STRING && right == LOTUS_STRING) return true;
+    if (left == stringType && right == stringType) return true;
 
     return false;
 }
 
-bool isValidBinaryOperation(TokenKind operator, LotusType left, LotusType right) {
-    if (left != right) return false;
+bool isValidBinaryOperation(TokenKind operator, Type *left, Type *right) {
+    if (!typesEqual(left, right)) return false;
 
     switch (operator) {
         case TOKEN_PLUS:
-            if (isNumericType(left) || left == LOTUS_STRING) return true;
+            if (isNumericType(left) || left == stringType) return true;
             return false;
 
         case TOKEN_MINUS:
@@ -48,7 +48,7 @@ bool isValidBinaryOperation(TokenKind operator, LotusType left, LotusType right)
         case TOKEN_GE:
         case TOKEN_LE: return isNumericType(left);
 
-        case TOKEN_DOUBLE_STAR: return left == LOTUS_F32 || left == LOTUS_F64;
+        case TOKEN_DOUBLE_STAR: return left == floatType || left == doubleType;
 
         case TOKEN_PERCENT: return isIntegerType(left);
 
@@ -56,16 +56,16 @@ bool isValidBinaryOperation(TokenKind operator, LotusType left, LotusType right)
         case TOKEN_NEQ: return areComparable(left, right);
 
         case TOKEN_AND:
-        case TOKEN_OR: return left == LOTUS_BOOL;
+        case TOKEN_OR: return left == boolType;
 
         default: return false;
     }
 }
 
-LotusType binaryResultType(TokenKind operator, LotusType left, LotusType right) {
+Type *binaryResultType(TokenKind operator, Type *left, Type *right) {
     switch (operator) {
         case TOKEN_PLUS:
-            if (left == LOTUS_STRING && right == LOTUS_STRING) return LOTUS_STRING;
+            if (left == stringType && right == stringType) return stringType;
 
             return commonNumericType(left, right);
 
@@ -83,8 +83,8 @@ LotusType binaryResultType(TokenKind operator, LotusType left, LotusType right) 
         case TOKEN_EQ:
         case TOKEN_NEQ:
         case TOKEN_AND:
-        case TOKEN_OR: return LOTUS_BOOL;
+        case TOKEN_OR: return boolType;
 
-        default: return LOTUS_ANY;
+        default: return anyType;
     }
 }

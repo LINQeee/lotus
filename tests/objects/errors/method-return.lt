@@ -1,0 +1,6 @@
+// error: "without returning"
+
+class A {
+    fn f(): int {
+    }
+}

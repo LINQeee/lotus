@@ -5,11 +5,15 @@
 #include <stddef.h>
 
 #include "../lexer/lexer.h"
-#include "../llvm/lotus_types.h"
+#include "../llvm/types.h"
 
 #define MAX_ARGS 256
 
 typedef enum {
+    NODE_TYPE,
+    NODE_OBJECT,
+    NODE_MEMBER,
+    NODE_METHOD_CALL,
     NODE_NUMBER,
     NODE_IDENTIFIER,
     NODE_BINARY,
@@ -36,7 +40,7 @@ typedef enum {
 
 typedef struct {
     NodeType type;
-    LotusType dataType;
+    Type *dataType;
     SourceLocation location;
 } Node;
 
@@ -183,6 +187,55 @@ typedef struct {
     int argumentCount;
 } CallNode;
 
+typedef struct {
+    char *name;
+    Type *type;
+    Node *defaultValue;
+    FunctionNode *initializer;
+    SourceLocation location;
+} ObjectField;
+
+typedef enum {
+    OBJECT_UNCHECKED,
+    OBJECT_CHECKING,
+    OBJECT_CHECKED
+} ObjectCheckState;
+
+struct ObjectType {
+    Node base;
+    Type type;
+    char *name;
+    ObjectField *fields;
+    size_t fieldCount;
+    FunctionNode **methods;
+    size_t methodCount;
+    bool defined;
+    ObjectCheckState checkState;
+};
+
+typedef struct {
+    Node base;
+    char **names;
+    Node **values;
+    size_t *indices;
+    size_t count;
+} ObjectNode;
+
+typedef struct {
+    Node base;
+    Node *object;
+    char *name;
+    size_t index;
+    Node *value;
+    TokenKind op;
+} MemberNode;
+
+typedef struct {
+    Node base;
+    MemberNode *member;
+    CallNode *call;
+} MethodCallNode;
+
 Token current();
 Token advance();
 Token expect(TokenKind type);
@@ -191,6 +244,7 @@ bool matchCurrent(TokenKind type);
 Token peekNext();
 Token previous();
 
-ProgramNode *buildAST(const Token *tokensToParse);
+extern const char *parserSource;
+ProgramNode *buildAST(const Token *tokensToParse, const char *source);
 
 #endif

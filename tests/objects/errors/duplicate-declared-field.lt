@@ -1,0 +1,6 @@
+// error: "duplicate field"
+
+class A {
+    n: int
+    n: int
+}

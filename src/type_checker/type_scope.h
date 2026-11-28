@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#include "../llvm/lotus_types.h"
+#include "../llvm/types.h"
 
 typedef struct TypeScope {
     Variable *variables;
@@ -16,7 +16,7 @@ typedef struct TypeScope {
 TypeScope *typeScopeCreate(TypeScope *parent);
 void typeScopeDestroy(TypeScope *scope);
 
-void typeScopeDeclare(TypeScope *scope, const char *name, LotusType type);
+void typeScopeDeclare(TypeScope *scope, const char *name, Type *type);
 
 Variable *typeScopeFind(TypeScope *scope, const char *name);
 

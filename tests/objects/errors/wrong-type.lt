@@ -1,0 +1,9 @@
+// error: "requires string"
+
+class User {
+    name: string
+}
+
+User user = {
+    name: 1
+}
