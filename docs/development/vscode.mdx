@@ -16,7 +16,7 @@ cd tools/lotus-extension
 npm ci
 npm test
 npm run package
-code --install-extension dist/lotus-extension-0.1.1.vsix
+code --install-extension dist/lotus-extension-0.1.2.vsix
 ```
 
 Alternatively, use **Extensions: Install from VSIX** in VS Code. The extension requires VS Code 1.85 or newer. Packaging uses a current Node.js release compatible with the dependencies.
@@ -115,7 +115,7 @@ A push changing `releases/*.vsix` on `main` runs `.github/workflows/release.yml`
 
 GitHub Releases work immediately with the workflow's built-in GitHub token. Marketplace publication remains disabled until the publisher is configured:
 
-1. Sign in to [Marketplace publisher management](https://marketplace.visualstudio.com/manage) and create publisher ID `LINQeee`. If that ID is unavailable, update `publisher` in `package.json` and rebuild before publishing.
+1. Sign in to [Marketplace publisher management](https://marketplace.visualstudio.com/manage) and create publisher ID `LINQe`. If that ID is unavailable, update `publisher` in `package.json` and rebuild before publishing.
 2. In the publisher's **Trusted Publishing** settings, create a policy for owner `LINQeee`, repository `lotus-extension`, workflow `release.yml`. Leave Environment empty.
 3. In the GitHub repository's **Settings → Secrets and variables → Actions → Variables**, add `MARKETPLACE_ENABLED` with value `true`.
 4. Run **Release VSIX** from the Actions tab to publish the current release.
