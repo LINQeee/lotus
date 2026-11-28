@@ -40,7 +40,8 @@
               "language/control-flow",
               "language/functions",
               "language/strings",
-              "language/arrays"
+              "language/arrays",
+              "language/objects"
             ]
           },
           {

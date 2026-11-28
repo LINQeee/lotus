@@ -1,0 +1,80 @@
+---
+title: "Classes and objects"
+description: "Declare named object types with fields, per-instance defaults and methods. Create typed literals and share objects through references."
+keywords: ["Lotus", "objects", "class", "this"]
+---
+
+Use `class` to group fields and methods. Create an object with `User { ... }`, or omit `User` when the surrounding declaration, argument, field or return supplies its type.
+
+```rust objects.lt
+class User {
+    name: string
+    age: int = 0
+
+    fn greet(): string {
+        return "Hello, " + this.name
+    }
+
+    fn birthday() {
+        this.age += 1
+    }
+}
+
+User user = { name: "Alex" }
+user.birthday()
+print(user.greet())
+print(user.age)
+```
+
+```text Output
+Hello, Alex
+1
+```
+
+## Fields and initialization
+
+Classes are declared at top level and can be referenced before their declaration. Fields are public and mutable. Each field has an explicit type: a scalar, an existing scalar array, or another object type.
+
+- Supply every field without a default exactly once. Unknown and duplicate fields are errors.
+- Field values must match their types. Named object types are distinct even when their fields match.
+- Separate initializer entries with commas; a trailing comma is allowed. Field declarations do not use commas.
+- Explicit values run left to right in initializer order. Missing defaults then run in field declaration order.
+- Defaults run anew for each object. A default array or object is not shared unless its expression explicitly returns an existing reference.
+- Defaults can call functions, but cannot directly reference `this`, other fields, local variables or top-level variables.
+
+```rust
+User other = User { name: "Sam", age: 20 }
+other.age = 21
+other.name += "!"
+```
+
+Empty classes and empty initializers are allowed. An empty initializer requires all fields to have defaults, or a type with no fields.
+
+## References and lifetime
+
+Assignment and function arguments share objects. Updating a field through one reference is visible through every reference to that object. Reassigning a variable changes only that variable.
+
+```rust
+User alias = user
+alias.name = "Sam"
+print(user.name) // Sam
+
+alias = User { name: "Kate" }
+print(user.name) // Sam
+```
+
+Reference counting releases objects and their managed fields after their last owning reference is released. Nested fields, temporary results, returns and loop jumps follow the same ownership rules as [strings](/language/strings) and [arrays](/language/arrays).
+
+## Methods
+
+Declare methods with `fn` and access the receiver explicitly through `this`. Methods can read and update fields, call other methods through `this`, accept objects and return objects, including `this`.
+
+Methods belong to the class. They cannot be replaced, overloaded or extracted as function values. A field and a method cannot share a name. Calls evaluate the receiver once, then arguments from left to right.
+
+Field assignments support `=`, `+=`, `-=`, `*=`, `/=` and `%=` when the field type supports the corresponding operation. A compound assignment reads its field before evaluating the right-hand side. Field `++` and `--` are not supported.
+
+## Current limits
+
+Object shapes, spread, inheritance, nullable fields, object arrays and recursive field types are not implemented. Objects cannot be compared or passed to native functions, including `print`; print their scalar fields or method results instead.
+
+Methods support at most 31 explicit parameters. The current backend allows 256 user functions in total, including methods and generated field-default functions. Qualified method names must fit within 63 bytes.
