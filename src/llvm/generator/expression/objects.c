@@ -19,7 +19,7 @@
 #include "../../types.h"
 
 typedef struct {
-    ObjectType *type;
+    ClassNode *type;
     LLVMTypeRef layout;
     LLVMValueRef retain;
     LLVMValueRef release;
@@ -28,8 +28,8 @@ static ObjectCodegen *objects;
 static LLVMTypeRef lifetimeType;
 
 static ObjectCodegen *findObjectCodegen(Type *type) {
-    for (size_t i = 0; i < objectTypeCount; i++)
-        if (objects[i].type == type->object) return &objects[i];
+    for (size_t i = 0; i < classCount; i++)
+        if (objects[i].type == type->classNode) return &objects[i];
     exitWithError("Object type was not prepared: %s", typeName(type));
 }
 
@@ -40,11 +40,11 @@ void releaseObject(Type *type, LLVMValueRef value) {
     LLVMBuildCall2(cg->builder, lifetimeType, findObjectCodegen(type)->release, &value, 1, "");
 }
 void prepareObjectCodegen() {
-    objects = mallocSafe((objectTypeCount ? objectTypeCount : 1) * sizeof(ObjectCodegen));
+    objects = mallocSafe((classCount ? classCount : 1) * sizeof(ObjectCodegen));
     LLVMTypeRef pointer = LLVMPointerType(cg->i8Type, 0);
     lifetimeType = LLVMFunctionType(cg->voidType, &pointer, 1, false);
-    for (size_t i = 0; i < objectTypeCount; i++) {
-        ObjectType *type = objectTypes[i];
+    for (size_t i = 0; i < classCount; i++) {
+        ClassNode *type = classes[i];
         ObjectCodegen *object = &objects[i];
         object->type = type;
         object->layout = LLVMStructCreateNamed(cg->context, type->name);
@@ -61,8 +61,8 @@ void prepareObjectCodegen() {
         object->release = LLVMAddFunction(cg->module, name, lifetimeType);
         LLVMSetLinkage(object->release, LLVMInternalLinkage);
     }
-    for (size_t i = 0; i < objectTypeCount; i++) {
-        ObjectType *type = objectTypes[i];
+    for (size_t i = 0; i < classCount; i++) {
+        ClassNode *type = classes[i];
         ObjectCodegen *object = &objects[i];
         for (int release = 0; release < 2; release++) {
             LLVMValueRef fn = release ? object->release : object->retain;
@@ -100,7 +100,7 @@ void prepareObjectCodegen() {
     }
 }
 LLVMValueRef generateObject(const ObjectNode *node) {
-    ObjectType *type = getObjectType(node->base.dataType);
+    ClassNode *type = getClass(node->base.dataType);
     ObjectCodegen *object = findObjectCodegen(node->base.dataType);
     LLVMValueRef *values = mallocSafe((type->fieldCount ? type->fieldCount : 1) * sizeof(LLVMValueRef));
     for (size_t i = 0; i < type->fieldCount; i++) values[i] = NULL;

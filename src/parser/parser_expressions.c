@@ -119,9 +119,9 @@ static Node *parsePrimary() {
 
     if (isCurrent(TOKEN_LBRACE)) return parseObject(unknownType, primaryT.location);
     if (isCurrent(TOKEN_IDENTIFIER) && peekNext().type == TOKEN_LBRACE &&
-        findObjectType(primaryT.value) != unknownType) {
+        findClassType(primaryT.value) != unknownType) {
         advance();
-        return parseObject(findObjectType(primaryT.value), primaryT.location);
+        return parseObject(findClassType(primaryT.value), primaryT.location);
     }
     if (matchCurrent(TOKEN_THIS)) return (Node *)newIdentifierNode("this", unknownType, primaryT.location);
     if (matchCurrent(TOKEN_NEW)) {

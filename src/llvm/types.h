@@ -15,17 +15,17 @@ typedef enum {
     TYPE_FUNCTION,
     TYPE_UNKNOWN,
     TYPE_ARRAY,
-    TYPE_OBJECT,
+    TYPE_CLASS,
     TYPE_ANY_ARRAY
 } TypeKind;
 
 typedef struct Type Type;
-typedef struct ObjectType ObjectType;
+typedef struct ClassNode ClassNode;
 struct Type {
     TypeKind kind;
     union {
         Type *elementType;
-        ObjectType *object;
+        ClassNode *classNode;
     };
 };
 

@@ -7,13 +7,13 @@
 #include "../lexer/lexer.h"
 #include "../llvm/types.h"
 
-extern ObjectType **objectTypes;
-extern size_t objectTypeCount;
-bool isObjectType(Type *type);
-ObjectType *getObjectType(Type *type);
-Type *findObjectType(const char *name);
-void collectObjectTypes(const Token *tokens);
-Node *parseObjectDeclaration();
+extern ClassNode **classes;
+extern size_t classCount;
+bool isClassType(Type *type);
+ClassNode *getClass(Type *type);
+Type *findClassType(const char *name);
+void collectClasses(const Token *tokens);
+Node *parseClassDeclaration();
 Node *parseObject(Type *type, SourceLocation location);
-void appendObjectFunctions(ProgramNode *program);
+void appendClassFunctions(ProgramNode *program);
 #endif

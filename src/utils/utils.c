@@ -55,8 +55,8 @@ static void printNode(const Node *node, const char *prefix, bool isLast) {
     makeChildPrefix(prefix, isLast, childPrefix, sizeof(childPrefix));
 
     switch (node->type) {
-        case NODE_TYPE: {
-            const ObjectType *type = (const ObjectType *)node;
+        case NODE_CLASS: {
+            const ClassNode *type = (const ClassNode *)node;
             printf("Class %s\n", type->name);
             for (size_t i = 0; i < type->fieldCount; i++) {
                 printf("%s  %s: %s\n", childPrefix, type->fields[i].name, typeName(type->fields[i].type));

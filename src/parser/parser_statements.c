@@ -156,7 +156,7 @@ static Node *parseFunction() {
 
 Node *parseStatement() {
     switch (current().type) {
-        case TOKEN_OBJECT_TYPE: return parseObjectDeclaration();
+        case TOKEN_CLASS: return parseClassDeclaration();
         case TOKEN_FUNCTION: return parseFunction();
 
         case TOKEN_RETURN: return parseReturn();

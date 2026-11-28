@@ -246,7 +246,7 @@ UnaryNode *newUnaryNode(TokenKind op, Node *operand, SourceLocation location) {
 
 Type *parseType() {
     Token token = advance();
-    Type *type = token.type == TOKEN_IDENTIFIER ? findObjectType(token.value) : tokenTypeToType(token.type);
+    Type *type = token.type == TOKEN_IDENTIFIER ? findClassType(token.value) : tokenTypeToType(token.type);
     if (type == unknownType) diagnosticError(parserSource, token.location, "Unknown type '%s'", token.value);
     if (matchCurrent(TOKEN_LBRACKET)) {
         expect(TOKEN_RBRACKET);
@@ -273,10 +273,10 @@ LengthNode *newLengthNode(Node *array, SourceLocation location) {
     return node;
 }
 
-ObjectType *newTypeNode(char *name, SourceLocation location) {
-    ObjectType *node = mallocSafe(sizeof(ObjectType));
-    *node = (ObjectType){.base = {NODE_TYPE, &node->type, location}, .name = name};
-    node->type = (Type){.kind = TYPE_OBJECT, .object = node};
+ClassNode *newClassNode(char *name, SourceLocation location) {
+    ClassNode *node = mallocSafe(sizeof(ClassNode));
+    *node = (ClassNode){.base = {NODE_CLASS, &node->type, location}, .name = name};
+    node->type = (Type){.kind = TYPE_CLASS, .classNode = node};
     return node;
 }
 

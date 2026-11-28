@@ -11,33 +11,33 @@
 #include "../lexer/lexer.h"
 #include "../llvm/types.h"
 
-ObjectType **objectTypes;
-size_t objectTypeCount;
+ClassNode **classes;
+size_t classCount;
 
-bool isObjectType(Type *type) {
-    return type->kind == TYPE_OBJECT;
+bool isClassType(Type *type) {
+    return type->kind == TYPE_CLASS;
 }
-ObjectType *getObjectType(Type *type) {
-    return type->object;
+ClassNode *getClass(Type *type) {
+    return type->classNode;
 }
-Type *findObjectType(const char *name) {
-    for (size_t i = 0; i < objectTypeCount; i++)
-        if (!strcmp(objectTypes[i]->name, name)) return &objectTypes[i]->type;
+Type *findClassType(const char *name) {
+    for (size_t i = 0; i < classCount; i++)
+        if (!strcmp(classes[i]->name, name)) return &classes[i]->type;
     return unknownType;
 }
-void collectObjectTypes(const Token *tokens) {
+void collectClasses(const Token *tokens) {
     for (size_t i = 0; tokens[i].type != TOKEN_EOF; i++) {
-        if (tokens[i].type != TOKEN_OBJECT_TYPE || tokens[i + 1].type != TOKEN_IDENTIFIER) continue;
-        if (findObjectType(tokens[i + 1].value) != unknownType) continue;
-        ObjectType *type = newTypeNode(tokens[i + 1].value, tokens[i].location);
-        objectTypes = reallocSafe(objectTypes, (objectTypeCount + 1) * sizeof(ObjectType *));
-        objectTypes[objectTypeCount++] = type;
+        if (tokens[i].type != TOKEN_CLASS || tokens[i + 1].type != TOKEN_IDENTIFIER) continue;
+        if (findClassType(tokens[i + 1].value) != unknownType) continue;
+        ClassNode *type = newClassNode(tokens[i + 1].value, tokens[i].location);
+        classes = reallocSafe(classes, (classCount + 1) * sizeof(ClassNode *));
+        classes[classCount++] = type;
     }
 }
-Node *parseObjectDeclaration() {
-    expect(TOKEN_OBJECT_TYPE);
+Node *parseClassDeclaration() {
+    expect(TOKEN_CLASS);
     Token name = expect(TOKEN_IDENTIFIER);
-    ObjectType *type = getObjectType(findObjectType(name.value));
+    ClassNode *type = getClass(findClassType(name.value));
     if (type->defined) diagnosticError(parserSource, name.location, "Class '%s' is already declared", name.value);
     type->defined = true;
     expect(TOKEN_LBRACE);
@@ -56,8 +56,8 @@ Node *parseObjectDeclaration() {
             expect(TOKEN_COLON);
             Type *fieldType = parseType();
             Node *value = matchCurrent(TOKEN_EQUAL) ? parseExpression() : NULL;
-            type->fields = reallocSafe(type->fields, (type->fieldCount + 1) * sizeof(ObjectField));
-            type->fields[type->fieldCount++] = (ObjectField){field.value, fieldType, value, NULL, field.location};
+            type->fields = reallocSafe(type->fields, (type->fieldCount + 1) * sizeof(ClassField));
+            type->fields[type->fieldCount++] = (ClassField){field.value, fieldType, value, NULL, field.location};
         }
     }
     expect(TOKEN_RBRACE);
@@ -80,9 +80,9 @@ Node *parseObject(Type *type, SourceLocation location) {
     expect(TOKEN_RBRACE);
     return (Node *)node;
 }
-void appendObjectFunctions(ProgramNode *program) {
-    for (size_t i = 0; i < objectTypeCount; i++) {
-        ObjectType *type = objectTypes[i];
+void appendClassFunctions(ProgramNode *program) {
+    for (size_t i = 0; i < classCount; i++) {
+        ClassNode *type = classes[i];
         for (size_t j = 0; j < type->methodCount; j++) {
             FunctionNode *method = type->methods[j];
             char name[64];
@@ -93,7 +93,7 @@ void appendObjectFunctions(ProgramNode *program) {
             programAddStatement(program, (Node *)method);
         }
         for (size_t j = 0; j < type->fieldCount; j++) {
-            ObjectField *field = &type->fields[j];
+            ClassField *field = &type->fields[j];
             if (!field->defaultValue) continue;
             char name[64];
             snprintf(name, sizeof(name), "$default.%zu.%zu", i, j);

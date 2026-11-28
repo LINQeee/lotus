@@ -38,11 +38,11 @@ bool typesEqual(Type *left, Type *right) {
     if (left == right) return true;
     if (left->kind != right->kind) return false;
     if (left->kind == TYPE_ARRAY) return typesEqual(left->elementType, right->elementType);
-    if (left->kind == TYPE_OBJECT) return left->object == right->object;
+    if (left->kind == TYPE_CLASS) return left->classNode == right->classNode;
     return true;
 }
 const char *typeName(Type *type) {
-    if (type->kind == TYPE_OBJECT) return type->object->name;
+    if (type->kind == TYPE_CLASS) return type->classNode->name;
     if (type->kind == TYPE_ARRAY) {
         switch (type->elementType->kind) {
             case TYPE_I32: return "int[]";
@@ -115,7 +115,7 @@ bool isArrayType(Type *type) {
 }
 bool isMemoryType(Type *type) {
     return type->kind == TYPE_STRING || type->kind == TYPE_ARRAY || type->kind == TYPE_ANY_ARRAY ||
-           type->kind == TYPE_OBJECT;
+           type->kind == TYPE_CLASS;
 }
 NumericKind getNumericKind(Type *type) {
     if (isIntegerType(type)) return NUMERIC_INTEGER;

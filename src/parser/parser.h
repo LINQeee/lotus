@@ -10,7 +10,7 @@
 #define MAX_ARGS 256
 
 typedef enum {
-    NODE_TYPE,
+    NODE_CLASS,
     NODE_OBJECT,
     NODE_MEMBER,
     NODE_METHOD_CALL,
@@ -193,24 +193,24 @@ typedef struct {
     Node *defaultValue;
     FunctionNode *initializer;
     SourceLocation location;
-} ObjectField;
+} ClassField;
 
 typedef enum {
-    OBJECT_UNCHECKED,
-    OBJECT_CHECKING,
-    OBJECT_CHECKED
-} ObjectCheckState;
+    CLASS_UNCHECKED,
+    CLASS_CHECKING,
+    CLASS_CHECKED
+} ClassCheckState;
 
-struct ObjectType {
+struct ClassNode {
     Node base;
     Type type;
     char *name;
-    ObjectField *fields;
+    ClassField *fields;
     size_t fieldCount;
     FunctionNode **methods;
     size_t methodCount;
     bool defined;
-    ObjectCheckState checkState;
+    ClassCheckState checkState;
 };
 
 typedef struct {

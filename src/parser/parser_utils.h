@@ -57,7 +57,7 @@ CastNode *newCastNode(Type *type, Node *operand, SourceLocation location);
 
 UnaryNode *newUnaryNode(TokenKind op, Node *operand, SourceLocation location);
 
-ObjectType *newTypeNode(char *name, SourceLocation location);
+ClassNode *newClassNode(char *name, SourceLocation location);
 ObjectNode *newObjectNode(Type *type, SourceLocation location);
 MemberNode *newMemberNode(Node *object, char *name, SourceLocation location);
 MethodCallNode *newMethodCallNode(MemberNode *member, int argumentCount, Node **arguments, SourceLocation location);

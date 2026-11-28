@@ -285,7 +285,7 @@ static void generateProgram(ProgramNode *node) {
 
 void generateStatement(const Node *node) {
     switch (node->type) {
-        case NODE_TYPE: break; // Class declarations have no runtime action
+        case NODE_CLASS: break; // Class declarations have no runtime action
         case NODE_DECLARATION: generateDeclaration((DeclarationNode *)node); break;
         case NODE_ASSIGN: generateAssignment((AssignmentNode *)node); break;
         case NODE_PROGRAM: generateProgram((ProgramNode *)node); break;

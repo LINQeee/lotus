@@ -46,8 +46,8 @@ ProgramNode *buildAST(const Token *tokensToParse, const char *source) {
     parserSource = source;
     pos = 0;
     tokens = tokensToParse;
-    collectObjectTypes(tokens);
+    collectClasses(tokens);
     ProgramNode *program = parseProgram();
-    appendObjectFunctions(program);
+    appendClassFunctions(program);
     return program;
 }

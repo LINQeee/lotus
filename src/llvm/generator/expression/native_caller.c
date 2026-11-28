@@ -51,13 +51,13 @@ LLVMValueRef callStringConcat(LLVMValueRef left, LLVMValueRef right) {
 }
 
 void retainIfNeeded(Type *type, LLVMValueRef value) {
-    if (isObjectType(type)) retainObject(type, value);
+    if (isClassType(type)) retainObject(type, value);
     else if (type == stringType) nativeCall("_stringRetain", &value, 1);
     else if (isArrayType(type) || type->kind == TYPE_ANY_ARRAY) nativeCall("_arrayRetain", &value, 1);
 }
 
 void releaseIfNeeded(Type *type, LLVMValueRef value) {
-    if (isObjectType(type)) releaseObject(type, value);
+    if (isClassType(type)) releaseObject(type, value);
     else if (type == stringType) nativeCall("_stringRelease", &value, 1);
     else if (isArrayType(type) || type->kind == TYPE_ANY_ARRAY) nativeCall("_arrayRelease", &value, 1);
 }

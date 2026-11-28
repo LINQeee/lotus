@@ -185,7 +185,7 @@ static Type *checkIdentifier(TypeChecker *checker, IdentifierNode *node) {
 
 static Type *checkExpected(TypeChecker *checker, Node *node, Type *expected) {
     if (node->type == NODE_ARRAY && !((ArrayNode *)node)->size && isArrayType(expected)) node->dataType = expected;
-    if (node->type == NODE_OBJECT && node->dataType == unknownType && isObjectType(expected)) node->dataType = expected;
+    if (node->type == NODE_OBJECT && node->dataType == unknownType && isClassType(expected)) node->dataType = expected;
     return checkExpression(checker, node);
 }
 
@@ -272,10 +272,9 @@ static Type *checkCall(TypeChecker *checker, CallNode *node) {
     for (int i = 0; i < node->argumentCount; i++) {
         Type *expectedType = i < (int)function->parameterCount ? function->parameterTypes[i] : anyType;
         Type *actual = checkExpected(checker, node->arguments[i], expectedType);
-        if (expectedType == anyType && (isArrayType(actual) || isObjectType(actual)))
+        if (expectedType == anyType && (isArrayType(actual) || isClassType(actual)))
             diagnosticError(checker->scriptContent, node->arguments[i]->location,
-                            isObjectType(actual) ? "objects cannot be passed as any"
-                                                 : "arrays cannot be passed as any");
+                            isClassType(actual) ? "objects cannot be passed as any" : "arrays cannot be passed as any");
 
         size_t parameterIndex = (size_t)i;
 
@@ -301,9 +300,9 @@ static Type *checkCall(TypeChecker *checker, CallNode *node) {
 }
 
 static Type *checkObject(TypeChecker *checker, ObjectNode *node) {
-    if (!isObjectType(node->base.dataType))
+    if (!isClassType(node->base.dataType))
         diagnosticError(checker->scriptContent, node->base.location, "object literal requires an object type");
-    ObjectType *type = getObjectType(node->base.dataType);
+    ClassNode *type = getClass(node->base.dataType);
     for (size_t i = 0; i < node->count; i++) {
         size_t index = 0;
         while (index < type->fieldCount && strcmp(type->fields[index].name, node->names[i])) index++;
@@ -336,10 +335,10 @@ static Type *checkMember(TypeChecker *checker, MemberNode *node) {
         if (node->value) diagnosticError(checker->scriptContent, node->base.location, "array length is read-only");
         return node->base.dataType = intType;
     }
-    if (!isObjectType(owner))
+    if (!isClassType(owner))
         diagnosticError(checker->scriptContent, node->base.location, "type %s has no field '%s'", typeName(owner),
                         node->name);
-    ObjectType *type = getObjectType(owner);
+    ClassNode *type = getClass(owner);
     size_t index = 0;
     while (index < type->fieldCount && strcmp(type->fields[index].name, node->name)) index++;
     if (index == type->fieldCount)
@@ -371,9 +370,9 @@ static Type *checkMember(TypeChecker *checker, MemberNode *node) {
 }
 static Type *checkMethodCall(TypeChecker *checker, MethodCallNode *node) {
     Type *owner = checkExpression(checker, node->member->object);
-    if (!isObjectType(owner))
+    if (!isClassType(owner))
         diagnosticError(checker->scriptContent, node->base.location, "method call requires an object");
-    ObjectType *type = getObjectType(owner);
+    ClassNode *type = getClass(owner);
     FunctionNode *method = NULL;
     for (size_t i = 0; i < type->methodCount; i++)
         if (!strcmp(strchr(type->methods[i]->name, '.') + 1, node->member->name)) method = type->methods[i];
@@ -671,7 +670,7 @@ static void checkFunction(TypeChecker *checker, FunctionNode *node) {
 
 static void checkStatement(TypeChecker *checker, Node *node) {
     switch (node->type) {
-        case NODE_TYPE:
+        case NODE_CLASS:
             if (checker->scope->parent || checker->currentReturnType != unknownType)
                 diagnosticError(checker->scriptContent, node->location, "classes can only be declared at top level");
             break;
@@ -722,14 +721,14 @@ static void checkProgramBody(TypeChecker *checker, const ProgramNode *program) {
     }
 }
 
-static void checkObjectType(TypeChecker *checker, ObjectType *type) {
-    if (type->checkState == OBJECT_CHECKED) return;
-    if (type->checkState == OBJECT_CHECKING)
+static void checkClass(TypeChecker *checker, ClassNode *type) {
+    if (type->checkState == CLASS_CHECKED) return;
+    if (type->checkState == CLASS_CHECKING)
         diagnosticError(checker->scriptContent, type->base.location, "recursive object fields are not supported: %s",
                         type->name);
-    type->checkState = OBJECT_CHECKING;
+    type->checkState = CLASS_CHECKING;
     for (size_t i = 0; i < type->fieldCount; i++) {
-        ObjectField *field = &type->fields[i];
+        ClassField *field = &type->fields[i];
         for (size_t j = 0; j < i; j++)
             if (!strcmp(field->name, type->fields[j].name))
                 diagnosticError(checker->scriptContent, field->location, "duplicate field '%s'", field->name);
@@ -737,17 +736,17 @@ static void checkObjectType(TypeChecker *checker, ObjectType *type) {
             if (!strcmp(field->name, strchr(type->methods[j]->name, '.') + 1))
                 diagnosticError(checker->scriptContent, field->location, "field and method share name '%s'",
                                 field->name);
-        if (isObjectType(field->type)) checkObjectType(checker, getObjectType(field->type));
+        if (isClassType(field->type)) checkClass(checker, getClass(field->type));
     }
-    type->checkState = OBJECT_CHECKED;
+    type->checkState = CLASS_CHECKED;
 }
 
 void typeCheckerCheckProgram(TypeChecker *checker, const ProgramNode *program) {
     collectFunctions(checker, program);
-    for (size_t i = 0; i < objectTypeCount; i++) checkObjectType(checker, objectTypes[i]);
-    for (size_t i = 0; i < objectTypeCount; i++)
-        for (size_t j = 0; j < objectTypes[i]->fieldCount; j++)
-            if (objectTypes[i]->fields[j].initializer) checkFunction(checker, objectTypes[i]->fields[j].initializer);
+    for (size_t i = 0; i < classCount; i++) checkClass(checker, classes[i]);
+    for (size_t i = 0; i < classCount; i++)
+        for (size_t j = 0; j < classes[i]->fieldCount; j++)
+            if (classes[i]->fields[j].initializer) checkFunction(checker, classes[i]->fields[j].initializer);
 
     checkProgramBody(checker, program);
 }
